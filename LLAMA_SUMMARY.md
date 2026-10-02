@@ -1,62 +1,59 @@
 # Allegiance codebase - summary by the local model
 
-Written 2026-10-02 00:26 by Qwen2.5-Coder-7B via `C:\llama\read-allegiance.py`.
+Written 2026-10-02 01:57 by Qwen2.5-Coder-7B via `C:\llama\read-allegiance.py`.
 1458 of 1458 code/text files read. These are notes to orient by, not verified facts.
+
+What was checked: every code name under KEY PARTS and in the PARTS outlines occurs in the file it is listed under (names that did not were dropped), and every file name in the overviews exists. What each thing is said to do was not checked. Files of 20 lines or fewer are shown in full. Files read in 4 or more parts carry a PARTS outline with line numbers.
 
 ## Overview
 
-The Allegiance game source code is organized into several key folders that collectively form the backbone of the game's development. The main components include client and server applications, game logic, networking, player management, and various utilities.
+The Allegiance source code is organized into several key directories, each containing specific components essential for the game's functionality. The `src` folder houses the core client application, which includes modules like WinTrek (user interface), engine (rendering and input), Igc (game object management), and test (COM and UI components). These components work together to provide a rich gaming experience.
 
-Starting with the `src` folder, it contains the core source code for both the client and server. The `Allegiance.cpp` file serves as the entry point for the client application, while `FedSrv.cpp` is the main entry point for the game server. These files are essential for initializing the respective applications and setting up their lifecycles.
+The `src/Lib/steam` directory is crucial for integrating Steam services, enabling features such as user authentication and matchmaking. This folder contains essential interfaces and implementations that facilitate communication between the game and the Steam client.
 
-The `GameLogic.cpp` file contains the core logic for game mechanics, handling everything from player interactions to mission management. This file is crucial for understanding how the game's rules and systems are implemented.
+For server-side logic, the `src/FedSrv` folder is vital. It manages game state, player interactions, and mission handling, providing the backbone of multiplayer functionality in Allegiance.
 
-For networking, the `NetworkManager.cpp` file plays a pivotal role in managing communication between clients and servers. It handles tasks such as data transmission, synchronization, and error recovery, ensuring smooth gameplay experiences.
+The `src/engine` directory contains fundamental utilities and components for managing rendering, configuration, input, and other core functionalities, ensuring smooth performance and responsiveness in the game.
 
-Player management is handled by the `Player.cpp` file, which manages player data and interactions within the game. This includes tracking player states, handling input, and coordinating actions across different parts of the game.
+For development tools and utilities, the `src/clintlib`, `src/effect`, `_Utility`, and `soundengine` folders provide essential support. These modules handle tasks such as downloading files, processing server messages, managing audio playback, and collision detection, respectively.
 
-The `AGC` folder contains core components for managing game objects, events, and interactions. It includes essential classes and interfaces for handling game logic, event management, and COM-based communication. Understanding these files is crucial for developers working on game mechanics and object management.
+The `src/training` folder focuses on training missions, defining conditions, actions, and goals to help players learn specific game mechanics. This ensures that new players can quickly grasp the rules and strategies needed to succeed in Allegiance.
 
-The `AllSrvUI` folder focuses on the server-side user interface, responsible for managing admin pages, chat settings, game creation, player management, and other administrative tasks. This folder is essential for developers working on server management and administration features.
+For managing game objects and behaviors, the `src/Pigs` folder is essential. It includes classes for handling ships, parts, asteroids, and more, providing a comprehensive system for game object management.
 
-The `AutoUpdate` folder contains the implementation for the auto-update system, which manages the process of updating the game client automatically. This includes handling user interface interactions and managing update processes.
+The `src/Reloader` and `AutoUpdate` folders contain scripts and utilities for managing file operations and ensuring that players have the latest version of the game files.
 
-The `FedSrv` folder contains core server-side components for managing Allegiance games, including mission handling, player management, and administrative functions. It provides the backbone for running and maintaining game sessions on a server.
-
-The `Igc` folder manages various game objects, mission parameters, and interactions within the Allegiance game. This includes classes and functions for handling different aspects of the game's universe, such as ships, asteroids, stations, and missions.
-
-The `Inc` folder contains header files for various components and systems used in the Allegiance game, including messaging, database operations, utility functions, and more. Understanding these headers is essential for developers working on integrating new features or fixing bugs.
-
-The `Lib` folder contains third-party libraries used by Allegiance, such as Lua for scripting, OGG for audio streaming, and Steam for platform integration. These libraries provide essential functionality that enhances the game's capabilities without requiring significant changes to the core codebase.
-
-In summary, the Allegiance source code is organized into several key folders, each handling specific aspects of the game development process. The `src` folder contains the core logic for both client and server applications, while other folders focus on networking, player management, UI components, and third-party libraries. A programmer should start reading with the `src` folder to understand the overall structure and flow of the game's codebase.
+In summary, Allegiance's source code is structured into client, server, lobby, game logic, engine, and tool components. Each directory contains specific modules that work together to create a cohesive and functional game experience. A programmer should start reading in the `src` folder to understand the core functionality, then explore other directories as needed based on their interests or areas of focus.
 
 ## Folders
 
 ### (top level)
 
-**Folder: src**
+The folder contains essential configuration and documentation files for building and managing the Allegiance game.
 
-**Overview:** The `src` folder contains the core source code for the Allegiance game, including both client and server components.
-
-**Important Files:**
-- **Allegiance.cpp**: Main entry point for the client application.
-- **FedSrv.cpp**: Main entry point for the game server.
-- **GameLogic.cpp**: Contains the core logic for game mechanics.
-- **NetworkManager.cpp**: Handles network communication between clients and servers.
-- **Player.cpp**: Manages player data and interactions within the game.
+- README.md: Provides detailed instructions on how to build and install the Allegiance game, including required tools and project structures.
+- CMakeLists.txt: Contains the build configuration for the Allegiance game using CMake, a cross-platform build system generator.
+- appveyor.yml: Defines the build process for continuous integration using AppVeyor, a cloud-based CI/CD platform.
+- pigs.xml: Likely contains XML data related to the game's assets or configurations.
 
 #### `CMakeLists.txt`
 
-PURPOSE: This file is a CMake configuration script for the Allegiance project. It sets up the minimum required version of CMake, defines policies, and configures the project to build with or without Steam integration.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- SET_MODULE: A macro that sets module-specific definitions and includes directories.
-- ADD_SUBDIRECTORY(src): Includes the source directory for building the project.
-
-CONNECTS TO: src (the source code directory)
-
-NOTES: None
+    CMAKE_MINIMUM_REQUIRED(VERSION 3.24)
+    CMAKE_POLICY(SET CMP0005 NEW)
+    PROJECT(Allegiance)
+    OPTION(USE_STEAM "Use steam" OFF)
+    MACRO(SET_MODULE MODULE_NAME)
+        ADD_DEFINITIONS(-D__MODULE__="${MODULE_NAME}")
+        INCLUDE_DIRECTORIES(../Inc)
+        IF (USE_STEAM)
+            INCLUDE_DIRECTORIES(../Lib/steam)
+        ELSE()
+            ADD_DEFINITIONS(-DNO_STEAM)
+        ENDIF()
+    ENDMACRO()
+    ADD_SUBDIRECTORY(src)
 
 #### `README.md`
 
@@ -87,39 +84,31 @@ NOTES:
 
 #### `appveyor.yml`
 
-PURPOSE: This file is a configuration script used by AppVeyor, an online continuous integration and delivery service, to build the Allegiance game project.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- version: Specifies the version of the appveyor.yml schema.
-- image: Defines the environment in which the build will run (Visual Studio 2017).
-- configuration: Lists the build configurations to be used (FZDebug and FZRetail).
-- before_build: Commands to run before the build process, specifically restoring NuGet packages for the solution.
-- build: Specifies the project file to build (Allegiance.sln) and sets options like parallel execution and verbosity level.
-
-CONNECTS TO: VS2017/Allegiance.sln
-
-NOTES: None.
+    version: 1.0.{build}
+    image: Visual Studio 2017
+    configuration:
+    - FZDebug
+    - FZRetail
+    before_build:
+      - nuget restore VS2017/Allegiance.sln
+    build:
+      project: VS2017/Allegiance.sln
+      parallel: true
+      verbosity: minimal
 
 #### `pigs.xml`
 
-PURPOSE: The file `pigs.xml` appears to be a configuration or metadata file for the draw.io application, which is used for creating diagrams. It contains information about the diagram's version, editor, and other properties.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `mxfile`: Root element containing metadata about the diagram.
-- `userAgent`: Information about the browser that created the diagram.
-- `version`: Version of the draw.io software used to create the diagram.
-- `editor`: Name of the editor used to create the diagram.
-- `type`: Type of storage or platform where the file is hosted.
-
-CONNECTS TO: This file is likely used by the draw.io application itself and may not directly connect to other systems or files outside of the draw.io environment.
-
-NOTES: None.
+    <mxfile userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36" version="7.8.6" editor="www.draw.io" type="github"><diagram id="64294a6c-b639-0982-2639-bffb041bd56e" nam
 
 ### .github/scripts
 
-The `.github/scripts` folder contains scripts used by the Allegiance project, particularly for GitHub-related tasks such as monitoring email addresses for Steam Guard codes.
+This folder contains scripts used by the Allegiance project, specifically focusing on automating interactions with external services to enhance game functionality.
 
-- `get_steam_guard_code.ps1`: A PowerShell script that monitors a specified email address for Steam Guard codes sent by Catchmail.io and extracts the first valid code found. It uses APIs provided by Catchmail.io to check for new emails and fetch details of individual messages, filtering based on timestamps and polling at regular intervals. The script outputs only the found Steam Guard code to standard output and deletes the message containing the code after extracting it.
+- get_steam_guard_code.ps1: Monitors a specified email address for Steam Guard codes sent by Catchmail.io and extracts the first valid code found, aiding in automated login processes.
 
 #### `.github/scripts/get_steam_guard_code.ps1`
 
@@ -143,17 +132,9 @@ NOTES:
 
 ### .github/workflows
 
-This folder contains the build and deployment scripts for the Allegiance game, specifically focusing on automating the process using GitHub Actions. It includes workflows that handle setting up SteamCMD, checking out repositories, building components, copying security libraries, deploying to Steam, and managing checksums for DRM purposes.
+The `.github/workflows` folder contains configuration files for GitHub Actions workflows used in the Allegiance project. These workflows automate tasks such as building and deploying the game.
 
-- build-and-deploy.yml: Orchestrates the entire build and deployment pipeline.
-- steamcmd_setup.sh: Script to set up SteamCMD for interacting with Steam.
-- checkout_repositories.sh: Handles cloning the Allegiance and AllegianceSecurity repositories.
-- handle_steam_guard.sh: Manages Steam Guard authentication by requesting and using a code.
-- restore_nuget_packages.sh: Restores NuGet packages required for building.
-- build_allegiance.sh: Builds the Allegiance game in FZRetail configuration.
-- copy_security_libraries.sh: Copies security libraries to the Allegiance source directory.
-- deploy_to_steam.sh: Deploys the built game to Steam using SteamCMD.
-- update_checksum.sh: Updates a file checksum for DRM purposes.
+- build-and-deploy.yml: Defines a workflow to build the Allegiance game from source code and deploy it to Steam.
 
 #### `.github/workflows/build-and-deploy.yml`
 
@@ -182,46 +163,38 @@ NOTES:
 
 ### VS2005
 
-The VS2005 folder contains project files for Allegiance, a 2000 Microsoft multiplayer space game. These project files are no longer being maintained and it is advised to upgrade to Visual Studio 2008 or Visual Studio 2010.
+The Allegiance source code folder VS2005 contains a single text file named README.txt.
 
-- Allegiance.sln: The solution file that contains all the projects in the Allegiance source codebase.
-- GameEngine.cpp: Contains the implementation of the game engine, which handles the core gameplay logic.
-- SpaceCombat.cpp: Handles the piloted space combat mechanics.
-- Multiplayer.cpp: Manages multiplayer functionality, including networking and player interactions.
-- Graphics.cpp: Responsible for rendering the game's graphics and user interface.
-- Audio.cpp: Manages audio playback in the game.
+- README.txt: Provides a brief overview and instructions for working with the Allegiance source code in Visual Studio 2005. It likely includes information on setting up the development environment, building the project, and running the game or toolset.
 
 #### `VS2005/README.txt`
 
-PURPOSE: This file contains information about the project files for Allegiance, a 2000 Microsoft multiplayer space game. It warns that these project files are no longer being maintained and advises upgrading to Visual Studio 2008 or Visual Studio 2010.
+PURPOSE: tiny file (3 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None specified in this text.
-
-CONNECTS TO: Other project files and the Allegiance source codebase.
-
-NOTES: Deprecation warning for maintenance.
+    Depreciation Warning:
+    These project files are no longer being maintained.
+    Upgrade to Visual Studio 2008 or Visual Studio 2010.
 
 ### VS2017
 
-The `VS2017` folder contains essential setup and configuration files for running Allegiance, a Microsoft multiplayer space game from 2000. It includes instructions on setting up a local lobby and server using SteamCMD, as well as configuration files for the lobby service and screen management.
+The folder contains documentation and configuration files related to running a local lobby and server in Allegiance.
 
-- **How To Run a Local Lobby and Server.txt**: Provides detailed steps to set up a local lobby and server using SteamCMD.
-- **lobby config file.txt**: Manages server connections and core configurations for the Allegiance lobby service.
-- **screens.txt**: Contains information about screens in the game, including screen IDs, view modes, camera modes, and rendering layers.
+- screens.txt: Lists information about screens in the Allegiance game, including details on screen IDs, view modes, camera modes, and rendering layers.
 
 #### `VS2017/How To Run a Local Lobby and Server.txt`
 
-PURPOSE: This file provides instructions on how to set up a local lobby and server for Allegiance using SteamCMD.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- login anonymous: Logs into SteamCMD anonymously.
-- force_install_dir c:\Allegiance\Server: Specifies the installation directory for Allegiance.
-- app_update 730810: Updates the specified application (presumably Allegiance) to the latest version.
-
-CONNECTS TO: SteamCMD, Allegiance server files.
-
-NOTES: None.
+    Get SteamCMD from: https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip
+    Unzip it to C:\Steam
+    run c:\Steam\SteamCMD
+    Run these steamCMDs from inside SteamCMD:
+        login anonymous
+        force_install_dir c:\Allegiance\Server
+        app_update 730810
+    Go to C:\Allegiance\Server
+    Follow instructions in the readme.
+    The batch files are looking for files in these paths, so it would be easiest not to modify them.
 
 #### `VS2017/lobby config file.txt`
 
@@ -260,40 +233,46 @@ NOTES:
 
 ### VS2022
 
-This folder contains documentation and configuration files for setting up and running a local lobby and server for Allegiance using SteamCMD.
+The folder contains documentation and configuration files related to running a local lobby and server in Allegiance.
 
-- How To Run a Local Lobby and Server.txt: Provides instructions on how to set up and run a local lobby and server for Allegiance using SteamCMD.
-- lobby config file.txt: A configuration file used by the Allegiance game lobby to manage server connections and core settings.
-- screens.txt: Contains information and code related to screens in the Allegiance game, including screen initialization, rendering, and management.
+- screens.txt: Contains information and code related to screens within the Allegiance game, including initialization, rendering, and management.
 
 #### `VS2022/How To Run a Local Lobby and Server.txt`
 
-PURPOSE: This file provides instructions on how to set up and run a local lobby and server for Allegiance using SteamCMD.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Register as Local Server: Registers the server locally.
-- Register as Service: Registers the server as a Windows service, which can be configured to run under a specific account or as the local system account.
-
-CONNECTS TO: SteamCMD (for downloading and setting up the game files), Allegiance server files.
-
-NOTES: None.
+    Get SteamCMD from: https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip
+    Unzip it to C:\Steam
+    run c:\Steam\SteamCMD
+    Run these steamCMDs from inside SteamCMD:
+        force_install_dir c:\Allegiance\Server
+        login anonymous
+        app_update 730810
+    Go to C:\Allegiance\Server
+    Follow instructions in the readme.
+    The batch files are looking for files in these paths, so it would be easiest not to modify them...
+    For the lobby, the following command lines can be used:
+    // Register as Local Server
+    -RegServer
+    // Register as Service (you can chose to register as a local windows account for better security).
+    -Service [Local Windows Account] [Password]
+    // Register as Service (will run as local system)
+    -Service
 
 #### `VS2022/lobby config file.txt`
 
-PURPOSE: This file is a configuration file used by the Allegiance game lobby to manage server connections and core settings.
+PURPOSE: This configuration file is used by the Allegiance lobby service to manage server connections and core configurations.
 
 KEY PARTS:
 - NumberOfServers: Specifies the total number of servers.
-- FilterType: Determines whether to allow or block specific servers.
-- ServerX: Lists the IP addresses of allowed servers.
-- zone_core, dn_000460, etc.: Define various game cores available in the lobby.
-- OfficialCores: Indicates which cores are considered official and should be displayed.
+- FilterType: Determines whether to allow or deny specific servers based on the list provided.
+- zone_core, dn_000460, plus15b7, etc.: Names of cores available for selection.
+- OfficialCores: Indicates which cores are officially supported or recommended.
+- PlanetX, ASGSBox, Excalibur, etc.: Lists official server IP addresses.
 
-CONNECTS TO:
-- The Allegiance game lobby service running on c:\windows\system32.
+CONNECTS TO: Allegiance lobby service running as a Windows service.
 
-NOTES:
-- Some servers are commented out with ";", indicating they are disabled or under development.
+NOTES: None.
 
 #### `VS2022/screens.txt`
 
@@ -314,74 +293,61 @@ NOTES:
 
 ### cmake
 
-The `cmake` folder in Allegiance contains configuration files for building the game using CMake, a cross-platform build system generator.
+This folder contains toolchain configuration files for building Allegiance on MinGW (Minimalist GNU for Windows) environments.
 
-- `toolchain-mingw32.cmake`: Configures a MinGW-w64 toolchain for building on Windows.
-- `toolchain-mingw64.cmake`: Configures a MinGW-w64 toolchain for building on Windows.
-- `FindAllegiance.cmake`: Custom module to find Allegiance-specific libraries and headers.
-- `FindSDL2.cmake`: Custom module to find SDL2 library and headers.
-- `FindOpenAL.cmake`: Custom module to find OpenAL library and headers.
-- `FindOGG.cmake`: Custom module to find OGG library and headers.
+- toolchain-mingw32.cmake: Configures the build environment for 32-bit MinGW.
+- toolchain-mingw64.cmake: Configures the build environment for 64-bit MinGW.
 
 #### `cmake/toolchain-mingw32.cmake`
 
-PURPOSE: This file configures a CMake toolchain for building Allegiance on a Windows system using the MinGW-w64 cross-compiler.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `CMAKE_SYSTEM_NAME`: Sets the target system to Windows.
-- `TOOLCHAIN_PREFIX`: Specifies the prefix for the MinGW-w64 tools.
-- `CMAKE_C_COMPILER`, `CMAKE_CXX_COMPILER`, `CMAKE_RC_COMPILER`: Set the paths to the GCC, G++, and windres compilers respectively.
-- `CMAKE_FIND_ROOT_PATH`: Sets the root path for finding libraries and includes.
-- `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM`, `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY`, `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE`: Configures how CMake searches for programs, libraries, and includes.
-
-CONNECTS TO: CMake build system.
-
-NOTES: None.
+    set(CMAKE_SYSTEM_NAME Windows)
+    set(TOOLCHAIN_PREFIX i686-w64-mingw32)
+    set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+    set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+    set(CMAKE_RC_COMPILER ${TOOLCHAIN_PREFIX}-windres)
+    set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 #### `cmake/toolchain-mingw64.cmake`
 
-PURPOSE: This CMake toolchain file is used to configure the build environment for compiling Allegiance source code using the MinGW-w64 cross-compiler on a Windows system.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `CMAKE_SYSTEM_NAME`: Sets the target operating system to Windows.
-- `TOOLCHAIN_PREFIX`: Specifies the prefix for the MinGW-w64 tools.
-- `CMAKE_C_COMPILER`, `CMAKE_CXX_COMPILER`, `CMAKE_RC_COMPILER`: Set the paths to the GCC, G++, and windres compilers respectively.
-- `CMAKE_FIND_ROOT_PATH`: Sets the root path for finding libraries and headers.
-- `CMAKE_FIND_ROOT_PATH_MODE_PROGRAM`, `CMAKE_FIND_ROOT_PATH_MODE_LIBRARY`, `CMAKE_FIND_ROOT_PATH_MODE_INCLUDE`: Configures how CMake locates programs, libraries, and includes.
-
-CONNECTS TO: Allegiance source code build process using CMake.
-
-NOTES: None.
+    set(CMAKE_SYSTEM_NAME Windows)
+    set(TOOLCHAIN_PREFIX x86_64-w64-mingw32)
+    set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+    set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+    set(CMAKE_RC_COMPILER ${TOOLCHAIN_PREFIX}-windres)
+    set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
+    set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+    set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+    set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 ### src
 
-**Folder: src**
+This folder contains essential documentation and configuration files for the Allegiance source code. The SolapReadme.txt file provides release notes and license information, while the todo.txt lists tasks and improvements needed. The CMakeLists.txt file is a small build script used in the development process.
 
-Allegiance's source code is organized into several subdirectories, each handling specific aspects of the game development. The `src` folder contains the core components that make up the Allegiance game engine and related systems.
-
-- **CMakeLists.txt**: This file serves as a CMake configuration script for building the Allegiance project. It specifies which subdirectories to include in the build process, such as zlib for compression, soundengine for audio processing, engine for the core game logic, and effect for visual effects.
-  
-- **SolapReadme.txt**: A README document summarizing the license update and release history of the Allegiance source code. It details changes from the MSR-SSLA to MIT license, mentions various releases with specific features and bug fixes, and notes that the sources are built without an authentication service.
-
-- **license.txt**: The license agreement for the Allegiance software, granting permissions and specifying conditions under which the software can be used. This file outlines the copyright holder and the rights provided to users of the software.
-
-- **todo.txt**: A list of tasks and improvements that need to be addressed in the Allegiance game engine and related systems. It includes items such as adding support for different rendering types, fixing mdlc conversion issues, and implementing "Nerf" options like visibility toggles.
-
-These files collectively form the backbone of the Allegiance project, providing essential configurations, documentation, licensing information, and a roadmap for future development tasks.
+- SolapReadme.txt: Contains release notes and license information for the Allegiance source code.
+- todo.txt: Lists tasks and improvements that need to be addressed in the Allegiance game engine and its related components.
+- license.txt: Tiny file containing license information (13 lines).
+- CMakeLists.txt: Small build script used in the development process (9 lines).
 
 #### `src/CMakeLists.txt`
 
-PURPOSE: This file is a CMake configuration file used to specify the subdirectories that should be built as part of the Allegiance project.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- zlib: Manages the Zlib compression library.
-- soundengine: Handles audio processing and playback.
-- engine: Contains core game logic and systems.
-- effect: Manages visual effects within the game.
-
-CONNECTS TO: Other CMake configuration files and subdirectories in the Allegiance project.
-
-NOTES: The commented-out directories (`_Utility`, `Igc`, `training`, `clintlib`, `WinTrek`) suggest that these components were either experimental, unused, or not fully developed at the time of this file's creation.
+    ADD_SUBDIRECTORY(zlib)
+    ADD_SUBDIRECTORY(soundengine)
+    ADD_SUBDIRECTORY(engine)
+    ADD_SUBDIRECTORY(effect)
+    #ADD_SUBDIRECTORY(_Utility)
+    ADD_SUBDIRECTORY(Igc)
+    #ADD_SUBDIRECTORY(training)
+    #ADD_SUBDIRECTORY(clintlib)
+    #ADD_SUBDIRECTORY(WinTrek)
 
 #### `src/SolapReadme.txt`
 
@@ -400,14 +366,21 @@ NOTES: The sources are built to point to an authentication service that no longe
 
 #### `src/license.txt`
 
-PURPOSE: This file contains the license agreement for the Allegiance software, granting permissions and limitations on its use.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: none
-
-NOTES: none
+    Copyright Microsoft Corporation
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+    and associated documentation files (the "Software"), to deal in the Software without restriction,
+    including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all copies or substantial
+    portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+    LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+    OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #### `src/todo.txt`
 
@@ -428,21 +401,15 @@ NOTES: The file includes a mix of technical tasks, bug fixes, and feature enhanc
 
 ### src/AGC
 
-### Folder Overview
+The AGC folder in Allegiance's source code contains essential components for managing game objects and operations. It includes classes for handling game parameters, events, models, hull types, probes, asteroids, and more.
 
-The `src/AGC` folder contains core components for managing game objects, events, and interactions in Allegiance. It includes essential classes and interfaces for handling game logic, event management, and COM-based communication.
+- AGCGameParameters.cpp: Manages various game parameters including mission-specific settings.
+- AGCGlobal.cpp: Handles global state and event handling in the game.
+- AGCHullType.cpp: Represents properties and behaviors of different ship hull types.
+- AGCEventData.cpp: Manages event data, including serialization and deserialization.
+- AGCEventLogger.cpp: Responsible for logging events within the game using both NT Event Log and database logging.
 
-### Key Files and Their Functions:
-
-- **AGC.cpp**: Implements the DLL entry points and lifecycle management for the Active Game Core.
-- **AGCAleph.cpp** and **AGCAleph.h**: Manage error information for the IAGCAleph interface, providing essential functionality for game objects.
-- **AGCAsteroids.cpp** and **AGCAsteroids.h**: Handle asteroid-related logic, including initialization, movement, and collision detection.
-- **AGCCommand.cpp** and **AGCCommand.h**: Implement command handling with interfaces for serialization and persistence.
-- **AGCDBParams.cpp** and **AGCDBParams.h**: Manage database connection parameters and provide persistence methods.
-- **AGCEventLogger.cpp** and **AGCEventLogger.h**: Handle event logging to both the NT Event Log and a database, providing asynchronous and synchronous logging capabilities.
-- **AGCGlobal.cpp** and **AGCGlobal.h**: Manage global state, object creation, and event handling in the game.
-
-These files collectively form the backbone of Allegiance's core functionality, ensuring that game objects are managed effectively, events are handled efficiently, and data is persisted across sessions.
+Largest files: AGCGameParameters.cpp (2896 lines), TCPropBagOnRegKey.cpp (1433 lines), AGCEventLogger.cpp (1390 lines), agcevent.cpp (1053 lines), AGCEvents.xml (900 lines).
 
 #### `src/AGC/AGC.cpp`
 
@@ -462,15 +429,17 @@ NOTES: None.
 
 #### `src/AGC/AGC.def`
 
-PURPOSE: This file declares the module parameters for an Allegiance Game Client (AGC) DLL.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- LIBRARY "AGC.DLL": Specifies the name of the DLL.
-- EXPORTS: Lists functions that are accessible from outside the DLL, including registration and unregistration functions for AGC components.
-
-CONNECTS TO: Other system or file dependencies not explicitly shown in this snippet.
-
-NOTES: None.
+    ; AGC.def : Declares the module parameters.
+    LIBRARY      "AGC.DLL"
+    EXPORTS
+        DllCanUnloadNow     PRIVATE
+        DllGetClassObject   PRIVATE
+        DllRegisterServer   PRIVATE
+        DllUnregisterServer PRIVATE
+        DllRegisterAGC
+        DllUnregisterAGC
 
 #### `src/AGC/AGC.idl`
 
@@ -538,15 +507,16 @@ NOTES:
 
 #### `src/AGC/AGCAlephs.cpp`
 
-PURPOSE: This file contains the implementation of the CAGCAlephs class, which is responsible for managing aleph entities in the game Allegiance.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCAlephs: Manages aleph entities and their interactions within the game.
-- TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCAlephs): Defines that CAGCAlephs cannot be created directly but can be referenced externally.
-
-CONNECTS TO: src/AGC/AGCAlephs.h
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AdminAGCAlephs.cpp : Implementation of CAGCAlephs
+    //
+    #include "pch.h"
+    #include "AGCAlephs.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCAlephs
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCAlephs)
 
 #### `src/AGC/AGCAlephs.h`
 
@@ -637,17 +607,16 @@ NOTES: None.
 
 #### `src/AGC/AGCAsteroids.cpp`
 
-PURPOSE: Implements the CAGCAsteroids class, which is responsible for managing asteroids in the game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCAsteroids: Manages the creation, movement, and destruction of asteroids.
-- InitializeAsteroids: Initializes the asteroid fields at the start of a game.
-- UpdateAsteroids: Updates the positions and states of all asteroids.
-- HandleCollisions: Handles collisions between asteroids and other objects.
-
-CONNECTS TO: AGCGame.cpp (manages game state), AGCAsteroid.h (defines asteroid properties).
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCAsteroids.cpp : Implementation of the CAGCAsteroids class.
+    //
+    #include "pch.h"
+    #include "AGCAsteroids.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCAsteroids
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCAsteroids)
 
 #### `src/AGC/AGCAsteroids.h`
 
@@ -895,15 +864,16 @@ NOTES: None.
 
 #### `src/AGC/AGCEventIDRange.cpp`
 
-PURPOSE: This file contains the implementation of the CAGCEventIDRange class, which manages a range of event IDs for Allegiance.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCEventIDRange: Manages a range of event IDs and provides methods to check if an ID is within the range.
-- TC_OBJECT_EXTERN_IMPL(CAGCEventIDRange): Macro used to register the class with a system that handles object creation.
-
-CONNECTS TO: AGCEventIDRange.h, which contains the declaration of the CAGCEventIDRange class.
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCEventIDRange.cpp : Implementation of the CAGCEventIDRange class.
+    //
+    #include "pch.h"
+    #include "AGCEventIDRange.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CEventIDRange
+    TC_OBJECT_EXTERN_IMPL(CAGCEventIDRange)
 
 #### `src/AGC/AGCEventIDRange.h`
 
@@ -957,15 +927,16 @@ NOTES:
 
 #### `src/AGC/AGCEventIDRanges.cpp`
 
-PURPOSE: This file contains the implementation of the CAGCEventIDRanges class, which manages ranges of event IDs for Allegiance.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCEventIDRanges: Manages and provides access to predefined ranges of event IDs used in the game.
-- TC_OBJECT_EXTERN_IMPL(CAGCEventIDRanges): Macro that registers the class with a system for external object management.
-
-CONNECTS TO: src/AGC/AGCEventIDs.h (header file defining the class)
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCEventIDRanges.cpp : Implementation of the CAGCEventIDRanges class.
+    //
+    #include "pch.h"
+    #include "AGCEventIDRanges.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CEventIDRanges
+    TC_OBJECT_EXTERN_IMPL(CAGCEventIDRanges)
 
 #### `src/AGC/AGCEventIDRanges.h`
 
@@ -997,41 +968,71 @@ NOTES: None.
 
 #### `src/AGC/AGCEventLogger.cpp`
 
-**PURPOSE:** The `AGCEventLogger.cpp` file in Allegiance is responsible for managing event logging across both the NT Event Log and a database. It provides functionality to log events synchronously or asynchronously, manage database connections, and handle configuration settings from the Windows Registry.
+PURPOSE: The file `AGCEventLogger.cpp` is responsible for managing and logging events within the Allegiance game, handling both NT Event Log and database logging.
 
-**KEY PARTS:**
-- **Class: CAGCEventLogger:** Manages event logging for both NT Event Log and Database.
-- **Function: LogEvent(IAGCEvent* pEvent, bool bSynchronous):** Logs an event to either the NT Event Log or Database based on configuration.
-- **Function: CloseDatabase():** Closes any open database connections.
-- **Function: ChangeDatabase(IDBInitialize* pInit, DBID* pidTable, CDBPropSet* pPropSet):** Changes and tests a new database connection.
-- **Function: CloseNTEventLog():** Closes the NT Event Log handle.
-- **Function: ChangeNTEventLog(BSTR bstrComputer):** Opens an NT Event Log on a specified computer.
-- **Function: RootKeyFromString(BSTR bstrRegKey, DWORD* cchEaten):** Converts a registry key string to its corresponding HKEY value.
-- **Function: ReadStringValueFromRegistry(LPCTSTR pszValueName, CComBSTR& bstrOut):** Reads a string value from the Windows Registry.
-- **Function: QueryValue:** Reads a registry value into a buffer.
-- **Function: OpenWriteableRegKey:** Opens or creates a writable registry key for configuration settings.
-- **Function: FireNTEventLogStopped:** Fires an event indicating that the NT event log has been stopped.
-- **Function: FireDBEventLogStopped:** Fires an event indicating that the database event log has been stopped.
-- **Function: CopyChildNodes:** Copies child nodes from an XML DOM node to a vector of IXMLDOMNode pointers.
-- **Function: RemoveStyleSheetPIs:** Removes processing instructions related to XML stylesheets from an XML document.
-- **Function: ProcessXMLNode:** Processes each node in the XML document, handling event and group elements, and setting attributes based on configuration.
-- **Function: OnEventTriggered:** Handles asynchronous event triggering by posting a message to log the event.
-- **Function: OnEventTriggeredSynchronous:** Handles synchronous event triggering by posting a message and waiting for it to be processed.
-- **Function: get_EventList:** Loads and processes XML data from a resource, removing stylesheets and processing nodes based on configuration.
-- **Function: put_NTEventLog:** Sets the NT event log computer name in the registry and triggers an event indicating that the log has started.
-- **Function: get_NTEventLog:** Retrieves the current NT event log computer name from the registry.
-- **Function: put_DBEventLog:** Configures the database event log by setting connection parameters, attempting to establish a connection, and triggering events.
-- **Function: get_DBEventLog:** Retrieves the current database event log configuration.
-- **Function: put_EnabledNTEvents:** Sets the enabled NT event IDs in the registry and triggers an event indicating that the settings have changed.
-- **Function: get_EnabledNTEvents:** Retrieves the currently enabled NT event IDs from the registry.
+KEY PARTS:
+- CAGCEventLogger: Main class for event logging.
+- LogEvent: Method to log an event.
+- DisplayOLEDBErrorRecords: Function to display OLE DB error records.
+- OnMessage and ReleaseWorkItem: Message handling and work item release methods.
+- PRIVATE_ASSERTE: Macro for assertions in debug builds.
+- XLock: Class for locking critical sections.
+- IsWinNT: Function to check if the operating system is Windows NT.
+- ReportEventW: Windows API function to report events to the NT Event Log.
+- CloseDatabase and ChangeDatabase: Manage database connections.
+- CloseNTEventLog and ChangeNTEventLog: Manage NT event log handles.
+- RootKeyFromString, ReadStringValueFromRegistry, OpenWriteableRegKey: Functions for registry operations.
+- OnEventTriggered and OnEventTriggeredSynchronous: Handle asynchronous and synchronous event triggering.
+- get_EventList: Retrieves XML list of events.
+- put_NTEventLog and get_NTEventLog: Manage NT Event Log computer name.
+- put_DBEventLog and get_DBEventLog: Manage database event log parameters.
+- Initialize and Terminate: Methods for initializing and cleaning up the event logger.
 
-**CONNECTS TO:** Other systems or files it depends on or serves, one line. 
-- Depends on Windows Registry for configuration settings, uses COM interfaces for database operations, and interacts with the NT Event Log API.
+CONNECTS TO:
+- Windows API functions like ReportEventW
+- Registry operations through various helper methods
 
-**NOTES:**
-- Contains several TODO comments indicating areas that need further development.
-- Uses assertions and error handling mechanisms to ensure robustness.
-- Commonly uses `USES_CONVERSION` for converting between wide and narrow strings in Windows programming.
+NOTES:
+- "mdvalley: SetStringValue" indicates a potential code smell or placeholder.
+
+PARTS (in file order):
+
+- lines 1-337
+  - CAGCEventLogger: Main class for logging events.
+  - LogEvent: Method to log an event.
+  - DisplayOLEDBErrorRecords: Function to display OLE DB error records.
+  - OnMessage and ReleaseWorkItem: Message handling and work item release methods.
+  - PRIVATE_ASSERTE: Macro for assertions in debug builds.
+  - XLock: Class for locking critical sections.
+  - IsWinNT: Function to check if the operating system is Windows NT.
+  - ReportEventW: Windows API function to report events to the NT Event Log.
+- lines 338-690
+  - CAGCEventLogger: Manages logging events to various destinations like databases and event logs.
+  - CloseDatabase: Closes connections to the database.
+  - ChangeDatabase: Changes the database connection based on provided parameters.
+  - CloseNTEventLog: Closes the NT event log handle.
+  - ChangeNTEventLog: Opens the NT event log on a specified computer.
+  - RootKeyFromString: Converts registry key strings to HKEY values.
+  - ReadStringValueFromRegistry: Reads a string value from the Windows registry.
+  - OpenWriteableRegKey: Opens or creates a writable registry key.
+- lines 691-1057
+  - CAGCEventLogger: Main class handling event logging.
+  - OnEventTriggered: Handles asynchronous event triggering.
+  - OnEventTriggeredSynchronous: Handles synchronous event triggering.
+  - get_EventList: Retrieves XML list of events.
+  - put_NTEventLog: Sets the NT Event Log computer name.
+  - get_NTEventLog: Gets the NT Event Log computer name.
+  - put_DBEventLog: Sets database event log parameters.
+  - get_DBEventLog: Gets database event log parameters.
+- lines 1058-1389
+  - CAGCEventLogger: Manages event logging for both NT and DB.
+  - Initialize: Initializes the event logger with registry settings.
+  - Terminate: Cleans up resources when shutting down.
+  - put_LoggingToNTEnabled/get_LoggingToNTEnabled: Enables/gets NT logging.
+  - put_LoggingToDBEnabled/get_LoggingToDBEnabled: Enables/gets DB logging.
+  - put_HookForNTLogging/get_HookForNTLogging: Sets/gets hooks for NT logging.
+  - put_HookForDBLogging/get_HookForDBLogging: Sets/gets hooks for DB logging.
+  - TODOs: "mdvalley: SetStringValue" indicates a potential code smell or placeholder.
 
 #### `src/AGC/AGCEventLogger.h`
 
@@ -1248,21 +1249,94 @@ NOTES:
 
 #### `src/AGC/AGCGameParameters.cpp`
 
-**PURPOSE:** The file `AGCGameParameters.cpp` manages game parameters for missions in the Allegiance game. It includes functions to load and save parameters, validate settings, and provide accessors for various mission attributes such as player counts, game names, and resource visibility.
+PURPOSE: The file `AGCGameParameters.cpp` contains the implementation of a class `CAGCGameParameters` which manages various game parameters for Allegiance, including mission-specific and general settings.
 
-**KEY PARTS:**
-- **Class: CAGCGameParameters:** Manages game parameters for a mission.
-- **Function: Load:** Loads game parameters from an input stream.
-- **Function: Save:** Saves the current state of game parameters to an output stream.
-- **Function: Validate:** Validates the current state of game parameters.
-- **Functions: put_MinPlayers, get_MinPlayers, put_MaxPlayers, get_MaxPlayers:** Set and get minimum and maximum players per team.
-- **Function: get_IsGoalConquest:** Retrieves whether the goal is to conquer all sectors.
-- **Function: put_StartingMoney:** Sets the starting money for a mission if not attached to an existing one.
-- **Function: get_Lives:** Retrieves the number of lives for a mission.
+KEY PARTS:
+- CAGCGameParameters: Manages game parameters.
+- GetClassID: Returns the class ID for IPersist interface support.
+- IsDirty: Always returns S_OK indicating the object is always dirty.
+- Load: Loads game parameters from a stream.
+- Save: Saves game parameters to a stream.
+- put_AllowPrivateTeams, get_PowerUps, etc.: Set and get methods for various game settings like private teams, power-ups, joiners, stations, resources, and more.
 
-**CONNECTS TO:** Other game systems and files that handle mission setup, player management, and resource tracking.
+CONNECTS TO: None
 
-**NOTES:** The file includes repetitive patterns for setting/getting properties. It uses thread-safe mechanisms like `XLock` to ensure data integrity during concurrent access.
+NOTES: The class implements the IPersist interface for persistence operations.
+
+PARTS (in file order):
+
+- lines 2-369
+  - CAGCGameParameters: Class representing game parameters, either attached to an existing mission or unattached for creating a new one.
+  - GetClassID: Method implementing IPersist interface to return the class ID of the object.
+  - IsDirty: Always returns S_OK indicating the object is always dirty.
+  - Load: Loads game parameters from a stream, validating version and structure size.
+  - Save: Saves game parameters to a stream, including version information and current time adjustments.
+  - GetSizeMax: Returns the maximum size of the persisted data.
+  - InitNew: Initializes a new game parameters object.
+  - InterfaceSupportsErrorInfo: Checks if the interface supports error information.
+- lines 370-716
+  - CAGCGameParameters: Class representing game parameters.
+  - put_AllowPrivateTeams: Method to set whether private teams are allowed.
+  - get_PowerUps: Method to get whether power-ups are enabled.
+  - put_PowerUps: Method to set whether power-ups are enabled.
+  - get_AllowJoiners: Method to get whether players can join a mission.
+  - put_AllowJoiners: Method to set whether players can join a mission.
+  - get_Stations: Method to get whether stations are available.
+  - put_Stations: Method to set whether stations are available.
+- lines 717-1060
+  - CAGCGameParameters: Manages game parameters.
+  - put_Resources: Sets whether resources are enabled.
+  - get_ResourceAmountsVisible: Gets visibility of resource amounts.
+  - put_ResourceAmountsVisible: Sets visibility of resource amounts.
+  - get_RandomWormholes: Gets random wormhole generation setting.
+  - put_RandomWormholes: Sets random wormhole generation setting.
+  - get_NoTeams: Gets no teams mode setting.
+  - put_NoTeams: Sets no teams mode setting.
+- lines 1063-1407
+  - CAGCGameParameters: Manages game parameters for a mission.
+  - put_StartingMoney: Sets the starting money for players if not attached to an existing mission.
+  - get_Lives: Retrieves the number of lives for players.
+  - put_Lives: Sets the number of lives for players if not attached to an existing mission.
+  - get_GoalTeamKills: Retrieves the goal team kills for a mission.
+  - put_GoalTeamKills: Sets the goal team kills for a mission if not attached to an existing mission.
+  - get_MapType: Retrieves the map type for a mission.
+  - put_MapType: Sets the map type for a mission if not attached to an existing mission.
+- lines 1408-1753
+  - CAGCGameParameters: Class representing game parameters.
+  - put_MaxRank: Method to set the maximum rank property.
+  - get_PlayerSectorAsteroids: Method to get the number of asteroids in player's sector.
+  - put_PlayerSectorAsteroids: Method to set the number of asteroids in player's sector.
+  - get_NeutralSectorAsteroids: Method to get the number of asteroids in neutral sector.
+  - put_NeutralSectorAsteroids: Method to set the number of asteroids in neutral sector.
+  - get_PlayerSectorTreasures: Method to get the number of treasures in player's sector.
+  - put_PlayerSectorTreasures: Method to set the number of treasures in player's sector.
+- lines 1754-2111
+  - CAGCGameParameters: Manages game parameters.
+  - put_IGCStaticFile: Sets the IGC static file path.
+  - get_GamePassword: Retrieves the game password.
+  - put_GamePassword: Sets the game password.
+  - get_InvulnerableStations: Checks if stations are invulnerable.
+  - put_InvulnerableStations: Enables or disables invulnerable stations.
+  - get_ShowMap: Determines if the map is shown.
+  - put_ShowMap: Enables or disables showing the map.
+- lines 2112-2475
+  - CAGCGameParameters: Manages game parameters.
+  - get_TimeStart: Retrieves the start time of the game.
+  - get_TimeStartClock: Retrieves the clock-based start time of the game.
+  - get_GoalArtifactsCount: Retrieves the count of goal artifacts in the game.
+  - put_GoalArtifactsCount: Sets the count of goal artifacts in the game.
+  - get_AutoRestart: Retrieves whether auto-restart is enabled.
+  - put_AutoRestart: Enables or disables auto-restart.
+  - get_DefaultCountdown: Retrieves the default countdown time.
+- lines 2476-2895
+  - CAGCGameParameters: Manages game parameters and settings.
+  - get_IsTechBitOverridden: Checks if a technology bit is overridden for a team.
+  - put_OverriddenTechBit: Sets or clears an overridden technology bit for a team.
+  - put_SetOverriddenTechBitRange: Sets or clears a range of overridden technology bits for a team.
+  - get_GoalFlagsCount: Retrieves the count of goal flags.
+  - put_GoalFlagsCount: Sets the count of goal flags.
+  - get_StoryText: Gets the story text for the game.
+  - put_StoryText: Sets the story text for the game.
 
 #### `src/AGC/AGCGameParameters.h`
 
@@ -1353,16 +1427,10 @@ NOTES: None.
 
 #### `src/AGC/AGCGuid.c`
 
-PURPOSE: AGCGuid.c is part of the Allegiance game's core functionality, responsible for managing GUIDs (Globally Unique Identifiers) used to uniquely identify objects within the game.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- AGCGUIDManager: Manages the creation and storage of GUIDs.
-- GenerateGUID: Function that generates a new unique GUID.
-- IsValidGUID: Checks if a given GUID is valid.
-
-CONNECTS TO: AGCIDL_i.c, AGC_i.c - These files likely contain interfaces or definitions used by AGCGuid.c for interaction with other parts of the game engine.
-
-NOTES: None.
+    #include "AGCIDL_i.c"
+    #include "AGC_i.c"
 
 #### `src/AGC/AGCHullType.cpp`
 
@@ -1473,15 +1541,16 @@ NOTES: None.
 
 #### `src/AGC/AGCModels.cpp`
 
-PURPOSE: This file contains the implementation of the CAGCModels class, which is responsible for managing and providing models related to the game's administration.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCModels: Manages and provides models for administrative purposes within the game.
-- TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCModels): Defines that CAGCModels cannot be created externally.
-
-CONNECTS TO: AGCModels.h
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AdminAGCModels.cpp : Implementation of CAGCModels
+    //
+    #include "pch.h"
+    #include "AGCModels.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCModels
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCModels)
 
 #### `src/AGC/AGCModels.h`
 
@@ -1624,18 +1693,16 @@ NOTES:
 
 #### `src/AGC/AGCProbes.cpp`
 
-PURPOSE: The file `AGCProbes.cpp` contains the implementation of the `CAGCProbes` class, which is responsible for managing probes in the Allegiance game. These probes are used for various tasks such as exploration and resource gathering.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCProbes: Manages the creation, destruction, and behavior of probes within the game.
-- TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCProbes): Defines that `CAGCProbes` is a non-createable object, meaning it cannot be instantiated directly but can only be accessed through other means.
-
-CONNECTS TO:
-- AGCProbes.h: The header file for the `CAGCProbes` class.
-- Other game systems and files involved in managing probes and their interactions with the game environment.
-
-NOTES:
-- None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AdminAGCProbes.cpp : Implementation of CAGCProbes
+    //
+    #include "pch.h"
+    #include "AGCProbes.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCProbes
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCProbes)
 
 #### `src/AGC/AGCProbes.h`
 
@@ -1728,17 +1795,16 @@ NOTES: None.
 
 #### `src/AGC/AGCSectors.cpp`
 
-PURPOSE: The file `AGCSectors.cpp` is part of the Allegiance game's source code and contains the implementation for managing sectors within the game world. Sectors are regions that divide the game map into manageable chunks.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCSectors: Main class responsible for sector management, including initialization, updating, and rendering.
-- Initialize(): Function to set up initial state of sectors.
-- Update(): Method to update sector data over time.
-- Render(): Function to render the sectors on the screen.
-
-CONNECTS TO: AGCWorld.cpp (manages the overall game world).
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCSectors.cpp : Implementation of the CAGCSectors class.
+    //
+    #include "pch.h"
+    #include "AGCSectors.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCSectors
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCSectors)
 
 #### `src/AGC/AGCSectors.h`
 
@@ -1837,15 +1903,16 @@ NOTES:
 
 #### `src/AGC/AGCShips.cpp`
 
-PURPOSE: This file contains the implementation of the CAGCShips class, which manages and controls ships in the Allegiance game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCShips: Manages ship entities within the game.
-- TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCShips): Defines the class as non-creatable externally.
-
-CONNECTS TO: AGC.h (header file for CAGCShips)
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCShips.cpp : Implementation of the CAGCShips class.
+    //
+    #include "pch.h"
+    #include "AGCShips.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCShips
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCShips)
 
 #### `src/AGC/AGCShips.h`
 
@@ -1966,15 +2033,16 @@ NOTES:
 
 #### `src/AGC/AGCStations.cpp`
 
-PURPOSE: The file AGCStations.cpp contains the implementation of the CAGCStations class, which manages stations in the Allegiance game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCStations: Manages and controls various stations within the game.
-- TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCStations): Defines that CAGCStations cannot be created externally.
-
-CONNECTS TO: AGCStations.h, which contains the class definition for CAGCStations.
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCStations.cpp : Implementation of the CAGCStations class.
+    //
+    #include "pch.h"
+    #include "AGCStations.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCStations
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCStations)
 
 #### `src/AGC/AGCStations.h`
 
@@ -2050,15 +2118,16 @@ NOTES: None.
 
 #### `src/AGC/AGCTeams.cpp`
 
-PURPOSE: Implements team management functionality within the Allegiance game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CAGCTeams: Manages teams of players and their associated data.
-- TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCTeams): Macro to declare a non-createable object class.
-
-CONNECTS TO: AGCPlayer.cpp (manages player data)
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCTeams.cpp : Implementation of the CAGCTeams class.
+    //
+    #include "pch.h"
+    #include "AGCTeams.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCTeams
+    TC_OBJECT_EXTERN_NON_CREATEABLE_IMPL(CAGCTeams)
 
 #### `src/AGC/AGCTeams.h`
 
@@ -2153,17 +2222,15 @@ NOTES:
 
 #### `src/AGC/AGCVersionInfo.cpp`
 
-PURPOSE: This file contains the implementation of the CAGCVersionInfo class, which is responsible for managing and providing version information related to the Allegiance game client.
+PURPOSE: tiny file (7 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: CAGCVersionInfo - Manages and provides version information.
-- Function: GetVersionString() - Returns a string containing the current version of the game client.
-- Function: IsUpdateAvailable() - Checks if an update is available based on the current version.
-- Data: m_strVersion - Stores the current version number as a string.
-
-CONNECTS TO: AGCVersionInfo.h (header file for class definition).
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // AGCVersionInfo.cpp : Implementation of the CAGCVersionInfo class.
+    #include "pch.h"
+    #include "AGCVersionInfo.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CAGCVersionInfo
+    TC_OBJECT_EXTERN_IMPL(CAGCVersionInfo)
 
 #### `src/AGC/AGCVersionInfo.h`
 
@@ -2573,22 +2640,17 @@ None.
 
 #### `src/AGC/Pre-build.bat`
 
-PURPOSE:
-This batch file is responsible for building message resources for the AGCEvents system in Allegiance. It processes XML files using JavaScript transformations and then compiles these transformed files into various resource formats.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `targetDir`: Variable that holds the target directory for output files.
-- `cscript /e:jscript /NoLogo ..\..\src\AGC\XMLXForm.js ...`: Command to execute a JavaScript script (`XMLXForm.js`) with specific XSLT stylesheets to transform XML files into C++ header files, resource files, and other formats.
-- `mc.exe -r %targetDir% -h %targetDir% %targetDir%AGCEventsMC.mc`: Command to compile the message catalog file (`AGCEventsMC.mc`) into a binary resource format.
-
-CONNECTS TO:
-- `..\..\src\AGC\XMLXForm.js`
-- `..\..\src\AGC\AGCEvents.xml`
-- `..\..\src\AGC\AGCEventsCPP.xsl`, `..\..\src\AGC\AGCEventsRC2.xsl`, `..\..\src\AGC\AGCEventsRCH.xsl`, `..\..\src\AGC\AGCEventsMC.xsl`
-- `mc.exe`
-
-NOTES:
-- None.
+    echo Building message resources for AGCEvents...
+    set targetDir=..\%1
+    cscript /e:jscript /NoLogo ..\..\src\AGC\XMLXForm.js ..\..\src\AGC\AGCEvents.xml ..\..\src\AGC\AGCEventsCPP.xsl %targetDir%AGCEventsCPP.h
+    cscript /e:jscript /NoLogo ..\..\src\AGC\XMLXForm.js ..\..\src\AGC\AGCEvents.xml ..\..\src\AGC\AGCEventsRC2.xsl %targetDir%AGCEventsRC2.rc2
+    cscript /e:jscript /NoLogo ..\..\src\AGC\XMLXForm.js ..\..\src\AGC\AGCEvents.xml ..\..\src\AGC\AGCEventsRCH.xsl %targetDir%AGCEventsRCH.h
+    cscript /e:jscript /NoLogo ..\..\src\AGC\XMLXForm.js ..\..\src\AGC\AGCEvents.xml ..\..\src\AGC\AGCEventsMC.xsl %targetDir%AGCEventsMC.mc
+    echo Compiling AGC messages
+    echo mc.exe -r %targetDir% -h %targetDir% %targetDir%AGCEventsMC.mc
+    mc.exe -r %targetDir% -h %targetDir% %targetDir%AGCEventsMC.mc
 
 #### `src/AGC/TCMarshalByValue.cpp`
 
@@ -2645,15 +2707,24 @@ NOTES: None.
 
 #### `src/AGC/TCNullStream.cpp`
 
-PURPOSE: This file contains the implementation of the CTCNullStream class, which provides an IStream interface that counts the number of bytes being written to it. It is used to count the size of objects for persistence without allocating memory.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CTCNullStream: Implements the IStream interface and counts bytes written.
-- TC_OBJECT_EXTERN_IMPL(CTCNullStream): Registers the class as a COM object.
-
-CONNECTS TO: src/AGC/TCNullStream.h (header file)
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // TCNullStream.cpp | Implementation of the CTCNullStream class, which
+    // implements the CLSID_TCNullStream component object.<nl><nl>
+    // This object provides an implementation of the IStream interface that does
+    // nothing more that count the number of bytes being written to it.  Since
+    // ATL (currently 3.0) implements IPersistStreamInitImpl::GetSizeMax by
+    // returning E_NOTIMPL, this object can be used in an override of that
+    // method. This is accomplished by creating an instance of this null stream
+    // and 'persisting' an object to it, thereby counting the number of bytes
+    // needed to persist the object without allocating any memory.
+    //
+    #include "pch.h"
+    #include "TCNullStream.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CTCNullStream
+    TC_OBJECT_EXTERN_IMPL(CTCNullStream)
 
 #### `src/AGC/TCNullStream.h`
 
@@ -2688,31 +2759,63 @@ NOTES: None.
 
 #### `src/AGC/TCPropBagOnRegKey.cpp`
 
-**PURPOSE:** The `src/AGC/TCPropBagOnRegKey.cpp` file implements a component object that manages properties using Windows Registry keys. It provides methods to read and write various data types, including arrays, and handles the creation and management of objects based on registry entries.
+PURPOSE: The file `TCPropBagOnRegKey.cpp` implements a component object that uses a registry key to store and retrieve properties, managing various data types including safe arrays and objects.
 
-**KEY PARTS:**
-- **Class:** CTCPropBagOnRegKey
-  - Manages properties stored in a Windows registry key.
-  
-- **Functions:**
-  - `_GetSubkey()`: Retrieves the subkey path.
-  - `_GetServer()`, `_SetServer()`: Read and write server names.
-  - `_GetObjectCLSID()`: Retrieves the CLSID of an object.
-  - `_CreateObject()`, `_CreateLocalObject()`, `_CreateRemoteObject()`: Create objects based on server name or locally.
-  - `_LoadObject()`, `_SaveObject()`: Load and save persistent properties to/from the registry.
-  - `_ReadSafeArray()`, `_WriteSafeArray()`: Read and write safe arrays.
-  - `_ReadVariant()`, `_WriteVariant()`: Read and write variants.
+KEY PARTS:
+- CTCPropBagOnRegKey: Manages properties stored in a registry key.
+- CLSIDFromProgID: Converts a programmatic identifier to a class identifier.
+- _ReadVariantFromValue: Reads a value from the registry and converts it to a variant.
+- _LogError: Logs an error with details about the function, description, HRESULT, property name, and error log interface.
+- SafeArrayGetUBound and SafeArrayGetLBound: Get upper and lower bounds of a safe array.
+- SafeArrayAccessData and SafeArrayUnaccessData: Access and release data in a safe array.
+- WriteVariant: Writes a variant to a registry subkey.
+- IsSubkeySafeArray and IsSubkeyObject: Check if a subkey is a safe array or an object.
+- CComVariant: A COM variant class.
 
-- **Data:**
-  - `m_szElementCount`, `m_szLowerBound`, `m_szElementFmt`: Keys for array properties in the registry.
+CONNECTS TO: Windows Registry, COM (Component Object Model), DCOM (Distributed Component Object Model).
 
-**CONNECTS TO:** 
-- Other components that use property bag operations, such as game objects and settings.
+NOTES:
+- TODOs for adding support for more data types in `ReadSafeArray` and `WriteSafeArray`.
+- Error handling needs improvement in various functions.
 
-**NOTES:**
-- Uses `USES_CONVERSION` for COM string conversions.
-- Extensive error handling with detailed logging.
-- Supports various data types including arrays and complex objects.
+PARTS (in file order):
+
+- lines 1-364
+  - CTCPropBagOnRegKey: Implements a component object that uses a registry key to store and retrieve properties.
+  - _GetSubkey: Retrieves the full subkey path for this object.
+  - _GetServer: Reads the server name from the registry.
+  - _SetServer: Writes the server name to the registry.
+  - _GetObjectCLSID: Retrieves the CLSID of an object stored in the registry.
+  - _CreateObject: Creates a new object either locally or remotely based on the server information.
+  - _CreateLocalObject: Creates a local object using COM.
+  - _CreateRemoteObject: Creates a remote object using DCOM.
+- lines 365-714
+  - CTCPropBagOnRegKey: Manages properties stored in a registry key.
+  - CLSIDFromProgID: Converts a programmatic identifier to a class identifier.
+  - _ReadVariantFromValue: Reads a value from the registry and converts it to a variant.
+  - _LogError: Logs an error with details about the function, description, HRESULT, property name, and error log interface.
+  - _GetSubkeyVarType: Retrieves the variant type of a subkey in the registry.
+  - _ReadSafeArray: Reads a safe array from the registry.
+  - _WriteSafeArray: Writes a safe array to the registry.
+  - TODOs: Add support for more data types in ReadSafeArray and WriteSafeArray. Handle errors more gracefully in various functions.
+- lines 715-1045
+  - CTCPropBagOnRegKey::_WriteSafeArray: Writes a safe array to the registry.
+  - CTCPropBagOnRegKey::_ReadVariant: Reads a variant from the registry.
+  - CTCPropBagOnRegKey::_WriteVariant: Writes a variant to the registry.
+  - SafeArrayGetUBound and SafeArrayGetLBound: Get upper and lower bounds of a safe array.
+  - SafeArrayAccessData and SafeArrayUnaccessData: Access and release data in a safe array.
+  - WriteVariant: Writes a variant to a registry subkey.
+  - IsSubkeySafeArray and IsSubkeyObject: Check if a subkey is a safe array or an object.
+  - CComVariant: A COM variant class.
+- lines 1046-1432
+  - CTCPropBagOnRegKey: Manages a property bag stored in the Windows registry.
+  - _VarTypeFromUnknown: Determines the type of an unknown object.
+  - RootKeyFromString: Converts a string representation of a registry root key to its corresponding HKEY value.
+  - KeyExists: Checks if a specified subkey exists under a given registry key.
+  - QueryString: Retrieves a string value from the registry.
+  - CreateKey: Creates or opens a registry key.
+  - OpenKey: Opens an existing registry key.
+  - CreateObject, CreateLocalObject, CreateRemoteObject: Methods to create objects based on the property bag.
 
 #### `src/AGC/TCPropBagOnRegKey.h`
 
@@ -3041,34 +3144,28 @@ NOTES: None
 
 #### `src/AGC/guid.cpp`
 
-PURPOSE: The `guid.cpp` file in Allegiance is responsible for managing globally unique identifiers (GUIDs) used throughout the game to uniquely identify various objects and entities.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `class GUID`: Manages the creation and manipulation of GUIDs.
-- `function GenerateGUID()`: Generates a new GUID.
-- `function IsValidGUID(GUID guid)`: Checks if a given GUID is valid.
-- `function CompareGUIDs(GUID guid1, GUID guid2)`: Compares two GUIDs for equality.
-
-CONNECTS TO: AGCIDL_i.c and AGC_i.c
-
-NOTES: None.
+    #include "AGCIDL_i.c"
+    #include "AGC_i.c"
 
 #### `src/AGC/pch.cpp`
 
-PURPOSE: This file is a precompiled header (pch.cpp) for the Allegiance game. It includes standard headers and specific ATL (Active Template Library) components that are used across multiple source files to improve compilation speed.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include "pch.h"`: Includes the main precompiled header file.
-- `#include <TCAtl.cpp>`: Includes the implementation of the TCAtl library, which is part of the game's custom ATL extensions.
-- `#include <..\TCAtl\PropertyClass.cpp>`: Includes the implementation for property classes used in the game.
-- `#include <..\TCAtl\TCNullStreamImpl.cpp>`: Includes the implementation for a null stream class, likely used for logging or other purposes where no output is desired.
-- `#ifdef _ATL_STATIC_REGISTRY`: Conditional compilation block that includes registry handling code if the project is configured to use static registration.
-
-CONNECTS TO: Other source files and libraries that include this precompiled header file.
-
-NOTES:
-- The commented-out lines suggest that there was previous inclusion of `<statreg.cpp>`, which has been removed again.
-- There are no obvious TODOs or hacks in this snippet.
+    /////////////////////////////////////////////////////////////////////////////
+    // pch.cpp : source file that includes just the standard includes
+    //  pch.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
+    //#include <atlimpl.cpp>
+    #include <TCAtl.cpp>
+    #include <..\TCAtl\PropertyClass.cpp>
+    #include <..\TCAtl\TCNullStreamImpl.cpp>
+    #ifdef _ATL_STATIC_REGISTRY
+      #include <statreg.h>
+     // #include <statreg.cpp> Imago removed (again)
+    #endif
 
 #### `src/AGC/pch.h`
 
@@ -3105,16 +3202,15 @@ NOTES: None.
 
 ### src/AllSrvUI
 
-**Overview:** The `src/AllSrvUI` folder contains source code for the Allegiance game server's user interface, responsible for managing admin pages, chat settings, game creation, player management, and other administrative tasks.
+The `src/AllSrvUI` folder contains source code for the Allegiance game server's user interface, responsible for managing administrative tasks and player interactions.
 
-**Important Files:**
-- **AdminPageThreadWnd.cpp/h**: Manages admin-related events and messages.
-- **AllSrvUI.cpp/h**: Main application class handling initialization and event processing.
-- **AllSrvUISheet.cpp/h**: Property sheet dialog for managing server settings.
-- **AutoSizer.cpp/h**: Automatically adjusts control positions based on rules.
-- **DlgChatPreferences.cpp/h**: Manages chat preferences and user settings.
-- **PageGameCreate.cpp/h**: Handles game creation and management.
-- **PagePlayers.cpp/h**: Manages player information and interactions.
+- AdminPageThreadWnd.cpp: Handles administrative messages and events in the server UI.
+- AllSrvUISheet.cpp: Manages a property sheet dialog for configuring the game server.
+- PagePlayers.cpp: Manages the player-related UI page, handling game state changes and chat interactions.
+- PageChat.cpp: Manages chat functionality within the game client's user interface.
+- AutoSizer.cpp: Dynamically resizes and repositions controls based on specified rules.
+
+Largest files: PagePlayers.cpp (833 lines), PageChat.cpp (776 lines), AllSrvUISheet.cpp (696 lines), AutoSizer.cpp (610 lines), PageGameCreate.cpp (556 lines).
 
 #### `src/AllSrvUI/AdminPageThreadWnd.cpp`
 
@@ -3711,14 +3807,12 @@ NOTES:
 
 #### `src/AllSrvUI/StdAfx.cpp`
 
-PURPOSE: This file is part of the Allegiance game's AllSrvUI module and includes standard precompiled header files for efficient compilation.
+PURPOSE: tiny file (4 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: stdafx.h (precompiled header)
-
-NOTES: none
+    // stdafx.cpp : source file that includes just the standard includes
+    //	AllSrvUI.pch will be the pre-compiled header
+    //	stdafx.obj will contain the pre-compiled type information
+    #include "stdafx.h"
 
 #### `src/AllSrvUI/StdAfx.h`
 
@@ -3752,14 +3846,15 @@ NOTES: None.
 
 ### src/AutoUpdate
 
-The `src/AutoUpdate` folder in Allegiance contains the implementation for the auto-update system, which manages the process of updating the game client automatically.
+The AutoUpdate folder in Allegiance's source code is responsible for managing automatic updates of the game files to ensure players have the latest version.
 
-- **AutoUpdate.cpp**: Implements the main logic for initiating and managing the update process.
-- **AutoUpdate.h**: Declares the class responsible for handling the user interface and dialog interactions related to updates.
-- **AutoUpdate.rgs**: Defines the application ID and associated information in the Windows Registry for the AutoUpdate component.
-- **pch.cpp**: Part of the precompiled header, includes common headers and definitions used across multiple source files.
-- **pch.h**: Sets up necessary includes and defines global variables for the AutoUpdate module.
-- **resource.h**: Contains resource definitions for user interface elements used in the AutoUpdate dialog.
+- AutoUpdate.cpp: Implements the logic for downloading, verifying, and applying updates.
+- AutoUpdate.h: Defines the dialog class `CAutoUpdate` used for displaying update progress and handling user interactions.
+- pch.cpp: Precompiled header file for faster compilation of other source files in the project.
+- pch.h: Header file included by precompiled header files to provide common declarations.
+- resource.h: Contains definitions for resources such as strings and dialog identifiers used in the auto-update process.
+
+Largest files: AutoUpdate.cpp (614 lines), AutoUpdate.h (108 lines), pch.cpp (22 lines), resource.h (22 lines), pch.h (19 lines).
 
 #### `src/AutoUpdate/AutoUpdate.cpp`
 
@@ -3801,54 +3896,58 @@ NOTES:
 
 #### `src/AutoUpdate/AutoUpdate.rgs`
 
-PURPOSE: This file is a Windows registry script used to register the AutoUpdate application with the system.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: AppID
-  - Registers the application ID for AutoUpdate.
-- Name: {BB44CBB1-9D4D-47C4-9C45-00AA56B13A97}
-  - Unique identifier for the AutoUpdate application.
-- Name: AutoUpdate.EXE
-  - Specifies the executable file for the AutoUpdate application.
-- Name: AppID
-  - Assigns the unique identifier to the AutoUpdate application.
-
-CONNECTS TO:
-- Windows Registry
-
-NOTES:
-- None.
+    HKCR
+    {
+    	NoRemove AppID
+    	{
+    		{BB44CBB1-9D4D-47C4-9C45-00AA56B13A97} = s 'AutoUpdate'
+    		'AutoUpdate.EXE'
+    		{
+    			val AppID = s {BB44CBB1-9D4D-47C4-9C45-00AA56B13A97}
+    		}
+    	}
+    }
 
 #### `src/AutoUpdate/pch.cpp`
 
-PURPOSE: This file is part of the Allegiance game's precompiled header for the AutoUpdate module. It initializes COM support and includes a debug function that has been commented out.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `CComModule _Module`: Initializes COM support.
-- `_debugf(const char* format, ...)`: A commented-out function intended to provide formatted debug output.
-
-CONNECTS TO: The AutoUpdate module's other source files and the Allegiance game's overall build system.
-
-NOTES: The `_debugf` function is disabled and has been commented out.
+    #include "pch.h"
+    CComModule _Module;
+    // #include <atlimpl.cpp>
+    /////////////////////////////////////////////////////////////////////////////
+    /*
+    void _debugf(const char* format, ...)
+    {
+        const size_t size = 256;
+        char         bfr[size];
+        va_list vl;
+        va_start(vl, format);
+        _vsnprintf(bfr, size, format, vl);
+        va_end(vl);
+        debugf(bfr);
+    }
+    */
+    //Imago removed 6/10
 
 #### `src/AutoUpdate/pch.h`
 
-**PURPOSE:** The file `pch.h` is a precompiled header for the AutoUpdate module in Allegiance. It sets up necessary macros and includes essential libraries and headers required for the module to function.
+PURPOSE: tiny file (12 lines), shown in full rather than summarized.
 
-**KEY PARTS:**
-- `_WIN32_WINNT`: Defines the minimum Windows version.
-- `__MODULE__`: Sets the module name to "AutoUpdate".
-- `CComModule _Module`: Declares a COM module object.
-- `atlbase.h`, `atlcom.h`, `atlwin.h`: Include ATL (Active Template Library) components for COM and windowing support.
-- `commctrl.h`: Includes common controls library.
-- `zlib.h`: Introduces the zlib compression library.
-- `Utility.h`: Custom utility header file.
-- `zreg.h`: Header for registry operations.
-- `AutoDownload.h`: Header for auto-download functionality.
-
-**CONNECTS TO:** Other files and systems that depend on or are served by this module, such as other parts of Allegiance's codebase.
-
-**NOTES:** None.
+    #pragma once
+    #define _WIN32_WINNT 0x0A00
+    #define __MODULE__ "AutoUpdate"
+    #include <atlbase.h>
+    extern CComModule _Module;
+    #include <atlcom.h>
+    #include <atlwin.h>
+    #include <commctrl.h>
+    #include "zlib.h"
+    #include "Utility.h"
+    #include "zreg.h"
+    #include "AutoDownload.h"
 
 #### `src/AutoUpdate/resource.h`
 
@@ -3867,30 +3966,15 @@ NOTES: None.
 
 ### src/FedSrv
 
-### Folder Overview
+The `src/FedSrv` folder contains essential server-side logic and components for managing Allegiance games, including game state, player interactions, and mission handling.
 
-The `src/FedSrv` folder contains core server-side components for managing Allegiance games, including mission handling, player management, and administrative functions. It provides the backbone for running and maintaining game sessions on a server.
+- FedSrv.CPP: Implements the core server logic for handling game state, player interactions, and mission management.
+- fsmission.cpp: Manages mission creation, player management, voting, and game state for Allegiance multiplayer space games.
+- fsship.cpp: Handles ship and player interactions, including status updates, warp jumps, loadouts, and side affiliations.
+- allsrvmodule.cpp: Manages service-related functions and COM/ATL support for Allegiance's AllSrv module.
+- AllSrvModuleIDL.idl: Defines interfaces and coclasses for the Allegiance server administration API.
 
-### Key Files and Their Functions:
-
-- **AdminEventLoggerHook.cpp**: Manages asynchronous event logging to a database.
-  - `CAdminEventLoggerHook`: Class responsible for handling event logging.
-  - `LogEvent`: Interface method that logs an event asynchronously.
-
-- **AdminGame.cpp**: Implements administrative functions for managing game sessions.
-  - `CAdminGame`: Main class providing methods like sending messages, killing games, and setting team names.
-
-- **AdminServer.cpp**: Manages server operations such as sending messages and retrieving game information.
-  - `CAdminServer`: Class handling server-related tasks including game management and user connections.
-
-- **FedSrv.CPP**: Handles core operations of the Federation server, including mission management and player connections.
-  - `CFSMission`, `CFSPlayer`, `CFSDrone`: Classes managing missions, players, and drones respectively.
-
-- **allsrvmodule.cpp**: Manages the initialization and lifecycle of the Allegiance server as a Windows service.
-  - `CServiceModule`: Class for handling service registration, installation, and control.
-
-- **FedSrvApp.h**: Provides logging and debugging functionality for the server application.
-  - `FedSrvApp`: Class managing log files and debug output.
+Largest files: FedSrv.CPP (14126 lines), fsmission.cpp (6199 lines), fsship.cpp (1463 lines), allsrvmodule.cpp (1367 lines), AllSrvModuleIDL.idl (622 lines).
 
 #### `src/FedSrv/AdminEventLoggerHook.cpp`
 
@@ -4584,24 +4668,25 @@ NOTES:
 
 #### `src/FedSrv/CSteamUserGroupStatus.h`
 
-PURPOSE: The file defines a class `CSteamUserGroupStatus` that manages and queries the status of a user's membership in specific Steam groups.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CSteamID m_userID: Stores the Steam ID of the user.
-- CSteamID m_groupID: Stores the Steam ID of the group.
-- bool m_isMember: Indicates if the user is a member of the group.
-- bool m_isOfficer: Indicates if the user holds an officer position in the group.
-- bool m_requestComplete: Tracks whether the status request has been completed.
-- GetUserGroupStatus(bool &isMember, bool &isOfficer): Function to fetch and update the user's group status.
-- STEAM_GAMESERVER_CALLBACK(CSteamUserGroupStatus, OnUserGroupStatus, GSClientGroupStatus_t): Callback handler for Steam group status updates.
-- CSteamUserGroupStatus(CSteamID userID, CSteamID groupID): Constructor to initialize the user and group IDs.
-- static bool IsMemberOfModeratorsGroup(const char *steamID): Static function to check if a user is in the moderators group using their Steam ID as a string.
-- static bool IsMemberOfDevelopersGroup(const char *strSteamID): Static function to check if a user is in the developers group using their Steam ID as a string.
-- static bool IsMemberOfDevelopersGroup(CSteamID steamID): Static function to check if a user is in the developers group using their CSteamID.
-
-CONNECTS TO: This file depends on the Steam API for fetching and handling group status updates.
-
-NOTES: None.
+    #pragma once
+    class CSteamUserGroupStatus
+    {
+    private:
+    	CSteamID m_userID;
+    	CSteamID m_groupID;
+    	bool m_isMember = false;
+    	bool m_isOfficer = false;
+    	bool m_requestComplete = false;
+    	void GetUserGroupStatus(bool &isMember, bool &isOfficer);
+    	STEAM_GAMESERVER_CALLBACK(CSteamUserGroupStatus, OnUserGroupStatus, GSClientGroupStatus_t);
+    public:
+    	CSteamUserGroupStatus(CSteamID userID, CSteamID groupID);
+    	static bool IsMemberOfModeratorsGroup(const char *steamID);
+    	static bool IsMemberOfDevelopersGroup(const char *strSteamID);
+    	static bool IsMemberOfDevelopersGroup(CSteamID steamID);
+    };
 
 #### `src/FedSrv/CSteamValidation.cpp`
 
@@ -4625,17 +4710,28 @@ NOTES:
 
 #### `src/FedSrv/CSteamValidation.h`
 
-PURPOSE: This file contains the definition of the CSteamValidation class, which handles Steam authentication for players in the Allegiance game.
+PURPOSE: tiny file (20 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CSteamValidation: Manages Steam authentication for players.
-- BeginSteamAuthentication: Initiates the Steam authentication process.
-- GetRankForSteamID: Retrieves the rank associated with a Steam ID.
-- OnValidateAuthTicketResponse: Callback function to handle Steam authentication responses.
-
-CONNECTS TO: CSQLQuery, CQLogonStatsData, and other game systems for user validation and data storage.
-
-NOTES: None.
+    #pragma once
+    class CSteamValidation
+    {
+    private:
+    	DWORD				m_dwThreadID;
+    	CSQLQuery *			m_sqlQuery;
+    	CQLogonStatsData *	m_logonStatsData;
+    	int					m_characterID;
+    	bool				m_bAuthenticationComplete = false;
+    	ZString				m_responseText;
+    	bool				m_isValid;
+    public:
+    	CSteamValidation(DWORD dwThreadID, int characterID, CSQLQuery * pQuery, CQLogonStatsData * pqd);
+    	void BeginSteamAuthentication();
+    private:
+    	RankID GetRankForSteamID(CSteamID steamID);
+    	// Tells us a client has been authenticated and approved to play by Steam (passes auth, license check, VAC status, etc...)
+    	STEAM_GAMESERVER_CALLBACK(CSteamValidation, OnValidateAuthTicketResponse, ValidateAuthTicketResponse_t);
+    	void OnValidateAuthTicketResponse(CSteamID m_SteamID, EAuthSessionResponse eAuthSessionResponse, CSteamID ownerSteamID);
+    };
 
 #### `src/FedSrv/DPMono.rgs`
 
@@ -4655,36 +4751,385 @@ NOTES:
 
 #### `src/FedSrv/FedSrv.CPP`
 
-**File:** src/FedSrv/FedSrv.CPP
+PURPOSE: Allegiance's server-side logic for managing game state, player interactions, and mission handling.
 
-**PURPOSE:** Manages the core operations of the Allegiance server, including mission management, player connections, and network communication.
+KEY PARTS:
+- FedSrv_Terminate: Cleans up game state before exiting.
+- SetSessionDetails: Generates session details for messaging.
+- JoinMission: Handles logic for joining a mission, including checks and requirements.
+- CFSPlayer: Manages player data and interactions.
+- CFSDrone: Represents a drone ship with functions to create, leave, and board ships.
+- DoCheatCode: Parses chat lines and performs actions based on cheat codes.
+- MoveShips: Controls the movement of ships and manages scan range events.
+- FedSrvSiteBase: Base class for server site management, handling connections and session events.
+- CSteamValidation: Manages Steam validation for player logon processes.
+- pfsMission: Handles mission-related operations such as starting countdowns, sending messages, and managing player interactions.
+- FM_CS_SET_TEAM_INFO: Handles setting team information.
+- FM_C_CHANGE_ALLIANCE: Manages changing alliances between teams.
+- FM_CS_DELPOSITIONREQ: Deletes player positions.
+- FM_CS_MISSIONPARAMS: Adjusts mission parameters.
+- FM_C_START_GAME: Starts the game if conditions are met.
+- ProcessNetworkMessages: Processes network messages, including periodic roll calls and connection checks.
+- ThingSiteImpl: Manages visibility and interaction of game objects, including showing and hiding objects for specific sides.
+- FedSrvApp::AsyncFileOut: Asynchronously writes debug output to a file.
+- FedSrvApp::DebugOutput: Handles the actual logging and debugging output.
 
-**KEY PARTS:**
-- **Class:** `CFSMission`
-  - Manages mission-related operations such as loading missions, handling player joins, and managing game stages.
-  
-- **Function:** `JoinMission(CFSPlayer * pfsPlayer, DWORD dwCookie, const char * szPW)`
-  - Handles the logic for a player joining a mission. Checks if the mission exists, if it's not paused, and if the player can join based on the cookie provided.
+CONNECTS TO: Allegiance's client-side code, network infrastructure, Steam API.
 
-- **Function:** `SetSessionDetails()`
-  - Generates a string of name/value pairs representing session details such as game names and player counts, which are then sent to FedMessaging for tracking.
+NOTES: None.
 
-- **Function:** `UnloadDbCache()`
-  - Clears out cached database data that doesn't change between missions, such as core information and map details.
+PARTS (in file order):
 
-- **Function:** `FedSrv_Terminate(void)`
-  - Cleans up resources before the server exits, including shutting down threads, disconnecting from lobby, and freeing performance counters.
-
-- **Data Structure:** `GlobalAttributeSet`
-  - Holds various game attributes like speed, thrust, armor, etc., fetched from the database.
-
-- **TODOs/Unusual Code:**
-  - The commented-out Steam-related code in `JoinMission` suggests that there was an attempt to log player achievements, which has been disabled.
-  - The use of `#ifdef SRVLOG` and conditional compilation for logging indicates that detailed logging is enabled under certain conditions.
-
-**CONNECTS TO:** FedMessaging, database, network communication modules
-
-**NOTES:** Contains extensive TODOs and unusual code snippets related to Steam integration and debugging.
+- lines 1-342
+  - FedSrv_Terminate: Cleanup function called before exiting.
+  - SetSessionDetails: Generates a string of name/value pairs for session details in FedMessaging.
+  - UnloadDbCache: Clears out database cache that doesn't change between missions.
+  - LoadTechBits, LoadRankInfo, LoadStaticCoreInfo, LoadStaticMapInfo: Functions to load various game data from files or databases.
+  - VerifyUserMap: Checks if a user map is valid based on the number of teams and file name.
+  - AddNamedValue: Helper function to add named values to a string for session details.
+  - g: Global variable containing game state information.
+  - TODO: "Imago 6/10 #35 - Dropped player stats are reset" (comment in code)
+- lines 343-687
+  - FetchGlobalAttributeSet: Fetches attributes from a database for specified global attribute.
+  - IsAnotherPlayerUsingThisName: Checks if another player is using the same name in the mission.
+  - JoinMission: Handles the logic for joining a mission, including checks for password, player limits, and rank requirements.
+  - g.hKillReceiveEvent, g.hPlayerEvent: Handles event handling related to game events.
+  - g.fm.Shutdown(): Shuts down the message manager.
+  - DisconnectFromLobby(): Disconnects from the lobby server.
+  - ShutDownSQL(): Shuts down SQL operations if not in standalone mode.
+  - timeEndPeriod(1): Ends the time period for high-resolution timers.
+- lines 688-1043
+  - CFSPlayer: Manages player data and interactions.
+  - GotLogonDetails: Callback function for logon details query.
+  - pfmLogonAck: Packet format for logon acknowledgment.
+  - CQCharSquads: Query class for character squads information.
+  - GotCharSquads: Callback function for character squads query results.
+  - SetCharStats: Function to upload character persisted stats.
+  - TODOs: "KG: eventually remove this" in GotInvitationList and GotCharSquads functions. Debugging statements like debugf that should be removed or commented out in production code.
+- lines 1044-1388
+  - SetCharStats: Updates character statistics based on mission scores and rank calculations.
+  - RecordSquadGame: Uploads results of a squad game to the database.
+  - GetInvitations: Sends a request to get invitations for a specific mission.
+  - LoadDbCache: Loads static data from the database into memory for caching purposes.
+  - TODOs: Stress test commented out at the end of SetCharStats function. Debug statements in RecordSquadGame and LoadDbCache functions.
+  - Unusual code: Use of _alloca for dynamic memory allocation on the stack. Multiple while loops with similar logic to assign loser squad IDs in RecordSquadGame.
+- lines 1389-1747
+  - DataWeaponTypeIGC: Represents weapon data.
+  - IweaponIGC: Interface for weapons.
+  - DataMissileTypeIGC: Represents missile data.
+  - ImissileIGC: Interface for missiles.
+  - DataChaffTypeIGC: Represents chaff data.
+  - DataShieldTypeIGC: Represents shield data.
+  - DataCloakTypeIGC: Represents cloak data.
+  - DataAfterburnerTypeIGC: Represents afterburner data.
+- lines 1748-2091
+  - CFSCluster: Manages cluster data.
+  - GetGroupSectorDocked: Retrieves the group sector docked for a cluster.
+  - GetGroupSectorFlying: Retrieves the group sector flying for a cluster.
+  - ExportObj: Exports an IGC object to the client.
+  - SendPlayerInfo: Sends player information to another player or drone.
+  - rgperplrScore: Array of PersistPlayerScoreObject used in SendPlayerInfo.
+  - TODO: The comment "is this specified anywhere else? -- KGJV : 8 to 20, why 8 anyway ?" suggests a potential issue with the value of cCivsMax.
+- lines 2092-2444
+  - CFSDrone: Represents a drone ship.
+  - CreateStockDrone: Creates a new stock drone based on the given drone type and side.
+  - LeaveShip: Handles the process of leaving a ship for a player.
+  - BoardShip: Handles the process of boarding a ship by a player.
+  - pfmPlayerInfo: Structure used to store information about a player's ship, including orders, base object ID, side, ship ID, rank ID, readiness status, and money.
+  - CheatSides: Function that appears to be related to debugging or cheating, but is commented out.
+- lines 2445-2779
+  - CheatCreateDrones: Handles cheat code to create drones.
+  - EnumPlayersCallback: Callback function for enumerating players and groups in DPlay.
+  - CheatDPGroups: Cheat code to enumerate all our dpgroups for debugging purposes.
+  - CheatJPD: The Joel P Dehlin cheat to create a friendly and enemy ship in front of you.
+  - LogTrapHack: Logs trap hacks with event parameters.
+  - TODOs: None identified in the provided snippet.
+  - Unusual code: Uses assert statements, retailf for logging, and conditional compilation directives.
+- lines 2780-3103
+  - DoCheatCode: Parses chat lines and performs actions based on cheat codes.
+  - LogTrapHack: Logs and handles hack events.
+  - HandleCOMChatEvents: Generates COM events for chat messages.
+  - g.fm.DeleteConnection: Deletes a connection in the game framework.
+  - EventID_HackBoot, EventID_HackBootNoPlayer: Constants representing specific event IDs.
+  - CFSMission, CFSShip, CFSSide: Classes representing mission, ship, and side objects.
+  - ZString: A string class used for handling text.
+  - Sleep: A function to pause execution for a specified duration.
+- lines 3106-3447
+  - CFSShip: Represents a ship in the game.
+  - IshipIGC: Interface for ship-related information and operations.
+  - AGCEventID: Enumerates different event IDs used in the game.
+  - ChatData: Struct containing chat message data.
+  - ForwardChatMessageToWing: Sends a chat message to all ships in a specified wing.
+  - ForwardChatMessage: Handles forwarding of chat messages based on target type.
+  - CommandToDrone: Processes commands for drones, including setting default orders and handling special cases like mining and building.
+  - WingID: Identifier for a wing or group of ships.
+- lines 3448-3810
+  - CmpShipDeviation: Sort function for qsort to sort ships based on deviation.
+  - AddUpdate: Adds ship updates to a message buffer.
+  - SendShipUpdates: Sends ship updates to all clients in the sector.
+  - pszDest: Destination of the chat message.
+  - pcd->chatTarget: Chat target type.
+  - ForwardChatMessageToWing: Forwards chat messages to specific wings.
+  - CSteamAchievements::AwardIGCAchievements: Awards achievements based on IGC score triggers.
+  - TODO: NYI (Not Yet Implemented) for CHAT_ADMIN case.
+- lines 3811-4162
+  - CFSPlayer: Represents a player in the game.
+  - CFSShip: Represents a ship in the game.
+  - IshipIGC, ImodelIGC, IstationIGC, IdamageIGC: Interfaces for different types of game objects.
+  - ServerHeavyShipUpdate, ServerLightShipUpdate, ServerActiveTurretUpdate: Structures used to update specific aspects of ships and turrets.
+  - qsort: Standard C library function for sorting arrays.
+  - random: Function for generating random numbers.
+  - g.timeNow: Global variable representing the current game time.
+  - pcluster: Variable representing the cluster of objects in the game.
+- lines 4163-4528
+  - MoveShips: Keeps ships in constant motion, detects scan range entrances and exits, and sends appropriate notifications.
+  - CreateTreasure: Creates treasure on the server and exports its existence to all clients in the mission.
+  - ExportStaticIGCObjs: Not being used but contains code to send static IGC objects to clients.
+  - OnMessageBox: Handles message box events by printing them and triggering an event.
+  - OnSysMessage: Increments system messages counters when a system message is received.
+  - OnSQLErrorRecord: Triggers an event for SQL error records, indicating they may not be fatal.
+  - OnOLEDBErrorRecord: Triggers an event for OLEDB error records, indicating they are always fatal.
+  - TODO: Remove unused code related to sending FTP site information.
+- lines 4529-4882
+  - FedSrvSiteBase: Base class for server site handling.
+  - OnNewConnection: Handles new connections, logs IP address.
+  - OnDestroyConnection: Cleans up after a connection is destroyed.
+  - OnSessionLost: Triggers an event when the session is lost.
+  - OnBadCRC: Handles messages with bad CRC by dropping the player.
+  - OnMessageSent: Callback to update performance counters for sent messages.
+  - DisplaceProbe: Adjusts positions to avoid overlap with models or clusters.
+  - GetPlayerHandleFromSteamID: Converts Steam ID to a custom player handle.
+- lines 4883-5226
+  - CASTPFM: Macro for casting a pointer to a specific message type.
+  - INACTIVE_TURRET_UPDATE: Message type indicating an inactive turret update.
+  - IshipIGC: Interface for ship information.
+  - GetCluster, GetParentShip, GetTurretID: Methods of IshipIGC interface.
+  - SetInactiveTurretUpdate: Method to set the inactive turret update state.
+  - FM_CS_PING: Message type for ping requests.
+  - CS, PING: Specific message types within the FM_CS_PING case.
+  - g.timeNow: Global variable representing current time.
+- lines 5227-5586
+  - pfsMission->GetSite()->SendChatf: Sends a chat message to a specific player.
+  - pfsPlayer->GetIGCShip()->GetObjectID(): Retrieves the object ID of the player's ship.
+  - pfsMission->StartCountdown(1): Starts a countdown for the mission.
+  - ForwardChatMessage: A function that forwards chat messages between players and missions.
+  - SetWingID: Allows a player to set their wing ID within a mission.
+  - TallyVote: Tallys votes from players in a mission.
+  - DecrementChatBudget: Decrements the chat budget for a player.
+  - GetAutoDonate: Retrieves the auto-donation target of a player's ship.
+- lines 5587-5948
+  - CFSShip: Represents a ship in the game.
+  - CQLogonStats: Manages logon statistics and queries.
+  - CQLogonStatsData: Holds data related to logon statistics.
+  - FM_VAR_REF: Macro for accessing variables in a message frame.
+  - g.pzas: Pointer to the Zone Authentication Service, responsible for handling authentication.
+  - g.strAuthServer: The expected authentication server address.
+  - g.m_szToken: Token used for authentication.
+  - GetStateID: Function that retrieves the state ID based on a character name.
+- lines 5949-6318
+  - CSteamValidation: Manages Steam validation for player logon.
+  - LogonThread: Thread function to handle Steam validation and player rank retrieval.
+  - CQLogonStats: Query class for retrieving logon statistics.
+  - GotLogonDetails: Callback function for when logon details are retrieved.
+  - FM_C_TREASURE_ACK: Message handler for treasure acknowledgment.
+  - FM_C_BUY_LOADOUT: Message handler for buying a ship loadout.
+  - FM_CS_DROP_PART: Message handler for dropping a part from a ship.
+  - pqd: Player query data structure containing login information.
+- lines 6319-6689
+  - g.fm.ForwardMessage: Sends a message to all players in the same sector.
+  - ObjectType: Enumerates different types of objects in the game.
+  - CreateTreasure: Creates a treasure object at a specified location.
+  - pfsPlayer->GetIGCShip(): Retrieves the player's ship.
+  - pfsMission->GetStage(): Gets the current stage of the mission.
+  - LeaveShip: Handles leaving a parent ship.
+  - BoardShip: Handles boarding another ship.
+  - SetCluster: Sets the player's cluster.
+- lines 6690-7065
+  - pfsMission->RequestPosition: Handles a position request from a player.
+  - FM_C_POSITIONACK: Processes a position acknowledgment message.
+  - FM_CS_QUIT_MISSION: Handles a mission quit request from a player.
+  - FM_CS_QUIT_SIDE: Handles a side quit request from a player.
+  - FM_CS_AUTO_ACCEPT: Manages auto-accept settings for sides in a mission.
+  - FM_CS_LOCK_LOBBY: Locks or unlocks the lobby of a mission.
+  - FM_CS_LOCK_SIDES: Locks or unlocks the sides of a mission.
+  - FM_C_RANDOMIZE_TEAMS: Randomizes or flushes teams based on mission parameters.
+- lines 7066-7428
+  - FM_GUARANTEED: A message flag indicating that a message must be delivered.
+  - FM_FLUSH: A message flag indicating that messages should be flushed immediately.
+  - NA: A constant representing "Not Applicable" or an invalid ID.
+  - pfsPlayer: An object representing the player making the request.
+  - pstation: An object representing the station being interacted with.
+  - pship: An object representing the ship involved in the operation.
+  - pside: An object representing the side (team) of the player or ship.
+  - pfsMission: An object representing the current mission.
+- lines 7430-7800
+  - FM_CS_SET_TEAM_INFO: Handles setting team information.
+  - FM_C_CHANGE_ALLIANCE: Handles changing alliances between sides.
+  - FM_CS_DELPOSITIONREQ: Handles deletion of player positions.
+  - FM_CS_MISSIONPARAMS: Handles mission parameters changes.
+  - FM_C_START_GAME: Starts the game if conditions are met.
+  - FM_CS_SET_TEAM_LEADER: Sets a new team leader.
+  - FM_CS_SET_MISSION_OWNER: Sets a new mission owner, typically by bots.
+  - FM_C_RIPCORD_REQUEST: Handles ripcord requests during gameplay.
+- lines 7801-8141
+  - CreateUniqueMutex: Creates a mutex with a unique name to indicate when the server is running.
+  - CheckForNoShows: Ensures missions are terminated if the mission creator never shows up.
+  - DisconnectFromLobby: Disconnects from the lobby server.
+  - ProcessNetworkMessages: Handles receiving and processing network messages, including periodic roll calls and connection checks.
+  - TODO: "KGJV #114 reactivated" - Indicates a feature or fix that was previously deactivated.
+  - Unusual Code: Packet Loss Update logic within ProcessNetworkMessages. Conditional compilation for different server types (e.g., SRV_CHILD, SRV_PARENT). Use of wsprintf for string formatting, which is generally discouraged in favor of safer alternatives like snprintf.
+- lines 8142-8493
+  - UpdateMissions: Handles updating missions and managing game stages.
+  - CTimer: A timer class used for timing operations.
+  - CFSMission: Represents a mission in the game.
+  - STAGE_OVER, STAGE_NOTSTARTED, STAGE_STARTING, STAGE_STARTED: Constants representing different stages of a mission.
+  - c_fMissionBriefingCountdown: Time before a countdown starts.
+  - GetExePath: Retrieves the path to the executable file.
+  - IsCFGFileValid: Validates if a configuration file is valid.
+  - BeginConfigDownload: Starts downloading a configuration file from a server.
+- lines 8495-8871
+  - debugf: Prints debug messages.
+  - RetrieveCFGFile: Downloads and processes the configuration file.
+  - OnCFGDownloadDone: Handles the completion of the configuration download.
+  - DownloadAutoUpdateEXE: Initiates the download of an auto-update executable.
+  - AnnouncePause: Notifies the lobby whether the server is paused or not.
+  - RestartPausedMissions: Restarts any paused missions when the service resumes.
+  - ConnectToLobby: Establishes a connection to the lobby server.
+  - TODOs: Fire event for AutoUpdate.exe download error Remove MessageBox call in RetrieveCFGFile for service mode installations Revisit re-advertizing games comment
+- lines 8872-9218
+  - CFSMission: Represents a mission in the game.
+  - FedSrvSite: Represents a site for the server.
+  - ProcessMsgPump: Processes window messages while waiting for specified time or events.
+  - StartDefaultGames: Starts any games listed in the registry.
+  - BEGIN_PFM_CREATE and END_PFM_CREATE: Macros used to create and manage mission data.
+  - g.fmLobby: The lobby object for managing game missions.
+  - g.pServerCounters: Server counters object.
+  - Time::Now(): Returns the current time.
+- lines 9219-9584
+  - ReceiveThread: Receives messages for a mission and performs periodic processing.
+  - LoadSettings: Loads static server settings from the registry.
+  - Sleep(1000): Pauses execution for 1 second.
+  - CoInitialize(NULL): Initializes COM library on the current thread.
+  - _Module.Init(g.hInst): Initializes the ATL module.
+  - CComObject<CAdminServer>::CreateInstance(&pServer): Creates an instance of the CAdminServer object.
+  - GetAGCGlobal()->RegisterInterfaceInGlobal(pServer->GetUnknown(), IID_IUnknown, &g.dwServerGITCookie): Registers the interface in the GIT.
+  - CreateUniqueMutex(): Creates a uniquely-named mutex.
+- lines 9585-9939
+  - RegQueryValueExA: Queries a value from the Windows registry.
+  - StringStartsWith: Checks if one string starts with another.
+  - BuildIGCFiles: Builds IGC files from the database.
+  - DataClusterIGC, DataWarpIGC, DataAsteroidIGC, DataSideIGC: Structures representing different types of game objects.
+  - LoadRegString: Loads a registry string value.
+  - DumpIGCStaticCore: Dumps static core data to an IGC file.
+  - CreateMission: Creates a new mission object.
+  - SectorInfo, AlephsCount, Alephs, Asteroids: SQL queries for retrieving game data.
+- lines 9940-10280
+  - DataStationIGC: Represents a station with various properties like position, rotation, and type.
+  - DataProbeExport: Represents a probe with properties like location, type, and launcher.
+  - DataMineExport: Represents a mine with properties like location, type, and launcher.
+  - DataTreasureIGC: Represents a treasure with properties like location, amount, and code.
+  - RegisterAllSrv: Registers the server as an NT service or EXE.
+  - UnregisterAllSrv: Unregisters the server as an NT service or EXE.
+  - main: Entry point of the program that handles different modes of operation (service, executable, installation, de-installation).
+  - TODO -> propogate this to the database: Indicates a task to propagate data to the database.
+- lines 10281-10621
+  - SERVICE_TABLE_ENTRY rgSTE[]: Defines service table entries for Windows service registration.
+  - fShowUsage: Boolean flag to indicate if usage information should be displayed.
+  - g.hInst = GetModuleHandle(NULL): Retrieves the handle of the current module.
+  - _Module.TermAGC(): Terminates AGC (Assuming it's a custom module or library).
+  - RegisterAllSrv(...): Registers the server as an executable or service.
+  - UnregisterAllSrv(argv[0]): Unregisters the server.
+  - SteamGameServer_Init(...): Initializes Steam Game Server with specified parameters.
+  - SteamGameServer()->LogOnAnonymous(): Logs on to Steam Game Server anonymously.
+- lines 10622-10971
+  - ThingSiteImpl: Implements the ThingSite interface for managing visibility and interaction of game objects.
+  - ShowObject: Static function that handles showing a game object to a specific side.
+  - HideObject: Static function that handles hiding a game object from a specific side.
+  - UpdateSideVisibility: Virtual function that updates the visibility of a game object for all sides in its cluster.
+  - _AGCModule.TriggerEvent: Triggers an event within the Allegiance game module.
+  - GetModuleHandle and GetModuleFileName: Used to get the current executable's path.
+  - SetCurrentDirectory: Sets the current working directory to the executable's directory.
+  - LoadTechBits: Loads technology bits for a specific cheat.
+- lines 10972-11321
+  - FedSrvSiteBase: Manages sites and clusters for a side.
+  - CreateThingSite: Creates a new ThingSiteImpl instance.
+  - CreateClusterSite: Creates a new ClusterSiteImpl instance and adds it to the mission.
+  - UpgradeDrones: Upgrades any drones docked at stations for a given side.
+  - DevelopmentCompleted: Handles completion of development projects, including sending messages and applying effects.
+  - SideDevelopmentTechChange: Updates technology changes for a side, including upgrading station types and notifying clients.
+  - SideGlobalAttributeChange: Handles global attribute changes for a side, sending notifications to clients.
+  - Review: Changes for visibility of static objects (#135) may now require roid to be checked for abilities! -Imago 8/10
+- lines 11322-11660
+  - FedSrvSiteBase: Manages various events and interactions related to construction and upgrades.
+  - HullTypeCompleted: Handles completion of hull type construction for a side.
+  - PartTypeCompleted: Handles completion of part type construction for a side.
+  - StationTypeCompleted: Handles the completion of station type construction, including special handling for probes and asteroids.
+  - BuildStation: Creates a new station on an asteroid, handles upgrades, and manages events related to station creation.
+  - DroneTypeCompleted: Handles the completion of drone type construction, including sending messages to team members.
+  - UpgradeShip: Upgrades a ship based on the station it is built at.
+  - TerminateModelEvent: Placeholder function for handling model termination events.
+- lines 11661-12005
+  - CFSShip: Represents a ship in the game.
+  - IshipIGC: Interface for ship objects.
+  - PlayerScoreObject: Manages player scores and achievements.
+  - CreateTreasure: Function to create treasure items.
+  - KillShipEvent: Handles events related to ship deaths.
+  - RespawnFlag: Respawns a flag if it's outside a certain radius.
+  - ShipListIGC: List of ships.
+  - PartListIGC: List of parts on a ship.
+- lines 12006-12345
+  - FedSrvSiteBase: Manages events related to ships and stations being damaged or destroyed.
+  - DamageShipEvent: Handles damage events for ships, including sending chat messages about attacks.
+  - DamageStationEvent: Handles damage events for stations, including sending chat messages about attacks.
+  - KillStationEvent: Handles the destruction of a station, updating mission state and sending notifications.
+  - BEGIN_PFM_CREATE and END_PFM_CREATE: Macros used to create and send message frames (likely for network communication).
+  - SendChatf and SendChat: Functions for sending chat messages to players or teams.
+  - CFSShip, CFSPlayer, IstationIGC, ImodelIGC: Classes representing ships, players, stations, and models respectively.
+  - g.fm: Likely a global object responsible for managing message frames.
+- lines 12346-12690
+  - FedSrvSiteBase: Manages events related to various game objects like asteroids, probes, and ships.
+  - KillAsteroidEvent: Handles the destruction of an asteroid, sending a message to all sides.
+  - DrainAsteroidEvent: Handles the draining of an asteroid's ore, updating the game state accordingly.
+  - MineAsteroidEvent: Updates visible asteroids for players when they are mined.
+  - KillProbeEvent: Handles the destruction of a probe, notifying all sides.
+  - KillBuildingEffectEvent: Manages the termination and notification of building effects.
+  - KillTreasureEvent: Handles the destruction of treasure, potentially respawning it.
+  - KillMissileEvent: Processes the destruction of a missile, including exploding it if necessary.
+- lines 12691-13047
+  - FedSrvSiteBase::LandOnCarrierEvent: Handles the event when a ship lands on a carrier.
+  - FedSrvSiteBase::RescueShipEvent: Handles the event when one ship rescues another.
+  - IpartTypeIGC: Represents a type of part that can be mounted on a ship.
+  - IweaponIGC: Represents a weapon that can be mounted on a ship.
+  - IshieldIGC: Represents a shield that can be mounted on a ship.
+  - ShipLoadout: Holds information about the parts and equipment of a ship's loadout.
+  - BEGIN_PFM_CREATE: Macro to start creating a message for transmission.
+  - FM_VAR_REF: Macro to reference a variable in a message.
+- lines 13048-13405
+  - FedSrvSiteBase: Manages events related to space stations and ships.
+  - CaptureStationEvent: Handles capturing a station by a ship.
+  - DockWithStationEvent: Manages docking of a ship with a station, including handling artifacts and flags.
+  - ChangeStation: Handles changing the station of a ship, including launching from allied bases and rearming.
+  - GetDroneFromShip: Returns the drone associated with a non-player ship.
+  - RequestRipcord: Initiates or aborts a ripcord request for a ship.
+  - ContinueRipcord: Determines if a ripcord can continue based on mission parameters and side relationships.
+- lines 13406-13759
+  - FedSrvSiteBase: Manages events related to ships and their interactions with the game environment.
+  - UseRipcord: Handles the logic for using a ripcord on a ship or station.
+  - HitWarpEvent: Processes events when a ship hits a warp point.
+  - ChangeCluster: Updates the cluster (sector) of a ship.
+  - LoadoutChangeEvent: Manages changes to a ship's loadout, such as adding or removing weapons.
+  - HitTreasureEvent: Handles events related to ships hitting treasures, including flags and cash.
+  - PaydayEvent: Distributes money to a side.
+  - SendChat: Sends chat messages between players or entities in the game.
+- lines 13760-14126
+  - FedSrvSiteBase::LayExpendable: Handles laying expendables like mines or probes on a ship.
+  - FedSrvSiteBase::RespawnFlag: Manages respawning flags for sides in the game.
+  - FedSrvSiteBase::CreateSideEvent: Creates an FSSide when a side is created in IGC.
+  - FedSrvSiteBase::DestroySideEvent: Destroys an FSSide when a side is destroyed in IGC.
+  - FedSrvSiteBase::Destroy: Deletes the FedSrvSiteBase instance.
+  - PickNewLeader: Selects a new leader for a group of ships based on auto-donate settings.
+  - FedSrvApp::AsyncFileOut: Asynchronously writes debug output to a file.
+  - FedSrvApp::DebugOutput: Handles the actual logging and debugging output.
 
 #### `src/FedSrv/FedSrv.H`
 
@@ -4739,30 +5184,64 @@ NOTES: None.
 
 #### `src/FedSrv/allsrvmodule.cpp`
 
-**PURPOSE:** Manages the initialization, termination, and lifecycle of Allegiance Server as a Windows service.
+PURPOSE:
+allsrvmodule.cpp manages service-related functions and COM/ATL support for Allegiance's AllSrv module.
 
-**KEY PARTS:**
-- **Class: CServiceModule**: Manages registration, unregistration, installation, and removal of a Windows service.
-- **Function: RegisterServer()**: Registers the module with the registry and installs the service into the NT Service Manager.
-- **Function: UnregisterServer()**: Removes the module from the registry and uninstalls the service from the NT Service Manager.
-- **Function: InstallService(int argc, char * argv[])**: Installs the service into the NT Service Manager. Configures failure actions for the service.
-- **Function: RemoveService()**: Removes the service from the NT Service Manager if it is currently stopped.
-- **Function: HandlerRoutine(DWORD dwCtrlType)**: Handles control signals such as close, break, shutdown, and Ctrl+C events. Sets an event to terminate the application gracefully.
-- **Function: RunAsWindow()**: Runs the service as a windowed application with a taskbar icon for debugging purposes.
-- **Function: RunAsExecutable()**: Allows the service to be run from the command line, providing options to pause, continue, and quit.
-- **Function: SetSvcStatus(DWORD state, DWORD exitcode)**: Updates the status of the service in the Service Control Manager (SCM).
-- **Function: ServiceMain**: Entry point for the service main function, registers the service control handler and initializes the service.
-- **Function: ServiceHandler**: Handles service control commands such as STOP, SHUTDOWN, PAUSE, and CONTINUE.
-- **Function: EXEThreadProc**: Main thread procedure that initializes the server and handles messages until termination.
-- **Function: ThreadProc**: Manages the lifecycle of the EXEThreadProc, including restarting on failure.
-- **Function: MPServiceMain**: Entry point for the service main function when running as a parent process, sets up service status and thread management.
-- **Function: StopAllsrv**: Signals allsrv to terminate by setting an event.
-- **Function: MTAKeepAliveThunk**: Static thunk function to call MTAKeepAliveThread with the correct 'this' pointer.
-- **Function: MTAKeepAliveThread**: Manages the COM Multi-threaded Apartment (MTA) initialization, class object registration, and cleanup.
+KEY PARTS:
+- CServiceModule: Manages service operations like installation, removal, and running as an executable or a Windows service.
+- PrintSystemErrorMessage: Prints system error messages along with their descriptions.
+- IsInstalled: Checks if AllSrv was properly installed (either as a service or an EXE).
+- InitAGC: Initializes AGC, sets up event logging, and hooks for database event logging.
+- RunAsExecutable: Handles running the service as a standalone application for debugging purposes.
+- ServiceControl: Processes control codes received by the service manager (e.g., stop, pause, continue).
+- SetSvcStatus: Updates the service status to reflect its current state.
+- MTAKeepAliveThread: Manages the COM Multi-threaded Apartment (MTA) for the service.
 
-**CONNECTS TO:** Other system components for service management and event logging.
+CONNECTS TO:
+- Windows Service Control Manager
+- Allegiance game engine
 
-**NOTES:** Contains TODO comments indicating areas that need further work or review. Uses `TerminateThread` to terminate threads abnormally, which is generally discouraged.
+NOTES:
+- Contains TODOs and unusual code using USES_CONVERSION macro and _ATL_REGMAP_ENTRY structure.
+
+PARTS (in file order):
+
+- lines 2-381
+  - CServiceModule: Manages the service-related functions and COM/ATL support.
+  - PrintSystemErrorMessage: Prints system error messages along with their descriptions.
+  - IsInstalled: Checks if AllSrv was properly installed (either as a service or an EXE).
+  - IsInstalledAsService: Determines if AllSrv is installed as an NT service.
+  - IsInServiceControlManager: Verifies if AllSrv is an NT service by checking the Service Control Manager.
+  - InitAGC: Initializes AGC, sets up event logging, and hooks for database event logging.
+  - TermAGC: Terminates AGC and unhooks the event logger.
+  - GetOutgoingPort / SetOutgoingPort: Manage the last used outgoing port number (only in SRV_PARENT build).
+- lines 382-738
+  - CServiceModule::get_EventLog: Retrieves the previously created event logger object.
+  - CServiceModule::RegisterCOMObjects: Registers COM objects and starts a thread to keep the MTA alive.
+  - CServiceModule::RevokeCOMObjects: Unregisters COM objects and signals the MTA keep-alive thread to exit.
+  - CServiceModule::RegisterServer: Registers the module in the registry, including service registration if applicable.
+  - CServiceModule::UnregisterServer: Unregisters the module from the registry and removes the service from the service control manager.
+  - CServiceModule::InstallService: Installs the service into the NT service manager.
+  - TODOs: "Imago #167" comment suggesting additional code for modifying service configuration.
+  - Unusual Code: Use of USES_CONVERSION macro and _ATL_REGMAP_ENTRY structure for registry manipulation.
+- lines 739-1105
+  - CServiceModule: Manages service operations like installation, removal, and running as an executable or a Windows service.
+  - RunAsExecutable: Handles running the service as a standalone application for debugging purposes.
+  - RunAsWindow: Runs the service in a hidden window with a system tray icon.
+  - ServiceControl: Processes control codes received by the service manager (e.g., stop, pause, continue).
+  - SetSvcStatus: Updates the service status to reflect its current state.
+  - ServerTerminateThread: Terminates the server and updates the service status.
+  - StartServerTerminateThread: Creates a new thread to terminate the server.
+  - HandlerRoutine: Handles control events like close, break, shutdown, and Ctrl+C.
+- lines 1106-1366
+  - CServiceModule: Manages the service lifecycle and handles control messages.
+  - ServiceMain: Entry point for the Windows service, initializes the service and starts the main thread.
+  - MPServiceMain: Entry point for the parent process of a multi-process service.
+  - StopAllsrv: Signals allsrv to terminate.
+  - MTAKeepAliveThunk: Thunk function to call MTAKeepAliveThread with the correct 'this' pointer.
+  - MTAKeepAliveThread: Manages the COM Multi-threaded Apartment (MTA) for the service.
+  - ServiceHandler: Handles control messages from the service control manager.
+  - ThreadProc: Main thread procedure that initializes and runs the service.
 
 #### `src/FedSrv/allsrvmodule.h`
 
@@ -4912,22 +5391,184 @@ NOTES:
 
 #### `src/FedSrv/fsmission.cpp`
 
-**PURPOSE:** The `fsmission.cpp` file in Allegiance is responsible for managing the lifecycle and operations of a mission. It handles player management, side initialization, mission parameters, voting processes, game state transitions, and various other mission-related tasks.
+PURPOSE: Manages mission creation, player management, voting, and game state for Allegiance multiplayer space games.
 
-**KEY PARTS:**
-- **Class: CFSMission**: Manages mission details including player management, side initialization, and mission lifecycle events.
-- **Function: InitSide(SideID sideID)**: Initializes a side with default values and names.
-- **Function: InitializeCivList(const CivilizationListIGC* pcivs, CivID civIDs[])**: Populates an array of civilization IDs from the given list.
-- **Constructor: CFSMission()**: Initializes mission parameters, sets up the mission object, initializes sides, and handles various initialization tasks.
-- **Destructor: ~CFSMission()**: Cleans up resources, sends AGC events for mission destruction, and handles mission termination.
-- **Function: AddPlayerToMission(CFSPlayer * pfsPlayer)**: Adds a player to the mission, updates their score object, and notifies the lobby of the join.
-- **Function: RemovePlayerFromMission(CFSPlayer * pfsPlayer, QuitSideReason reason, const char* szMessageParam)**: Removes a player from the mission, handles side changes, and sends notifications to the lobby.
-- **Function: AddInvitation(SideID sid, char * szPlayerName)**: Adds a player invitation to a side.
-- **Function: IsInvited(CFSPlayer * pPlayer)**: Checks if a player is invited to any side in the mission.
+KEY PARTS:
+- CFSMission: Handles mission initialization, player addition/removal, and game lifecycle.
+- PlayerScoreObject: Tracks player scores and statistics.
+- Ballot: Manages voting processes like mutiny, resignation, and draw offers.
+- AddPlayerToSide: Adds a player to a specific side within the mission.
+- RemovePlayerFromSide: Removes a player from a side and handles leadership changes.
+- SetLeader: Assigns a new leader to a side, updates squad membership, and sends notifications.
+- StartGame(): Initializes the game when all ships are ready to start flying.
+- DoPayday(): Handles the payday process for each side in the mission.
+- GameOver: Handles the end of the game, setting the winner and triggering events.
 
-**CONNECTS TO:** Other mission-related classes and functions such as `CFSPlayer`, `IsideIGC`, and various AGC event handling functions.
+CONNECTS TO: None
 
-**NOTES:** The file includes numerous TODOs, debug prints, and commented-out sections indicating areas for future development or potential issues. It also contains assertions for debugging purposes and conditional compilation directives related to server environments.
+NOTES:
+- Contains complex logic for distributing ships among multiple stations without breaking wings.
+- Includes TODOs for various improvements and bug fixes.
+
+PARTS (in file order):
+
+- lines 1-355
+  - CFSMission: Handles mission creation and management.
+  - InitSide: Initializes side-specific data for a mission.
+  - InitializeCivList: Populates a list of civilizations for a mission.
+  - CFSMission::CFSMission: Constructor for creating a new mission instance.
+  - CFSMission::~CFSMission: Destructor for cleaning up resources when a mission is destroyed.
+  - s_list: A list to store all active missions.
+  - c_cSidesMax: Maximum number of sides in a mission.
+  - sideNames: Array containing names for each side.
+- lines 356-720
+  - CFSMission: Manages a mission, including adding and removing players.
+  - AddPlayerToMission: Adds a player to the mission.
+  - RemovePlayerFromMission: Removes a player from the mission.
+  - AddPlayerToSide: Adds a player to a specific side within the mission.
+  - OldPlayerLink: Stores old player data for persistence.
+  - PlayerScoreObject: Manages player scores and statistics.
+  - FM_VAR_PARM: Macro used in message creation, likely for parameter passing.
+  - TODOs: Verify that players are already gone in debug builds. Set server-side default wing to NA! #91
+- lines 721-1071
+  - CFSPlayer: Represents a player in the game.
+  - CFSMission: Manages the mission and its players.
+  - GetLeader: Retrieves the leader of a side.
+  - SetAutoDonate: Sets the auto-donation behavior for a player.
+  - SendMissionInfo: Sends information about the mission to a player.
+  - RemovePlayerFromSide: Removes a player from a side and handles team/mission leadership changes.
+  - PickNewLeader: Picks a new leader based on donation behavior.
+  - HasPlayers: Checks if a side has players.
+- lines 1072-1423
+  - CFSMission: Manages mission-related operations such as player management, voting, and side changes.
+  - AddInvitation: Adds an invitation for a player to join a side in the mission.
+  - IsInvited: Checks if a player is invited to any side in the mission.
+  - AddBallot: Adds a ballot to the mission's list of ballots.
+  - TallyVote: Tallys a vote cast by a player on a specific ballot.
+  - HasBallots: Checks if there are any active ballots of a given type in the mission.
+  - RemovePlayerByName: Removes a player from the mission based on their character name.
+  - RemovePlayerByCDKey: Removes a player from the mission based on their CD Key.
+- lines 1424-1776
+  - CFSMission: Manages mission-related operations such as setting leaders, stages, and squad information.
+  - GetBase: Finds a station with specific capabilities on a given side.
+  - GetLeader: Retrieves the leader of a specified side.
+  - SetLeaderID: Updates the leader ID for a side and handles associated commands.
+  - GetOwner: Returns the owner of the mission.
+  - SetOwner: Changes the owner of the mission and notifies clients.
+  - SetLeader: Assigns a new leader to a side, updates squad membership, and sends notifications.
+  - SetSideName: Sets the name of a side and notifies clients.
+- lines 1777-2129
+  - CFSMission: Manages mission parameters and state.
+  - GiveSideMoney: Adds money to a side's account and processes paydays.
+  - SetMissionParams: Updates mission parameters, handles team changes, and enforces rank limits.
+  - DelayCountdown: Adjusts the game start time by a specified delay.
+  - StartCountdown: Sets or resets the game start time and initializes mission setup.
+  - TODOs: "// BT - STEAM - Scores always count in steam!" "// TE: Enforce LockSides = on if ScoresCount mmf change to MaxImbalance"
+  - Unusual Code: Conditional compilation based on ALLSRV_STANDALONE for setting bClubGame. Complex logic for distributing ships among multiple stations, ensuring even distribution without breaking wings.
+- lines 2130-2477
+  - CFSMission: Manages the mission lifecycle and game state.
+  - StartGame(): Initializes the game when all ships are ready to start flying.
+  - DoPayday(): Handles the payday process for each side in the mission.
+  - DoTick(Time timeNow): Processes events and updates the game state at each tick.
+  - TODOs: NYI: Alliances may change in-game, create your own AGC Event! NYI: Include alliances info in AGCEvent. "TE, Modify GameStarted AGCEvent to include MissionID."
+- lines 2478-2830
+  - CFSMission: Manages the game mission logic.
+  - GameOver: Handles the end of the game, setting the winner and triggering events.
+  - RecordGameResults: Records game results to a database and sends statistics via HTTP POST.
+  - MakeOverrideTechBits: Initializes technology bitmasks for sides.
+  - POSTGameStats: Sends game statistics to a specified URL using HTTP POST.
+  - SaveAsOldPlayer: Saves player data before they leave the mission.
+  - Vacate: Kicks players out of the game, moving them to lifepods and terminating drones.
+  - TODOs: "TE, Modify GameEnded AGCEvent to include MissionName and MissionID." "BT - STEAM - Making this run for all game over scenarios." "Players who disconnect before the end of the game will not get any stats recorded."
+- lines 2831-3184
+  - CFSMission: Manages the mission and handles gameover processing.
+  - RecordTeamResults: Records team results to the database.
+  - RecordPlayerResults: Records player results to the database.
+  - QueueGameoverMessage: Queues messages for players indicating they are out of the game.
+  - ProcessGameOver: Wraps up things when the game is actually over.
+  - GetExpMult: Calculates experience multiplier based on total and side experience.
+  - TODOs: "make SURE they're NULL-terminated" (in RecordTeamResults) "KGJV- make sure there is a trailing zero" (in RecordTeamResults) "BT - STEAM - Making this run for all game over scenarios." (in QueueGameoverMessage)
+- lines 3185-3534
+  - sideID: Array to store side IDs.
+  - rank: Array to store rank sums for sides.
+  - GetSideRankSum: Function to calculate the rank sum for a side.
+  - PlayerScoreObject: Class representing player scores and statistics.
+  - SetCharStats: Function to save player character stats.
+  - RecordGameResults: Function to record game results.
+  - QueueGameoverMessage: Function to queue a game over message.
+  - Vacate: Function to clear clusters and destroy drones.
+- lines 3535-3883
+  - CFSMission: Manages the game mission.
+  - CheckForVictoryByStationBuild: Checks for victory by station build.
+  - CheckForVictoryByStationCapture: Checks for victory by station capture.
+  - CheckForVictoryByStationKill: Checks for victory by station kill.
+  - CheckForVictoryByKills: Checks for victory by kills.
+  - CheckForVictoryByInactiveSides: Checks for victory when all sides are inactive.
+  - CheckForVictoryByFlags: Checks for victory by flags or artifacts.
+  - bRestartable: Indicates if the game is restartable.
+- lines 3884-4234
+  - CFSMission: Manages mission-related operations.
+  - CreateDPGroups: Creates groups for a cluster and attaches them to an IGC cluster.
+  - SendLobbyMissionInfo: Sends mission information to players in the lobby.
+  - QueueLobbyMissionInfo: Queues up a shorter form of mission definition for players not yet choosing a game.
+  - SendMissionInfo: Sends detailed mission information to players joining or playing the mission.
+  - "mdvalley: Discover listening port" - Potential TODO comment.
+  - "char szAddr[64]= "XXX-YYY-ZZZ-TTT";": Placeholder for server address, likely needs updating.
+  - "DWORD dwPort = 0;": Variable declared but not used in the provided snippet.
+- lines 4235-4590
+  - CFSMission: Manages game missions.
+  - MineLinkIGC: Represents a mine link in the game.
+  - ProbeListIGC: Represents a list of probes.
+  - BucketLinkIGC: Represents a bucket link.
+  - ShipLinkIGC: Represents a ship link.
+  - SideLinkIGC: Represents a side link.
+  - GetMission: Retrieves a mission by cookie.
+  - GetMissionFromIGCMissionID: Retrieves a mission by IGCMissionID.
+- lines 4591-4935
+  - CFSMission: Manages mission state and player positions.
+  - CheckPositionRequest: Determines if a player can join or rejoin a side.
+  - RequestPosition: Handles player requests to change sides.
+  - VacateStation: Kicks players out of a station except those on the owning side.
+  - AddJoinRequest: Adds a player to the join request list when they cannot be auto-accepted.
+  - NotifyPlayerBoot: Notifies all players that a player has been removed from a side.
+  - RejectSideJoinRequests: Rejects and removes all pending join requests for a specific side.
+  - TODO: Revisit team balancing logic, especially newbstack implementation.
+- lines 4936-5279
+  - CFSMission: Manages mission-related operations like player requests and side management.
+  - RemoveJoinRequest: Removes join requests for a specific player or all players if no player is specified.
+  - SetAutoAccept: Turns auto-accept on or off for sides, handling both individual sides and all sides when passed NULL.
+  - SetLockLobby: Locks or unlocks the lobby for the game.
+  - SetLockSides: Locks or unlocks the sides for the game.
+  - SetMaxTeamImbalance: Sets the maximum team imbalance parameter for the mission.
+  - FlushSides: Removes all players (except commanders) from all sides and puts them in the team lobby.
+  - GetLockSides: Retrieves the status of the LockSides game parameter.
+- lines 5281-5625
+  - CFSMission: Manages mission state and logic.
+  - PlayerScoreObject: Represents a player's score object.
+  - SetSideAllies: Sets the alliance status for a side.
+  - GetSideAllies: Retrieves the alliance status for a side.
+  - SetSideActive: Activates or deactivates a side.
+  - GetSideActive: Checks if a side is active.
+  - DeactivateSide: Marks a side as inactive and handles cleanup.
+  - SetForceReady: Forces a side to be ready.
+- lines 5626-5973
+  - CFSMission::UpdateAlliances: Manages and updates alliances between sides in a mission.
+  - Ballot::Update: Handles updating the status of a ballot based on time or votes.
+  - Ballot::Cancel: Cancels an ongoing ballot.
+  - Ballot::CastVote: Records a vote from a player.
+  - Ballot::GetBallotID: Returns the ID of the ballot.
+  - Ballot::GetType: Retrieves the type of the ballot.
+  - Ballot::Init(CFSPlayer): Initializes a ballot proposed by a player.
+  - Ballot::Init(CFSSide): Initializes a ballot proposed by a team.
+- lines 5974-6194
+  - Ballot: Manages voting processes.
+  - MutinyBallot: Handles mutiny proposals.
+  - ResignBallot: Handles resignation proposals.
+  - OfferDrawBallot: Handles draw offers.
+  - AcceptDrawBallot: Handles accepting a draw offer.
+  - HasPassed: Checks if the vote has passed.
+  - AllVotesAreIn: Checks if all votes are received.
+  - GetTallyString: Generates a string describing the vote tally.
 
 #### `src/FedSrv/fsmission.h`
 
@@ -4944,29 +5585,66 @@ NOTES: None.
 
 #### `src/FedSrv/fsship.cpp`
 
-**PURPOSE:** The `fsship.cpp` file in Allegiance is responsible for managing ship-related operations within the game. It handles various aspects of ship behavior, including movement, status updates, and interactions with other ships and stations.
+PURPOSE: Manages ship and player interactions, including status updates, warp jumps, loadouts, and side affiliations.
 
-**KEY PARTS:**
-- **Class: CFSShip**: Manages a ship's properties and behaviors.
-  - **Constructor (`CFSShip::CFSShip`)**: Initializes a new ship.
-  - **Destructor (`CFSShip::~CFSShip`)**: Cleans up resources when a ship is destroyed.
-  - **Warp Handling (`CFSShip::HitWarp`)**: Manages the logic for entering warp points.
-  - **Mission and Side Management (`CFSShip::SetSide`)**: Assigns a mission and side to the ship.
-  - **Launch and Exit Announcements (`CFSShip::Launch` and `CFSShip::AnnounceExit`)**: Handles launching from stations and notifying other players of exits or destruction.
-  - **Status Updates (`CFSShip::ShipStatusSpotted` and `CFSShip::ShipStatusHidden`)**: Updates the ship's visibility status to other sides.
-  - **Cluster Management (`CFSShip::SetCluster`)**: Sets the cluster for the ship and handles visibility updates.
+KEY PARTS:
+- CFSShip: Base class for all ships, handling basic ship operations.
+- CFSPlayer: Manages player-specific data and interactions with ships.
+- CFSDrone: Represents AI-controlled drones, extending the base ship class.
+- HitWarp: Handles warp jumps between clusters.
+- Launch: Sends ships into space from stations.
+- ShipStatusSpotted: Updates ship status when spotted by an enemy side.
+- CaptureStation: Manages logic for capturing stations by ships.
+- SetCluster: Updates the cluster of a ship and handles related notifications.
+- QueueLoadoutChange: Queues changes in ship loadouts for players.
+- Launch: Initiates the launch process for player's ships.
+- Dock: Handles docking of player's ships at stations.
+- SetSide: Updates the side affiliation of ships and players.
+- ShipStatusRecalculate: Recalculates the status of ships based on mission conditions.
 
-- **Class: CFSDrone**: Manages drone ships, including initialization, launch, and docking operations.
+CONNECTS TO: Allegiance game engine, DPlay API for multiplayer functionality.
 
-**CONNECTS TO:** 
-- `IshipIGC`, `IsideIGC`, `IwarpIGC`, `IstationIGC`, `IclusterIGC` (Interfaces for game components)
-- `CFSShip::QueueLoadoutChange`: Manages loadout changes.
-- `CFSShip::CaptureStation`: Handles station captures.
-- `CFSPlayer::SetCluster`: Updates player cluster membership.
+NOTES:
+- Contains risky code comments regarding potential issues with player destruction.
 
-**NOTES:**
-- The file includes TODO comments about saving player progress and handling "aleph mass limits."
-- There are commented-out sections related to Steam achievements, events, and base capture logging.
+PARTS (in file order):
+
+- lines 1-355
+  - CFSShip: Base class for player and drone ships.
+  - CFSPlayer: Represents a player-controlled ship.
+  - CFSDrone: Represents an AI-controlled drone.
+  - HitWarp: Handles warp jumps between clusters.
+  - Launch: Sends the ship into space from a station.
+  - AnnounceExit: Notifies other players when a ship exits the game.
+  - ForceLoadoutChange: Forces a change in the player's loadout.
+  - ShipStatusSpotted: Updates the ship status when spotted by an enemy side.
+- lines 356-694
+  - CFSShip: Manages ship status and interactions.
+  - ShipStatus: Holds state information for a ship regarding its position, parent, and station.
+  - CaptureStation: Handles logic when a station is captured by a ship.
+  - SetCluster: Updates the cluster of a ship and handles related notifications.
+  - ShipStatusRecalculate: Recalculates the status of ships based on current mission conditions.
+  - ShipStatusLaunched: Sets the initial state for a launched ship.
+  - ShipStatusStart: Initializes the status when a ship starts at a station or dies.
+  - ShipStatusExit: Resets the status when a ship exits its current state.
+- lines 696-1051
+  - CFSPlayer: Manages player-specific data and interactions.
+  - SetCluster: Updates the player's cluster and handles various updates for other ships and stations within the cluster.
+  - QueueLoadoutChange: Queues a change in ship loadout for the player.
+  - Launch: Initiates the launch process for the player's ship.
+  - Dock: Handles docking of the player's ship at a station.
+  - SetSide: Updates the player's side affiliation.
+  - "// NYI: They might be in sector overview too" - Not Implemented
+  - "Too risky, dplay may block-- g.fm.GetDPlay()->DestroyPlayer(m_dpid);": Risky code comment
+- lines 1052-1460
+  - CFSShip::SetSide: Updates the side of a ship and handles related score and group changes.
+  - CFSPlayer::SetShipUpdate: Processes updates to a player's ship, including handling warp states.
+  - CFSPlayer::SetActiveTurretUpdate: Handles updates to active turrets on a player's ship.
+  - CFSPlayer::SetInactiveTurretUpdate: Resets the state of inactive turrets.
+  - CFSPlayer::SetDPGroup: Manages the primary group (flying or docked) for a player in a mission.
+  - CFSPlayer::IsMissionOwner: Checks if the player is the owner of the current mission.
+  - CFSPlayer::SetReady: Updates the readiness status of a player and notifies the mission.
+  - CFSPlayer::SetAutoDonate: Manages automatic donations between players, ensuring proper handling of autodonations.
 
 #### `src/FedSrv/fsship.h`
 
@@ -5023,17 +5701,25 @@ NOTES: None.
 
 #### `src/FedSrv/pch.cpp`
 
-PURPOSE: This file is a precompiled header for the fedsrv project in Allegiance, which includes necessary headers and definitions to speed up compilation.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary precompiled header file.
-- `<atlbase.h>`: Provides basic ATL (Active Template Library) functionality.
-- `<statreg.h>`: Used for static registry operations.
-- `<../TCAtl/UserAcct.cpp>`: Includes user account management code from the TCAtl library.
-
-CONNECTS TO: Other parts of the fedsrv project that require these headers and definitions.
-
-NOTES: None.
+    /*-------------------------------------------------------------------------
+     * pch.cpp
+     *
+     * Precompiled header for fedsrv
+     *
+     * Owner:
+     *
+     * Copyright 1986-1998 Microsoft Corporation, All Rights Reserved
+     *-----------------------------------------------------------------------*/
+    #include "pch.h"
+    #include <atlbase.h>
+    #ifdef _ATL_STATIC_REGISTRY
+    #include <statreg.h>
+    //#include <statreg.cpp> Imago removed (again)
+    #endif
+    //#include <atlimpl.cpp>
+    #include <../TCAtl/UserAcct.cpp>
 
 #### `src/FedSrv/pch.h`
 
@@ -5108,22 +5794,25 @@ This file contains helper functions for managing SQL operations in the Allegianc
 
 #### `src/FedSrv/srvqguids.cpp`
 
-PURPOSE: This file defines GUIDs (Globally Unique Identifiers) for various server query classes used in the Allegiance game.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CQLogonStats: Manages logon statistics.
-- CQCharSquads: Handles character squad information.
-- CQCharStats: Tracks character statistics.
-- CQReportSquadGame: Reports on squad games.
-- CQGameResults: Stores game results.
-- CQTeamResults: Manages team results.
-- CQPlayerResults: Keeps player results.
-- CQGetInvitationList: Retrieves invitation lists.
-- CQLogEvent: Logs events.
-
-CONNECTS TO: srvqueries.h (header file for query classes)
-
-NOTES: None.
+    /*-------------------------------------------------------------------------
+      srvqguids.cpp
+      Guids for srvqueries
+      Owner:
+      Copyright 1986-2000 Microsoft Corporation, All Rights Reserved
+     *-----------------------------------------------------------------------*/
+    #include "pch.h"
+    #define SQLGUID(X) GUID X::s_guid = GUID_NULL;
+    SQLGUID(CQLogonStats)
+    SQLGUID(CQCharSquads)
+    SQLGUID(CQCharStats)
+    SQLGUID(CQReportSquadGame)
+    SQLGUID(CQGameResults)
+    SQLGUID(CQTeamResults)
+    SQLGUID(CQPlayerResults)
+    SQLGUID(CQGetInvitationList)
+    SQLGUID(CQLogEvent)
 
 #### `src/FedSrv/srvqueries.h`
 
@@ -5148,20 +5837,13 @@ NOTES:
 
 ### src/Igc
 
-### Overview
+The Igc folder in Allegiance contains core game object and mission management system components. It handles various aspects of game entities such as ships, parts, asteroids, and missions.
 
-The `src/Igc` folder contains source code for managing various game objects, mission parameters, and interactions within the Allegiance game. It includes classes and functions for handling different aspects of the game's universe, such as ships, asteroids, stations, and missions.
+- igc.h: Defines interfaces and classes for game objects and data structures.
+- missionigc.cpp: Manages mission-related data and operations.
+- shipIGC.cpp: Implements the CshipIGC class, managing the behavior and state of ships.
 
-### Key Files and Their Functions
-
-- **CafterburnerIGC.cpp/.h**: Manages afterburners on ships, including initialization, updates, and power management.
-- **clusterIGC.cpp/.h**: Handles clusters in the game universe, managing objects like models, treasures, and stations within those clusters.
-- **common.cpp/.h**: Provides utility functions for collision detection, pathfinding, and other common game calculations.
-- **dispenserIGC.cpp/.h**: Manages dispensers on ships, handling their initialization, updates, and interactions with the mission system.
-- **mapmakerigc.cpp/.h**: Generates various types of map layouts for missions, including double ring, big ring, HiLo, star, brawl, pinwheel, diamond ring, and snowflake maps.
-- **mineIGC.cpp/.h**: Manages mines in the game, handling their initialization, collision detection, and damage calculations.
-
-These files collectively provide the foundational logic for managing game objects and mission parameters within Allegiance.
+Largest files: igc.h (6188 lines), missionigc.cpp (5706 lines), shipIGC.cpp (4768 lines), common.cpp (3109 lines), shipIGC.h (2673 lines).
 
 #### `src/Igc/CMakeLists.txt`
 
@@ -5568,42 +6250,100 @@ NOTES:
 
 #### `src/Igc/common.cpp`
 
-**Purpose:** The `common.cpp` file in Allegiance contains utility functions and classes that are essential for various game operations, including calculations for impact times, lead angles, and target finding. It also includes helper functions for model management, damage tracking, and score calculation.
+PURPOSE: common.cpp contains utility functions and classes used across various parts of Allegiance for calculations, object management, and game logic.
 
-**Key Parts:**
-- **Name:** `solveForImpact`
-  - What it does: Calculates the time at which a projectile will impact a target.
-  
-- **Name:** `solveForLead`
-  - What it does: Determines the lead angle needed to hit a moving target.
-  
-- **Name:** `turnToFace`
-  - What it does: Computes the yaw and pitch angles required for a ship to turn towards a given target.
-  
-- **Name:** `FindableModel`
-  - What it does: Checks if a model is within a specified type mask, side, and ability bitmask.
-  
-- **Name:** `IsFriendlyCluster`
-  - What it does: Determines if a cluster of models is considered friendly to a given side.
-  
-- **Name:** `FindTarget`
-  - What it does: Searches for a target model within a cluster based on type mask and other criteria.
-  
-- **Class:** `ModelLinkIGC`
-  - What it does: Represents a link in a linked list of models.
-  
-- **Function:** `FindPath`
-  - What it does: Calculates the shortest path between two clusters using Dijkstra's algorithm.
-  
-- **Struct:** `Path`
-  - What it does: Holds information about a potential path, including the starting warp and total distance.
+KEY PARTS:
+- solveForImpact: Calculates time of impact between objects.
+- FindTarget: Searches for targets based on criteria.
+- WarpListIGC: Manages connections between clusters.
+- IshipIGC: Represents ships in the game world.
+- DamageTrack::ApplyDamage: Applies damage to models over time.
+- CreateAsteroid: Generates asteroids at random positions within clusters.
 
-**Connects To:** Other game systems for model management, damage tracking, and score calculation.
+CONNECTS TO: Other game modules, particularly those related to collision detection, ship movement, and mission scoring.
 
-**Notes:**
-- The commented-out `_matherr` function suggests handling math errors by printing the offending function name.
-- The `solveForImpact` function has a workaround for numerical instability with negative `b24ac`.
-- The `IsFriendlyCluster` function includes experimental code that is not enabled by default.
+NOTES:
+- Contains bitwise operations for managing object capabilities.
+- Includes commented-out code from previous iterations of position handling logic.
+
+PARTS (in file order):
+
+- lines 1-353
+  - solveForImpact: Calculates the time of impact between a projectile and a target.
+  - solveForLead: Determines the lead angle needed for a shooter to hit a moving target.
+  - turnToFace: Computes the control inputs required for a ship to turn towards a given target.
+  - FindableModel: Checks if a model is within range, visible, and has the required abilities.
+  - _matherr: Custom math error handler that skips certain exceptions.
+  - c_pszWingName: Array of wing names used in the game.
+  - c_cdAllCommands: Array of command data for various actions.
+  - c_ttTypebits: Bitmask array indicating the type of each object.
+- lines 355-699
+  - IsFriendlyCluster: Determines if a cluster is friendly based on station presence and enemy activity.
+  - ClusterPosition: Struct to hold a cluster and its position.
+  - UniqueCP: Checks if a cluster position is unique in a list.
+  - NewCP: Adds a new cluster position to the list.
+  - FindTarget: Finds a target model within a cluster or adjacent clusters based on various criteria.
+- lines 701-1050
+  - FindTarget: Searches for a target model based on various criteria.
+  - WarpListIGC: Represents a list of warps (connections between clusters).
+  - IwarpIGC: Represents a warp (connection) between two clusters.
+  - IclusterIGC: Represents a cluster in the game world.
+  - IsideIGC: Represents a side or faction in the game.
+  - IshipIGC: Represents a ship controlled by a player or AI.
+  - ImodelIGC: Represents any model or object in the game.
+  - FindPath: Finds a path from one cluster to another using A search algorithm.
+- lines 1051-1398
+  - GetModelType: Determines the type of model based on its object type.
+  - GetModelName: Retrieves the name of a model, handling special cases for asteroids and buoys.
+  - GetAmmoState: Calculates the current state of a ship's ammunition.
+  - Waypoint::DoApproach: Handles the approach logic for a waypoint, determining the best position to move towards.
+  - Waypoint::GetGotoPosition: Determines the next position for a ship to move towards based on its objective and target.
+  - c_gpmKillThrottle: Mask indicating that the throttle should be killed.
+  - c_gpmFinished: Mask indicating that the operation is finished.
+  - c_gpmPivot: Mask indicating that the ship should pivot.
+- lines 1399-1742
+  - DoApproach: Handles the approach logic for different types of objects.
+  - getDirection: Determines the button control mask to thrust in a given direction based on the ship's orientation and desired movement.
+  - Ignore: Determines whether a ship should ignore another model (ship, mine, etc.) based on their sides, capabilities, and states.
+  - Dodge: Handles dodging logic for ships, avoiding collisions with other models within a cluster.
+  - The commented-out code in common.cpp suggests there were previous approaches to handling positions that have been removed or replaced.
+  - The use of bitwise operations (&) and bitmasks (c_habmLifepod, c_habmRescue, etc.) for checking capabilities is common in Allegiance, indicating a structured approach to defining and managing object behaviors.
+  - The function solveForImpact is used multiple times to calculate the time of impact between objects, which is crucial for collision detection and avoidance.
+- lines 1745-2104
+  - GotoPlan::Execute: Main function for executing a goto plan.
+  - GotoPlan::SetControls: Sets controls based on current state and target.
+  - assert (t >= 0.0f): Ensures time is non-negative.
+  - if (t < tCollide): Checks if collision will occur before the current time.
+  - pmodelCollide = pmodel;: Assigns colliding model to variable.
+  - ca = dp.GetOrthogonalVector();: Finds orthogonal direction for dodging.
+  - m_pship->SetStateBits(c_maneuverButtons, stateM);: Sets ship's state bits.
+  - m_pship->SetControls(controls);: Applies controls to the ship.
+- lines 2105-2452
+  - LineOfSightExist: Determines if there is a line of sight between two models in a cluster.
+  - CreateDrone: Creates a new drone ship with specified attributes.
+  - pcontrols->jsValues[c_axisRoll]: Sets the roll axis value based on distance and direction.
+  - pcontrols->jsValues[c_axisThrottle]: Adjusts throttle based on proximity to obstacles and target.
+  - LineOfSightExist uses trigonometry to calculate angles and distances for visibility checks.
+  - CreateDrone initializes a new ship data structure with unique name if provided.
+  - TODO: Debugging statements commented out, possibly for future use.
+- lines 2454-2808
+  - IshipIGC CreateObject(...): Creates a new ship object.
+  - ClusterWarning GetClusterWarning(AssetMask am, bool bInvulnerableStations): Determines the warning level for assets in a cluster.
+  - const char GetClusterWarningText(ClusterWarning cw): Returns the text description of a cluster warning.
+  - DamageTrack::DamageTrack(DamageTrackSet pdts): Constructor for DamageTrack class.
+  - void ApplyDamage(Time timeNow, ImodelIGC pmodel, float damage): Applies damage to a model in the track.
+  - PlayerScoreObject::CalculateScore(ImissionIGC pmission): Calculates the player's score based on mission data.
+  - float GetDistance(IshipIGC pship, IclusterIGC pcluster, IclusterIGC pclusterStop, int maxDistance): Calculates the distance between clusters using warps.
+  - static void GetAsteroidName(const char pszPrefix, AsteroidID id, char bfr): Generates a name for an asteroid based on its ID.
+- lines 2810-3109
+  - Vector: Represents a 3D vector with x, y, and z components.
+  - ModelLinkIGC: A link in a linked list of models.
+  - ImodelIGC: Interface for model objects.
+  - IasteroidIGC: Interface for asteroid objects.
+  - DataAsteroidIGC: Structure containing data for creating an asteroid.
+  - CreateAsteroid: Function to create an asteroid at a random position within a cluster.
+  - RandomPosition: Function to generate a random position within a cluster, avoiding other models.
+  - IstationIGC: Interface for station objects.
 
 #### `src/Igc/developmentigc.cpp`
 
@@ -5805,36 +6545,192 @@ NOTES:
 
 #### `src/Igc/igc.def`
 
-PURPOSE: This file defines the module parameters and exports for the igc.DLL library in Allegiance.
+PURPOSE: tiny file (7 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- DllCanUnloadNow: Determines if the DLL can be unloaded.
-- DllGetClassObject: Retrieves a class object from the DLL.
-- DllRegisterServer: Registers the DLL with the system.
-- DllUnregisterServer: Unregisters the DLL from the system.
-
-CONNECTS TO: None
-
-NOTES: none
+    ; igc.def : Declares the module parameters.
+    LIBRARY      "igc.DLL"
+    EXPORTS
+    	DllCanUnloadNow     @1 PRIVATE
+    	DllGetClassObject   @2 PRIVATE
+    	DllRegisterServer   @3 PRIVATE
+    	DllUnregisterServer	@4 PRIVATE
 
 #### `src/Igc/igc.h`
 
-**File:** src/Igc/igc.h
+PURPOSE: The file `igc.h` contains definitions and interfaces for various game objects, data structures, and functions used in the Allegiance game engine.
 
-**PURPOSE:** This header file contains declarations for various classes and structures used in managing game objects, missions, and player scores in the Allegiance game. It includes definitions for geometric objects, global attributes, map makers, mission parameters, and more.
+KEY PARTS:
+- Geo: Base class for geometric objects.
+- ThingGeo: Represents a thing with a geometry.
+- IclusterIGC: Manages a cluster of objects in the game.
+- DataHullTypeIGC: Represents a ship hull type with various attributes like mass, speed, and weapon mounts.
+- ShipLoadout: Represents a ship's loadout with hull and part data.
+- ShipStatus: Manages the state and properties of a ship.
+- DamageTrackSet: Manages damage tracks for objects.
+- PersistPlayerScoreObject: Manages persistent player score data.
 
-**KEY PARTS:**
-- **Class: Geo**: Base class for all geometric objects.
-- **Class: ThingGeo**: Represents a thing with a geometry.
-- **Class: GlobalAttributeSet**: Manages a set of global attributes for ships.
-- **Class: ImapMakerIGC**: Abstract base class for map makers that generate missions.
-- **Struct: MissionParams**: Holds parameters related to a game mission.
-- **Class: ShipLoadout**: Manages ship parts and their data.
-- **Class: PlayerScoreObject**: Manages player-specific score data during a game session.
+CONNECTS TO: Other game engine files, particularly those related to mission management, player scores, and geometric calculations.
 
-**CONNECTS TO:** Other files in the Igc directory, particularly those related to game objects, missions, and player scores.
+NOTES:
+- Contains numerous enums and constants defining various attributes and identifiers used throughout the game.
+- Includes interfaces for different types of game objects (e.g., ships, stations, asteroids).
+- Features functions for managing game data persistence and score calculation.
 
-**NOTES:** The file contains several TODO comments indicating areas for future development or potential issues. There are also commented-out sections and constants that suggest there may be incomplete features or legacy code.
+PARTS (in file order):
+
+- lines 1-340
+  - Geo: Base class for geometric objects.
+  - ThingGeo: Represents a thing with a geometry.
+  - ThingGeoSite: Represents a site where things can be placed.
+  - GroupGeo: Represents a group of geometric objects.
+  - BuildEffectGeo: Represents a build effect with geometry.
+  - PosterImage: Represents an image that can be posted.
+  - DamageTrackSet: Manages damage tracks for objects.
+  - DamageTrack: Represents a single damage track.
+- lines 341-702
+  - TrekKey: Enumerates various game keys and their corresponding values.
+  - SoundID and VoiceID: Types for sound and voice identifiers.
+  - enum { ... }: Defines a list of sounds using macros.
+  - NA, fNA: Constants representing "not applicable" or "not available".
+  - MissionID, ObjectID, etc.: Various types representing unique IDs for different game entities.
+  - ModelAttributes: Enumerates attributes that can be applied to game objects.
+  - EquipmentType and AbilityType: Enums defining types of equipment and abilities.
+  - DamageTypeID and DefenseTypeID: Enums for damage and defense types.
+- lines 704-1058
+  - PartBitMask: Represents a bitmask for parts of a ship.
+  - HullAbilityBitMask: Bitmask for abilities specific to hulls (ships).
+  - StationAbilityBitMask: Bitmask for abilities specific to stations.
+  - AsteroidAbilityBitMask: Bitmask for abilities specific to asteroids.
+  - ExpendableAbilityBitMask: Bitmask for expendable abilities that can be used by ships or other entities.
+  - WingmanBehaviourBitMask: Bitmask defining behaviors for wingmen in a flight formation.
+  - AchievementMask: Bitmask representing different achievements a player can earn.
+  - ShipControlStateIGC: Enumerates the states of ship controls and commands.
+- lines 1060-1402
+  - IclusterIGC: Represents a cluster of objects in the game.
+  - IasteroidIGC: Manages asteroid-related data and behavior.
+  - IwarpIGC: Handles warp points within the game.
+  - ItreasureIGC: Manages treasure objects and their properties.
+  - IsideIGC: Represents a side or team in the game.
+  - IcivilizationIGC: Manages civilization-specific data and behaviors.
+  - IstationTypeIGC: Defines different types of stations available in the game.
+  - IdroneTypeIGC: Handles drone-related data and behavior.
+- lines 1403-1755
+  - Class ImapMakerIGC: Manages game map creation and validation.
+  - Function IsValid(): Validates various game parameters to ensure they meet specified criteria.
+  - Struct ControlData: Holds joystick values for player control.
+  - Struct PartData: Represents a part with an ID, amount, and mount location.
+  - Struct ExpandedPartData: Extends PartData by adding the fraction of the part that is mounted.
+  - Struct Stockpile: Stores buyable items and their counts.
+  - Struct HardpointData: Contains information about a ship's hardpoints including sounds and locations.
+  - Struct AsteroidDef: Describes an asteroid with properties like ore content, hit points, and model name.
+- lines 1756-2108
+  - DataHullTypeIGC: Represents a ship hull type with various attributes like mass, speed, and weapon mounts.
+  - DataPartTypeIGC: Base class for different types of parts (e.g., weapons, shields) with common properties like mass and signature.
+  - DataWeaponTypeIGC: Inherits from DataPartTypeIGC and adds specific attributes for weapons like ready time and dispersion.
+  - DataShieldTypeIGC: Inherits from DataPartTypeIGC and includes shield-specific properties like regeneration rate.
+  - DataCloakTypeIGC: Inherits from DataPartTypeIGC and contains properties related to cloaking technology.
+  - DataAfterburnerTypeIGC: Inherits from DataPartTypeIGC and specifies afterburner-related attributes.
+  - DataPackTypeIGC: Represents a pack of items with type and quantity.
+  - DataLauncherTypeIGC: Describes a launcher that can fire parts or projectiles.
+- lines 2109-2462
+  - ShipLoadout: Represents a ship's loadout with hull and part data.
+  - CompactOrientation: Stores orientation data efficiently using quaternions.
+  - CompactTime: Compresses time differences into 2 bytes.
+  - CompactPosition: Compresses position deltas relative to a reference point.
+  - CompactState: Stores state information in 2 bytes.
+  - CompactVelocity: Compresses velocity data into 5 bytes.
+  - CompactTurnRates: Compresses turn rates into 3 bytes.
+  - CompactControlData: Stores control data from joysticks or other inputs.
+- lines 2463-2804
+  - CompactState: Represents compact state data.
+  - ClientActiveTurretUpdate: Holds client-side active turret update information.
+  - ServerActiveTurretUpdate: Holds server-side active turret update information.
+  - DataShipIGC: Stores information about a ship in the game.
+  - DataWarpIGC: Contains warp-related data for a ship.
+  - DataTreasureIGC: Represents treasure data, including position and lifespan.
+  - DataMunitionExport: Defines export parameters for munitions.
+  - DataMineBase: Base class for mine data.
+- lines 2805-3186
+  - ImissionIGC: Manages mission data and objects.
+  - Export: Exports mission data to a buffer.
+  - Import: Imports mission data from a buffer.
+  - BitsToTechsList: Converts technology bits to a list of technologies.
+  - TechsListToBits: Converts a list of technologies to technology bits.
+  - GenerateNewShipID: Generates a new unique ship ID.
+  - SetMissionStage: Sets the current mission stage.
+  - GetMissionStage: Gets the current mission stage.
+- lines 3187-3586
+  - IshipIGC: Interface for ship objects.
+  - ShipUpdateStatus: Enumerates possible statuses of a ship update.
+  - SetObjectID: Sets the object ID of the ship.
+  - GetValue: Returns the value of the ship.
+  - GetStation: Gets the station associated with the ship.
+  - Reset: Resets the ship, optionally fully.
+  - AddPart: Adds a part to the ship.
+  - DeletePart: Deletes a part from the ship.
+- lines 3587-3962
+  - IbuyableIGC: Base interface for buyable game objects.
+  - IdevelopmentIGC: Interface for development items with global attributes and tech-only status.
+  - IdroneTypeIGC: Interface for drone types with hull type, pilot type, skills, and laid expendables.
+  - IstationTypeIGC: Interface for station types with various stats and capabilities.
+  - IbucketIGC: Interface for buckets that can hold buyable items.
+  - IprojectileTypeIGC: Interface for projectile types with power, blast radius, speed, and model details.
+  - IexpendableTypeIGC: Base interface for expendable items like missiles, mines, and chaff.
+  - ImissileTypeIGC: Interface for missile types with specific attributes like acceleration and lock time.
+- lines 3963-4343
+  - IpartIGC: Base interface for parts of a ship or structure.
+  - IafterburnerIGC: Interface for afterburners, providing fuel consumption and power control.
+  - IpackIGC: Interface for packs, likely related to cargo or equipment.
+  - IlauncherIGC: Interface for launchers, including emission points and firing times.
+  - ImagazineIGC: Interface for magazines, extending launcher with missile type and lock status.
+  - IdispenserIGC: Interface for dispensers, extending launcher with expendable type.
+  - IclusterIGC: Interface for clusters, managing various game objects like models, warps, mines, etc.
+  - IasteroidIGC: Interface for asteroids, providing ore management and special abilities.
+- lines 4344-4698
+  - ShipStatus: Manages the state and properties of a ship.
+  - ClusterSite: Represents a site within a cluster, with methods for managing posters and scanners.
+  - solveForImpact: Calculates the impact point between two objects.
+  - solveForLead: Determines the lead position of a target relative to a shooter.
+  - turnToFace: Rotates a ship towards a target.
+  - FindPath: Finds a path from one object to another.
+  - GetModelType: Returns the type of a model.
+  - GetModelName: Returns the name of a model.
+- lines 4699-5059
+  - IGC.h: Header file for Allegiance game engine.
+  - IIgcSite: Interface class defining callbacks for various game events.
+  - DamageTrack: Class to track and manage damage over time.
+  - DamageBucket: Class representing a bucket of damage over a specific slot.
+  - c_dwFlashInterval: Constant for the duration of a flash effect when taking damage.
+  - c_dwDamageSlotInterval: Constant for the interval between switching damage slots.
+  - c_iDamageSlotCount: Constant for the number of damage slots to track.
+  - TODO: "Imago #120 #121 8/10" - Indicates potential issues or improvements related to asteroid events.
+- lines 5060-5418
+  - DamageTrack: Manages damage tracking for an object over time.
+  - DamageTrackSet: Maintains a set of DamageTrack objects and manages their lifecycle.
+  - CreateMission: Function to create a mission instance.
+  - AmmoState: Enumerates the states of ammunition (empty, low, full).
+  - GetAmmoState: Determines the current state of ammunition for a ship.
+  - AddIbaseIGC: Adds an IbaseIGC object to a list and increments its reference count.
+  - DeleteIbaseIGC: Removes an IbaseIGC object from a list and decrements its reference count.
+  - GetIbaseIGC: Retrieves an IbaseIGC object from a list by ID.
+- lines 5421-5773
+  - PersistPlayerScoreObject: Manages persistent player score data.
+  - PlayerScoreObject: Tracks and manages individual player scores during a game session.
+  - CalculateScore: Calculates the player's score based on mission outcomes.
+  - SetScore: Sets the player's score directly.
+  - Reset: Resets all score-related statistics to default values.
+  - Connect/Disconnect: Manages connection status and time played.
+  - StartCommand/StopCommand: Tracks when a player starts or stops commanding.
+  - EndGame: Calculates final scores at game end based on mission results.
+- lines 5774-6188
+  - PlayerScoreObject: Manages player scores and statistics.
+  - GameOverScoreObject: Stores recent game statistics for display.
+  - DumpIGCFile: Saves mission data to an IGC file.
+  - LoadIGCFile: Loads mission data from an IGC file.
+  - DumpIGCStaticCore: Saves static core mission data to a file.
+  - LoadIGCStaticCore: Loads static core mission data from a file.
+  - CacheIGCStaticCore: Caches static core mission data for faster access.
+  - TODOs: Comment out unused variables/functions. Remove commented-out code. Consider optimizing combat rating calculations.
 
 #### `src/Igc/launchertypeigc.cpp`
 
@@ -5941,34 +6837,88 @@ NOTES: None.
 
 #### `src/Igc/mapmakerigc.cpp`
 
-**PURPOSE:** The `mapmakerigc.cpp` file in Allegiance is responsible for generating and managing map data, including the creation of clusters, mission parameters, and team information. It also handles the validation and generation of missions based on these parameters.
+PURPOSE: The file `src/Igc/mapmakerigc.cpp` contains classes and functions for generating various types of maps in the Allegiance game, including double ring, big ring, high-level, star-shaped, pinwheel, and diamond ring layouts.
 
-**KEY PARTS:**
-- **Class: CMapData**: Manages map data such as clusters, mission parameters, and team information.
-  - `SetCluster(SectorID sID, IclusterIGC * pCluster, SideID sideID)`: Sets a cluster for a given sector ID.
-  - `GetNewClusterName(CHAR * szClusterName)`: Generates a new random cluster name.
+KEY PARTS:
+- CMapData: Manages map data including clusters and mission parameters.
+- ImapMakerIGC: Base class for creating different types of maps.
+- IsValid: Validates mission parameters based on map type.
+- Create: Creates a mission based on the given parameters.
+- FindPath: Recursively finds a path between two clusters.
+- EnoughPaths: Checks if there are enough paths between clusters.
+- OkToRemove: Determines if it's safe to remove a warp link.
+- GenerateMission: Generates a mission by setting up map data and creating clusters.
 
-- **Class: CmapMakerIGC**: Base class for map makers. Handles the creation and validation of missions based on mission parameters.
-  - `IsValid(const MissionParams* pmp)`: Validates the mission parameters.
-  - `Create(Time now, const MissionParams* pmp, ImissionIGC* pmission)`: Creates a mission based on the given parameters.
+CONNECTS TO: None
 
-- **Function: FindPath**: Recursively finds a path between two clusters using backtracking.
-  - Parameters: Destination cluster, indices for start and stop positions in the adjacency list, arrays to store adjacent clusters and backtracking information.
+NOTES:
+- Contains multiple classes for different map layouts such as `CmapMakerDoubleRingIGC`, `CmapMakerBigRingIGC`, etc.
+- Includes functions for generating cluster positions, linking clusters, and validating mission parameters.
 
-- **Function: EnoughPaths**: Checks if there are enough paths between two clusters by recursively marking visited nodes.
-  - Parameters: Arrays for backtracking and visited node tracking, parameters related to clusters and warps.
+PARTS (in file order):
 
-- **Function: OkToRemove**: Determines if a warp can be removed without disconnecting the map.
-  - Parameters: Parameters related to clusters and warps.
-
-- **Function: GenerateMission**: Generates a mission (partially described).
-
-**CONNECTS TO:** Other classes and functions involved in map generation, such as `CmapMakerDoubleRingIGC`, `CmapMakerBigRingIGC`, etc., which inherit from `CmapMakerIGC` and implement specific map layouts.
-
-**NOTES:**
-- The file contains multiple classes and functions related to map generation and validation.
-- There are TODO comments suggesting updates or changes, such as using the `MapSize` parameter instead of `MaxPlayersInMission`.
-- Some functions contain commented-out code that was likely removed or commented out for future use.
+- lines 1-350
+  - CMapData: Manages map data including clusters and mission parameters.
+  - ImapMakerIGC: Base class for creating different types of maps.
+  - IsValid: Validates mission parameters based on map type.
+  - Create: Creates a mission based on the given parameters.
+  - FindPath: Recursively finds a path between two clusters.
+  - EnoughPaths: Checks if there are enough paths between clusters.
+  - OkToRemove: Determines if it's safe to remove a warp link.
+  - GenerateMission: Generates a mission by setting up map data and creating clusters.
+- lines 352-725
+  - CmapMakerIGC::GenerateLayout: Generates the sector layout for the map.
+  - GenerateSides: Initializes sides with predefined colors and names.
+  - GenerateTeamClusterScreenPosition: Calculates screen position for team clusters.
+  - GenerateTeamCluster: Creates a new team cluster object.
+  - GenerateNeutralClusterScreenPosition: Calculates screen position for neutral clusters.
+  - GenerateNeutralCluster: Creates a new neutral cluster object.
+  - GenerateRingClusters: Generates clusters in a ring pattern.
+  - GenerateWarp: Creates a warp point between two clusters.
+- lines 726-1085
+  - CmapMakerIGC: Main class for generating IGC maps.
+  - CrossLinkClusters: Links clusters between teams.
+  - LinkClusters: Creates links within and between teams.
+  - GenerateLayout: Sets up the initial layout of clusters.
+  - GenerateStarbase: Generates a starbase at a cluster.
+  - PopulateCluster: Populates a cluster with resources.
+  - PopulateClusters: Populates all clusters in the map.
+  - RevealHomeClusters: Reveals home clusters to their respective sides.
+- lines 1086-1439
+  - CmapMakerDoubleRingIGC: Handles the generation and linking of clusters for a double ring map layout.
+  - GenerateLayout: Sets up team and neutral cluster counts and generates the ring clusters.
+  - GenerateTeamClusterScreenPosition: Calculates screen positions for team clusters in a circular pattern.
+  - GenerateNeutralClusterScreenPosition: Calculates screen positions for neutral clusters in a circular pattern.
+  - LinkClusters: Links sectors within teams and forms rings around the map.
+  - CmapMakerBigRingIGC: Handles the generation and linking of clusters for a big ring map layout.
+  - GenerateLayout: Sets up team, neutral, and other cluster counts and generates the ring clusters.
+  - GenerateTeamClusterScreenPosition: Calculates screen positions for team clusters in a circular pattern.
+- lines 1440-1804
+  - CmapMakerHiHigherIGC: Handles high-level map generation for a specific layout.
+  - LinkClusters: Links clusters together based on the current map configuration.
+  - GenerateLayout: Sets up the initial layout parameters and generates clusters.
+  - GenerateTeamClusterScreenPosition: Determines the screen position of team clusters.
+  - GenerateNeutralClusterScreenPosition: Determines the screen position of neutral clusters.
+  - CmapMakerStarIGC: Handles map generation for a star-shaped layout.
+  - IsValid: Checks if the mission parameters are valid for this map type.
+  - PopulateCluster: Populates a cluster with stations and asteroids.
+- lines 1805-2166
+  - CmapMakerPinWheelIGC: Class for generating a pinwheel-shaped map layout.
+  - IsValid: Function to validate mission parameters for pinwheel maps.
+  - GenerateLayout: Function to generate the layout of clusters for pinwheel maps.
+  - GenerateNeutralClusterScreenPosition: Function to calculate screen positions for neutral clusters in pinwheel maps.
+  - LinkClusters: Function to link clusters together in a pinwheel map layout.
+  - CmapMakerDiamondRingIGC: Class for generating a diamond ring-shaped map layout.
+  - IsValid: Function to validate mission parameters for diamond ring maps.
+  - GenerateLayout: Function to generate the layout of clusters for diamond ring maps.
+- lines 2167-2625
+  - CmapMakerIGC::LinkClusters: Links clusters on a map.
+  - CmapMakerLargeSplitIGC::IsValid: Validates parameters for large split maps.
+  - CmapMakerInsideOutIGC::IsValid: Validates parameters for inside-out maps.
+  - CmapMakerGridIGC::GenerateLayout: Generates layout for grid maps.
+  - CmapMakerEastWestIGC::IsValid: Validates parameters for east-west maps.
+  - CmapMakerSplitBaseIGC::IsValid: Validates parameters for split base maps.
+  - TODOs: Remove commented out code related to player counts and team validation. Consider refactoring repetitive cluster linking logic into a helper function.
 
 #### `src/Igc/mapmakerigc.h`
 
@@ -6142,43 +7092,188 @@ NOTES:
 
 #### `src/Igc/missionigc.cpp`
 
-**PURPOSE:** The `missionigc.cpp` file in Allegiance handles the management and serialization of mission data within the game. It includes functions for loading and saving mission data from/to IGC (Integrated Game Control) files, as well as managing various types of objects such as ships, weapons, and resources.
+PURPOSE: The file `missionigc.cpp` contains implementation for managing mission-related data and operations within the Allegiance game, including loading and saving IGC files, converting technology and part lists to bitmasks, and handling various types of objects like projectiles, missiles, probes, and chaff.
 
-**KEY PARTS:**
-- **Class:** `CmissionIGC`
-  - Manages the game mission, including initialization, termination, updating, exporting, and importing mission data.
-  
-- **Function:** `DoDecrypt`
-  - Decrypts data using a rolling XOR algorithm.
-  
-- **Function:** `DumpIGCFile`
-  - Exports mission data to a file, optionally applying a munge function for encryption.
-  
-- **Function:** `LoadIGCFile`
-  - Imports mission data from a file, optionally applying a munge function for decryption.
-  
-- **Function:** `TechBitFromToken`
-  - Converts a technology token to its corresponding bit index.
-  
-- **Function:** `TechsListToBits`
-  - Converts a list of technology tokens to a bitmask.
-  
-- **Class:** `DataProbeTypeIGC`, `DataChaffTypeIGC`, etc.
-  - Represents different types of expendables and parts in the game, such as probes, chaff, mines, afterburners, and weapons. Each class stores various properties like hit points, defense type, price, time to build, etc.
+KEY PARTS:
+- CmissionIGC: Manages mission object functionality.
+- DumpIGCFile: Writes mission data to an IGC file.
+- LoadIGCFile: Reads mission data from an IGC file.
+- TechBitFromToken: Converts technology token to bit index.
+- PartsListToMask: Converts a string of part names to a bitmask.
+- BitsToTechsList: Converts a tech bitmask to a list of tech names.
+- BitsToPartsList: Converts a part bitmask to a list of part names.
+- readCSV: Reads data from a CSV file into a vector of vectors.
+- ImportStaticIGCObjs: Imports static IGC objects from CSV files.
+- DataProjectileTypeIGC, DataMissileTypeIGC, etc.: Structures representing different types of game objects.
+- ObjectType: Enumerates object types (e.g., projectile, missile).
+- UTL::artworkPath(): Returns the path to artwork files.
 
-- **Function:** `readCSV`
-  - Reads a CSV file from an input stream and parses its contents into a vector of vectors of strings.
-  
-- **Data Structure:** `csvVector`, `ObjectType`
-  - Represents the parsed data from CSV files and defines different types of objects in the game.
+CONNECTS TO: Other mission-related classes and functions within Allegiance, such as `CstaticIGC`, `pMission->GetMissionParams()`, and various data structures like `DataStationTypeIGC`.
 
-**CONNECTS TO:**
-- Other mission-related classes and functions within Allegiance, such as those handling ship behavior, resource management, and AI.
+NOTES:
+- Contains TODOs for implementing support for gzipped CSV files, resurrecting the "artwork directory monitor" feature, adding support for exporting various object types, and including artwork directory names in exported files.
+- Functions like `DumpIGCFile` and `LoadIGCFile` handle file I/O operations critical to mission persistence.
 
-**NOTES:**
-- The file contains several TODOs indicating unfinished or unimplemented features.
-- There are assertions and debug statements to ensure robustness and correct data loading.
-- Manual memory management using `new` and `delete`, which requires careful handling to avoid memory leaks.
+PARTS (in file order):
+
+- lines 1-326
+  - CmissionIGC: Class implementing mission object functionality.
+  - DumpIGCFile: Function to dump IGC file data.
+  - LoadIGCFile: Function to load IGC file data.
+  - TechBitFromToken: Converts technology token to bit index.
+  - TechsListToBits: Converts technology list to bitmask.
+  - PartMaskFromToken: Converts part token to bitmask.
+  - AbilitiesListToMask: Converts abilities list to bitmask.
+  - Consider changing mission object to allow only a single instance.
+- lines 327-659
+  - CmissionIGC: Manages mission-related data and operations.
+  - PartsListToMask: Converts a string of part names to a bitmask.
+  - BitsToTechsList: Converts a tech bitmask to a list of tech names.
+  - BitsToPartsList: Converts a part bitmask to a list of part names.
+  - LoadTechBitsList: Loads tech bit flags from a CSV file.
+  - LoadPartsBitsList: Loads part bit flags from a CSV file.
+  - readCSV: Reads data from a CSV file into a vector of vectors.
+  - ImportStaticIGCObjs: Imports static IGC objects from CSV files.
+- lines 660-968
+  - DataProjectileTypeIGC: Represents projectile data.
+  - DataMissileTypeIGC: Represents missile data.
+  - DataProbeTypeIGC: Represents probe data.
+  - ObjectType: Enumerates object types (e.g., projectile, missile).
+  - readCSV: Function to read CSV data into a vector of strings.
+  - UTL::artworkPath(): Returns the path to artwork files.
+  - pMission->GetMissionParams()->szIGCStaticFile: Retrieves the IGC static file name.
+  - TechsListToBits: Converts technology lists to bitmasks.
+- lines 969-1279
+  - DataChaffTypeIGC: Represents a chaff expendable type.
+  - DataMineTypeIGC: Represents a mine expendable type.
+  - DataLauncherTypeIGC: Represents a launcher for various expendables.
+  - AbilitiesListToMask: Converts a list of abilities into a bitmask.
+  - PartMaskFromToken: Converts a token representing a part type into a bitmask.
+  - TechsListToBits: Converts a list of technologies into a bitmask.
+  - ObjectType: Enumerates the types of objects, including probes and chaff.
+  - UTL::artworkPath(): Returns the path to artwork files.
+- lines 1280-1590
+  - ObjectType: Enumerates different types of objects.
+  - DataAfterburnerTypeIGC, DataWeaponTypeIGC, DataPackTypeIGC, DataShieldTypeIGC, DataCloakTypeIGC: Structures representing different types of equipment parts.
+  - UTL::artworkPath(): Function to get the path to artwork files.
+  - pMission->GetMissionParams()->szIGCStaticFile: Retrieves the static file name for mission parameters.
+  - readCSV(): Function to read CSV data into a vector.
+  - csvVector: A vector of vectors representing CSV data.
+  - Strcpy(): Function to copy strings.
+  - atoi() and atof(): Functions to convert string to integer and floating-point number, respectively.
+- lines 1591-1903
+  - DataLauncherTypeIGC: Represents an expendable part launcher.
+  - DataHullTypeIGC: Represents a ship hull type and its associated hardpoints.
+  - ObjectType: Enumerates different types of objects (e.g., parts, hulls).
+  - UTL::artworkPath(): Returns the path to artwork files.
+  - pMission->GetMissionParams()->szIGCStaticFile: Path to static IGC data files.
+  - readCSV: Function to read CSV data into a vector.
+  - TechsListToBits: Converts a list of technologies to bitmasks.
+  - PartsListToMask: Converts a list of parts to a bitmask.
+- lines 1904-2213
+  - DataDevelopmentIGC: Represents development data for a game object.
+  - DataDroneTypeIGC: Represents drone type data for a game object.
+  - DataStationTypeIGC: Represents station type data for a game object.
+  - DataTreasureSetIGC: Represents treasure set data for a game object.
+  - readCSV: Function to read CSV data from a file into a vector of strings.
+  - TechsListToBits: Converts a list of technologies to bitmasks.
+  - AbilitiesListToMask: Converts a list of abilities to bitmasks.
+  - Strcpy: Custom string copy function.
+- lines 2214-2553
+  - TreasureData: Represents treasure data with properties like type and chance.
+  - DataCivilizationIGC: Holds civilization-specific data such as income, bonuses, names, and techs.
+  - DumpIGCFile: Writes mission data to an IGC file.
+  - LoadIGCFile: Reads mission data from an IGC file.
+  - DumpIGCStaticCore: Writes static core data to an IGC file with a version timestamp.
+  - LoadIGCStaticCore: Reads static core data from an IGC file and caches it for reuse.
+  - CachedStaticCore: Stores cached static core data along with its version and consumer count.
+  - s_cores: A list of cached static cores.
+- lines 2554-2897
+  - CreateMission: Function that creates a new mission object.
+  - CstaticIGC::CstaticIGC: Constructor for the static game configuration class, initializing various constants and damage constants.
+  - pMission->GetHullTypes(), pMission->GetStationTypes(): Methods to retrieve lists of hull types and station types in the mission.
+  - strcmp(h2->GetName(), l3->data()->GetName()) == 0: Compares names of objects for equality.
+  - pMission->GetDamageConstant(pmt->GetDamageType(), h2->GetDefenseType()): Retrieves damage constants based on damage type and defense type.
+  - debugf("\t\t\t%8.2f", ...): Outputs formatted debug information.
+  - FileHashTable fileHashTable: Used for checking file hashes, likely for security purposes.
+  - UTL::getFile(strName, ".csv", szFilename, true, true): Attempts to find a text-based core file.
+- lines 2898-3244
+  - CmissionIGC: Manages a mission in the game.
+  - TerminateStatic(CstaticIGC pStatic): Safely terminates a static object.
+  - Initialize(Time now, IIgcSite pIgcSite): Initializes the mission with the given site and time.
+  - Terminate(void): Terminates the mission by cleaning up all resources.
+  - Update(Time now): Updates the mission state based on the current time.
+  - ExportList(int64_t maskTypes, const BaseListIGC plist, char ppdata): Exports a list of objects based on the given types and data pointer.
+  - Export(int64_t maskTypes, char pdata) const: Exports mission data based on the given types and data pointer.
+  - Fixing fedsrv crashes (mentioned in comments)
+- lines 3246-3604
+  - CmissionIGC: Manages mission data and objects.
+  - ExportList: Exports a list of objects to a buffer.
+  - Import: Imports objects from a buffer into the mission.
+  - CreateObject: Creates an object based on its type.
+  - GetModel: Retrieves a model for a given object type and ID.
+  - GetBase: Retrieves a base object for a given object type and ID.
+  - AddWarp, DeleteWarp, GetWarp, GetWarps: Manage warp objects.
+  - AddStation, DeleteStation, GetStation, GetStations: Manage station objects.
+- lines 3605-3935
+  - CmissionIGC: Manages mission data and entities.
+  - AddSide: Adds a side to the mission.
+  - DeleteSide: Removes a side from the mission.
+  - GetSide: Retrieves a side by ID.
+  - GetSides: Returns all sides in the mission.
+  - GetSeenSides: Determines which sides can see a given model.
+  - AddCluster: Adds a cluster to the mission.
+  - DeleteCluster: Removes a cluster from the mission.
+- lines 3936-4274
+  - CmissionIGC::GenerateTreasure: Generates treasures for a cluster at a random position.
+  - GenerateNewTreasureID: Generates a unique ID for a new treasure.
+  - GetReplayCount: Returns the number of times this mission has been replayed.
+  - GetContextName: Generates and returns a context name based on the mission creation time and other parameters.
+  - ConstantsDamageComment: Provides comments for damage and defense constants, which are currently not used in the code.
+- lines 4275-4597
+  - ConstantsDamageComment: Converts damage type IDs to human-readable strings.
+  - Obj2Txt: Main function that dumps IGC data to text files.
+  - DataStationTypeIGC, DataProjectileTypeIGC, etc.: Structures representing different types of game objects.
+  - ObjectType: Enumerates the types of game objects (e.g., station, projectile).
+  - IbaseIGC, IexpendableTypeIGC, etc.: Interfaces for accessing game object data.
+  - Export method: Exports data from an IGC object to a structure.
+  - BitsToTechsList and BitsToPartsList: Convert bit flags to lists of technologies or parts.
+  - UTL::getFile: Utility function to get file paths with extensions.
+- lines 4598-4925
+  - DataExpendableTypeIGC: Represents expendable types with capabilities and attributes.
+  - DataProbeTypeIGC: Represents probe types with specific attributes like scanner range.
+  - DataPartTypeIGC: Represents part types with various properties including equipment type.
+  - DataBuyableIGC: Base class for buyable items, containing common attributes like price and build time.
+  - DataLauncherTypeIGC, DataCloakTypeIGC, DataAfterburnerTypeIGC, DataPackTypeIGC, DataShieldTypeIGC: Specific data classes for different types of parts.
+  - ET_Dispenser, ET_ChaffLauncher, ET_Magazine, ET_Cloak, ET_Afterburner, ET_Pack, ET_Shield: Enumerations representing different equipment types.
+  - pMission->BitsToPartsList(): Converts bitmasks to a list of parts.
+  - ConstantsDamageComment(): Function to generate damage comment based on defense type.
+- lines 4926-5248
+  - DataBuyableIGC: Represents an item that can be bought.
+  - DataWeaponTypeIGC: Contains data specific to weapon types.
+  - DataHullTypeIGC: Contains data specific to hull types.
+  - DataDevelopmentIGC: Represents a development or upgrade.
+  - DataDroneTypeIGC: Contains data specific to drone types.
+  - DataCivilizationIGC: Represents a civilization in the game.
+  - BitsToPartsList: Converts bitmasks to a list of parts.
+  - BitsToTechsList: Converts bitmasks to a list of technologies.
+- lines 5249-5584
+  - CmissionIGC::ExportStaticIGCObjs: Exports static IGC objects to text files.
+  - Obj2Txt: Converts an object to a text line and writes it to a file.
+  - ConstantsGlobalComment: Provides comments for global constants.
+  - UTL::getFile: Retrieves a file with the specified extension.
+  - TODO: Implement support for gzipped CSV files.
+  - TODO: Resurrect the "artwork directory monitor" feature.
+  - TODO: Add support for exporting various object types like stations, projectiles, and expendables.
+  - TODO: Include artwork directory names in exported files for convenience.
+- lines 5585-5706
+  - Obj2Txt: Function that converts an object of a specific type (OT_partType, OT_hullType, etc.) into text format and writes it to a file.
+  - UTL::getFile: Utility function to retrieve a file path based on the mission parameters and a given directory name.
+  - ZString: A string class used for handling strings in Allegiance.
+  - Standard C library type representing a file handle.
+  - fwrite: Standard C library function for writing data to a file.
+  - fclose: Standard C library function for closing a file.
+  - TODOs: None explicitly mentioned in the provided code snippet.
 
 #### `src/Igc/missionigc.h`
 
@@ -6326,31 +7421,44 @@ NOTES: None.
 
 #### `src/Igc/private.cpp`
 
-PURPOSE: This file contains implementation details for internal components of the IGC library that are not part of any specific class.
+PURPOSE: tiny file (15 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `InitializeInternalState`: Initializes internal state for the IGC library.
-- `CleanupInternalState`: Cleans up internal state when the library is shutting down.
-- `ProcessInternalEvents`: Processes internal events within the IGC library.
-- `LogInternalError`: Logs errors that occur internally within the IGC library.
-
-CONNECTS TO: pch.h, private.h
-
-NOTES: None.
+    /*
+    **  Copyright (C) 1996, 1997 Microsoft Corporation. All Rights Reserved.
+    **
+    **  File:	private.cpp
+    **
+    **  Author:
+    **
+    **  Description:
+    **      Implementation file for all things that are internal to the IGC library
+    **  but not part of any one class.
+    **
+    **  History:
+    */
+    #include    "pch.h"
+    #include    "private.h"
 
 #### `src/Igc/private.h`
 
-PURPOSE:
-This header file contains declarations and definitions for internal components of the IGC library that are not part of any specific class.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None explicitly listed in the provided snippet.
-
-CONNECTS TO:
-None explicitly listed in the provided snippet.
-
-NOTES:
-The file is a placeholder or template, as it does not contain any actual code or declarations. It serves as a header file for internal components of the IGC library but lacks specific content.
+    /*
+    **  Copyright (C) 1996, 1997 Microsoft Corporation. All Rights Reserved.
+    **
+    **  File:	private.h
+    **
+    **  Author:
+    **
+    **  Description:
+    **      Header file for all things that are internal to the IGC library
+    **  but not part of any one class.
+    **
+    **  History:
+    */
+    #ifndef private_h
+        #define private_h
+    #endif
 
 #### `src/Igc/probeigc.cpp`
 
@@ -6589,60 +7697,263 @@ NOTES:
 
 #### `src/Igc/shipIGC.cpp`
 
-**PURPOSE:** `shipIGC.cpp` contains the source code for managing ship behavior in Allegiance, including initialization, updates, collision detection, damage calculation, and state management.
+PURPOSE: The file `src/Igc/shipIGC.cpp` contains the implementation of the `CshipIGC` class, which manages the behavior and state of ships in the Allegiance game.
 
-**KEY PARTS:**
-- **Class: CshipIGC**: Represents an individual ship in the game.
-  - Manages ship attributes like fuel, hull type, weapons, and damage.
-  - Handles initialization, updates, termination, collision logic, and damage calculations.
-  
-- **Function: Initialize**: Initializes a new instance of `CshipIGC`.
-  - Sets up the ship's state based on provided data.
+KEY PARTS:
+- CshipIGC: Main class for ship objects.
+- ReInitialize: Resets or initializes a ship's state based on provided data.
+- Initialize: Initializes a new ship object with mission data.
+- Terminate: Cleans up and terminates the ship object.
+- Update: Updates the ship's state, including energy recharge and weapon updates.
+- Separate: Calculates the separation between two convex hulls to resolve collisions.
+- HandleCollision: Handles collisions with other objects, including warps and stations.
+- ReceiveDamage: Handles damage received by a ship, including friendly fire checks and repair calculations.
+- AddPart: Adds a new part to the ship and updates its mass.
+- DeletePart: Removes a part from the ship and updates its mass.
+- MountPart: Mounts or dismounts a part on the ship.
+- SetStateM: Sets the state of the ship, including handling cloak activation sounds.
+- ExecuteTurretMove: Handles turret movement based on controls and orientation.
+- PreplotShipMove: Manages ship movement and behavior, including checking for ammo and running away conditions.
+- FindTargetShip: Finds a target ship based on given criteria.
 
-- **Function: ReInitialize**: Resets an existing `CshipIGC` instance with new data.
-  - Cleans up old resources and sets up the ship for reuse.
+CONNECTS TO:
+- IshipIGC interface
+- ImodelIGC class
+- GlobalAttributeSet
 
-- **Function: Terminate**: Cleans up resources used by a `CshipIGC` instance.
-  - Handles termination of building effects if applicable.
+NOTES:
+- Contains TODOs and NYI debug comments indicating unimplemented or not yet integrated features.
+- Includes time-related variables like `m_dtCheckRunaway`.
+- Handles various ship states, collisions, and damage.
 
-- **Function: Update**: Updates the state of the ship over time.
-  - Handles energy recharge, weapon updates, and damage calculations.
+PARTS (in file order):
 
-- **Function: Export**: Exports the current state of the ship to a data structure for saving or transmission.
-
-- **Static Data: directions**: An array of unit vectors representing possible movement directions in 3D space.
-
-- **TODOs/Unusual Code**:
-  - Debugging statements like `debugf` which are specific to debugging non-player ships.
-  - Arbitrary constants and magic numbers used for calculations, such as the damage multiplier (`50.0f`) in out-of-bounds detection.
-  - The use of `assert` statements for validation, indicating potential issues if conditions are not met.
-
-**CONNECTS TO:** Other game systems for managing ship interactions, missions, and player controls.
-
-**NOTES:** Contains extensive debugging statements and assertions to help with development and maintenance.
+- lines 1-358
+  - CshipIGC: Main class for ship objects.
+  - ReInitialize: Resets or initializes a ship's state based on provided data.
+  - Initialize: Initializes a new ship object with mission data.
+  - Terminate: Cleans up and terminates the ship object.
+  - Update: Updates the ship's state, including energy recharge and weapon updates.
+  - TODOs: "BT - 9/17 - Trying to hunt down the mystery damage ship event crash." "Imago 6/10 #91" "Imago 7/10 #7" "Xynth #48 8/2010"
+  - Unusual code: m_dtCheckRunaway = 31.0f; and similar initialization of time-related variables. if (m_pilotType == c_ptBuilder) { ... } conditional handling for builder ships. SetRipcordModel(NULL); in multiple places, possibly to reset the ripcord state.
+- lines 359-731
+  - CshipIGC::Update: Updates the ship's state and handles collisions.
+  - m_mountedOthers[ET_Afterburner]->Update(now): Updates the afterburner mount.
+  - GetMyMission()->GetIgcSite()->KillShipEvent: Triggers a kill event for the ship if it has lifepod capability and is past its lifespan.
+  - Separate: Calculates the separation between two convex hulls to resolve collisions.
+  - HandleCollision: Handles collisions with other objects, including warps and stations.
+  - ObjectType: Enumerates types of objects that can collide with ships.
+  - OT_warp: Represents a warp point in space.
+  - OT_station: Represents a space station.
+- lines 732-1090
+  - IsideIGC pside1 = GetSide(): Retrieves the side of the current ship.
+  - IsideIGC pside2 = pModel->GetSide(): Retrieves the side of the model involved in the collision.
+  - Separate(entry, false, &position1, &position2, &normal): Calculates the positions and normal vector after separation.
+  - SetPosition(position1): Sets the new position of the ship.
+  - SetVelocity(newVelocity1): Sets the new velocity of the ship.
+  - ReceiveDamage(c_dmgidCollision, ...): Handles damage to the current ship.
+  - ((IdamageIGC)pModel)->ReceiveDamage(...): Handles damage to the model involved in the collision.
+  - PlaySoundEffect(collisionSound, this): Plays a collision sound effect.
+- lines 1091-1452
+  - CshipIGC::ReceiveDamage: Handles damage received by a ship.
+  - CshipIGC::SetBaseHullType: Changes the base hull type of a ship.
+  - newSpeed1 and newSpeed2: Calculate new velocities after collision.
+  - cElasticity: Coefficient of elasticity for collisions.
+  - vInelastic, vElastic1, vElastic2: Velocities before and after collision adjustments.
+  - damage1 and damage2: Calculated damage amounts.
+  - hp1 and hp2: Hit points of the ship and its model.
+  - ReceiveDamage: Handles damage received by a ship, including friendly fire checks and repair calculations.
+- lines 1453-1815
+  - CshipIGC::GetMyMission(): Retrieves the mission associated with the ship.
+  - CshipIGC::AddPart(IpartIGC part): Adds a new part to the ship and updates its mass.
+  - CshipIGC::DeletePart(IpartIGC part): Removes a part from the ship and updates its mass.
+  - CshipIGC::MountPart(IpartIGC part, Mount mountNew, Mount pmountOld): Mounts or dismounts a part on the ship.
+  - CshipIGC::SetStateM(int newVal): Sets the state of the ship, including handling cloak activation sounds.
+  - CshipIGC::ExecuteTurretMove(Time timeStart, Time timeStop, Orientation pOrientation): Handles turret movement based on controls and orientation.
+  - CshipIGC::PreplotShipMove(Time timeStop): Manages ship movement and behavior, including checking for ammo and running away conditions.
+  - "NYI debug" comments indicating unimplemented or not yet integrated features.
+- lines 1816-2147
+  - IshipIGC: Interface for ship objects.
+  - FindTargetShip: Finds a target ship based on given criteria.
+  - PlotShipMove: Handles movement and behavior of ships.
+  - ModelHasTargetPriority: Determines if a model has priority over another ship.
+  - c_ptPlayer, c_ptWingman, etc.: Constants representing different pilot types.
+  - c_ttFriendly, c_ttEnemy, etc.: Constants for target type masks.
+  - wantsToMineMaskIGC: Bitmask indicating the desire to mine.
+  - droneRipMaskIGC: Bitmask indicating a drone is being ripped off.
+- lines 2149-2488
+  - IshipIGC: Represents a ship in the game.
+  - ImodelIGC: Represents a model or object in the game.
+  - IasteroidIGC: Represents an asteroid in the game.
+  - GlobalAttributeSet: Holds global attributes for sides and other entities.
+  - GetMyMission(): Returns the current mission instance.
+  - GetSide(): Returns the side of the entity.
+  - GetCluster(): Returns the cluster containing the entity.
+  - FindTarget(): Finds a target based on given criteria.
+- lines 2489-2811
+  - GetStateM(): Retrieves the current state of the ship.
+  - SetStateBits(mask, state): Sets or clears bits in the ship's state based on a mask and new state.
+  - solveForLead(): Calculates the time until the drone can lead its target.
+  - turnToFace(): Determines the turn angle to face a given direction.
+  - Dodge(): Handles dodging logic for the drone.
+  - FindTargetShip(): Finds the nearest enemy ship within a specified range.
+  - SetCommand(): Sets the command for the drone, including attack, goto, or build actions.
+  - CanSee(): Checks if the drone can see its target.
+- lines 2812-3165
+  - CshipIGC: Main class for ship objects, handling movement, state changes, and updates.
+  - ExecuteShipMove: Updates the ship's velocity and orientation based on control inputs.
+  - ProcessFractions: Sets various fractions (hull, shield, fuel, ammo, energy) of the ship.
+  - LegalPosition: Checks if a given position is within legal bounds.
+  - ProcessShipUpdate: Handles different types of ship updates from server or client.
+  - TODO: Add comments explaining the purpose of the code blocks.
+  - TODO: Review and optimize the velocity and thrust calculations for performance.
+  - Debugf statements added to log unusual conditions, such as negative velocity squared or division by zero.
+- lines 3167-3539
+  - CshipIGC: Main class for managing ship updates and state.
+  - ProcessShipUpdate: Handles processing of ship updates based on different types (ServerSingleShipUpdate, ServerActiveTurretUpdate, ClientActiveTurretUpdate).
+  - CalculateShip: Calculates the ship's position, orientation, and velocity at a given time.
+  - WarpShip: Similar to CalculateShip but sets the calculated values directly.
+  - SetSide: Handles changing sides for the ship, including updating parent-child relationships and mission associations.
+  - SetMission: Resets the ship's state when it changes missions, clearing parts and inventory.
+  - Promote: Transfers ownership of a ship from one parent to another, copying over its inventory.
+  - Debugging statements commented out but still present in the code.
+- lines 3540-3886
+  - CshipIGC::SetParentShip(IshipIGC pshipParent): Sets a new parent ship for the current ship and handles various state transitions.
+  - ShipPair: A struct containing an IshipIGC pointer and an IclusterIGC pointer, used to store pairs of ships and their clusters.
+  - FindRipcordModel(IclusterIGC pcluster): Finds a suitable model for ripcording based on the current ship's capabilities and mission parameters.
+  - HullAbilityBitMask: An enumeration representing various abilities related to hulls.
+  - c_habmCanLtRipcord, c_habmIsRipcordTarget, c_habmIsLtRipcordTarget: Bitmask values indicating specific ripcord-related abilities.
+  - OT_probe, OT_ship: Object types for probes and ships.
+  - GetObjectType(): Returns the object type of a model.
+  - GetSide(): Returns the side associated with a ship or probe.
+- lines 3887-4232
+  - CshipIGC::SetAutopilot: Sets the autopilot state and updates the command if necessary.
+  - CshipIGC::ResetWaypoint: Resets the waypoint based on the current command target.
+  - CshipIGC::IsSafeToRipcord: Determines if it is safe to ripcord based on velocity and thrust calculations.
+  - CshipIGC::bShouldUseRipcord: Checks if ripcording should be used for a given cluster.
+  - debtMin: Tracks the minimum ripcord debt encountered.
+  - pmodelRipcord: Pointer to the model that can be ripped corded.
+  - positionGoal: Target position for the ship.
+  - warps: List of warps in the current cluster.
+- lines 4233-4577
+  - CshipIGC::InGarage: Checks if a ship can land inside another ship's garage.
+  - MyHullType::Initialize: Initializes a hull type with mission data.
+  - MyHullType::Terminate: Terminates the hull type.
+  - MyHullType::Update: Updates the hull type.
+  - MyHullType::GetObjectType: Returns the object type as OT_hullType.
+  - MyHullType::GetObjectID: Returns the object ID of the hull type.
+  - MyHullType::GetData: Returns the data associated with the hull type.
+  - MyHullType::GetModelName: Returns the model name of the hull type.
+- lines 4578-4768
+  - MyHullType::GetPartMask: Returns a bitmask of parts for a given equipment type and mount.
+  - MyHullType::GetCapacity: Returns the capacity for a given equipment type.
+  - MyHullType::GetMaxWeapons: Returns the maximum number of weapons that can be mounted.
+  - MyHullType::GetMaxFixedWeapons: Returns the maximum number of fixed weapons that can be mounted.
+  - MyHullType::GetHardpointData: Retrieves hardpoint data for a given mount ID.
+  - MyHullType::GetTextureName: Returns the texture name for the hull type.
+  - MyHullType::GetIconName: Returns the icon name for the hull type.
+  - MyHullType::GetCapabilities: Returns the capabilities bitmask of the hull type.
 
 #### `src/Igc/shipIGC.h`
 
-**PURPOSE:** The `shipIGC.h` file in Allegiance is a header file that defines the interface and implementation for managing ships within the game. It includes classes and functions related to ship initialization, updates, collision detection, damage handling, and other ship-specific behaviors.
+PURPOSE: The file `shipIGC.h` contains declarations for classes and methods related to managing and controlling ships in the Allegiance game. It includes functionalities for initializing, updating, moving, and processing ship-related data.
 
-**KEY PARTS:**
-- **Class: CshipIGC:** Represents a ship, handling initialization, updates, collision detection, damage, and other dynamic behaviors.
-- **Class: MyHullType:** Provides detailed information about the ship's hull type, including length, speed, hit points, and weapon positions.
-- **Function: Initialize:** Initializes the object with mission data, setting up initial state and properties.
-- **Function: Terminate:** Cleans up resources and releases any held references when the object is no longer needed.
-- **Function: Update:** Updates the ship's state, handling movement, collision detection, and other dynamic behaviors.
-- **Function: GetObjectType:** Returns the type of object (e.g., ship) represented by the class.
-- **Function: GetObjectID:** Retrieves the unique identifier for the ship.
-- **Function: SetCluster:** Assigns the ship to a cluster, managing its position and interactions with other objects in the game world.
-- **Function: HandleCollision:** Handles collisions between the ship and other objects, applying damage or other effects as necessary.
-- **Function: ReceiveDamage:** Processes damage received by the ship, updating its health and state accordingly.
+KEY PARTS:
+- CshipIGC: Main class representing a ship.
+- MyHullType: Implements specific data for a ship's hull type.
+- Initialize: Sets up the ship with mission data.
+- Update: Updates the state of the ship.
+- CanSee: Determines if the ship can see another model.
+- SetCommand: Sets commands for the ship.
+- ExecuteShipMove: Executes a ship move.
+- ExportFractions: Exports ship fractions to a CompactShipFractions object.
+- HitTreasure: Handles logic for hitting treasures like parts, development items, powerups, and flags.
+- GetLaunchSlot: Returns the next launch slot for a ship.
+- PickDefaultOrder: Determines default orders based on the ship's type.
 
-**CONNECTS TO:** Other systems and files related to game entities, such as `IpartIGC`, `IhullTypeIGC`, `IclusterIGC`, and others. It also interacts with network communication for updates and collision detection.
+CONNECTS TO:
+- ImodelIGC: Used for model-related operations.
+- DataShipIGC: Contains data for reinitializing the ship.
+- CompactShipFractions: For exporting fractions of the ship.
+- MissionSite: For mission-related commands and updates.
 
-**NOTES:**
-- The code includes several TODO comments indicating areas that need further development or review.
-- There are assertions throughout the code to ensure data integrity.
-- Some functions use macros (`SetSC`, `SetOVTP`, `SetF`) for setting various properties in update structures, which can make the code harder to read and maintain.
+NOTES:
+- The file contains TODO comments indicating areas that need fixing, such as crash issues.
+
+PARTS (in file order):
+
+- lines 1-364
+  - CshipIGC: Main class representing a ship in the game.
+  - MyHullType: Class that implements IhullTypeIGC and provides specific data for a ship's hull type.
+  - Initialize: Method to initialize the ship with mission data.
+  - Terminate: Method to clean up resources when the ship is terminated.
+  - Update: Method to update the state of the ship.
+  - GetObjectType: Returns the object type as OT_ship.
+  - GetObjectID: Returns the unique ID of the ship.
+  - SetCluster: Sets the cluster (group) that the ship belongs to.
+- lines 366-721
+  - CanSee(ImodelIGC pModel) const: Determines if the ship can see another model.
+  - SetObjectID(ObjectID id): Sets the object ID of the ship.
+  - GetValue(void) const: Calculates the value of the ship based on its hull and parts.
+  - ReInitialize(DataShipIGC  dataShip, Time now): Reinitializes the ship with new data.
+  - Reset(bool bFull): Resets various properties of the ship.
+  - GetTorqueMultiplier(void) const: Returns a multiplier for torque based on velocity.
+  - GetCurrentTurnRate(Axis axis) const: Gets the current turn rate along a specific axis.
+  - SetCurrentTurnRate(Axis axis, float newVal): Sets the current turn rate along a specific axis.
+- lines 722-1065
+  - SetCommand: Sets a command for the ship.
+  - ExecuteTurretMove: Executes a turret move.
+  - PreplotShipMove: Preplots a ship move.
+  - PlotShipMove: Plots a ship move.
+  - ExecuteShipMove: Executes a ship move.
+  - ExportShipLoadout: Exports the ship's loadout.
+  - EquivalentShip: Checks if the ship is equivalent to another ship.
+  - ProcessShipLoadout: Processes a ship loadout.
+- lines 1066-1429
+  - ShipIGC: Manages ship data and operations.
+  - ExportFractions: Exports ship fractions to a CompactShipFractions object.
+  - ExportShipUpdate: Exports ship update information based on different contexts (light, heavy, client).
+  - ProcessFractions: Processes incoming fraction updates.
+  - ProcessShipUpdate: Processes various types of ship update messages.
+  - HitTreasure: Handles the logic for hitting treasures like parts, development items, powerups, and flags.
+  - GetLastMissileFired: Retrieves the last missile fired by the ship.
+  - SetLastMissileFired: Sets the last missile fired by the ship.
+- lines 1430-1778
+  - IshipIGC::GetGunner(Mount turretID): const: Returns the gunner for a specific turret.
+  - IshipIGC::AddChildShip(IshipIGC pship): Adds a child ship to this ship.
+  - IshipIGC::DeleteChildShip(IshipIGC pship): Deletes a child ship from this ship.
+  - IshipIGC::CreateAndAddPart(const PartData ppd): Creates and adds a part based on the given data.
+  - IshipIGC::LegalCommand(CommandID cid, ImodelIGC pmodel = NULL): const: Checks if a command is legal for this ship.
+  - IshipIGC::Complain(SoundID sid, const char pszMsg): Sends a complaint message to the team chat.
+  - IshipIGC::SetAutoDonate(IshipIGC pship): Sets the auto-donate target for this ship.
+  - TODO: Fix to avoid crash 8963864
+- lines 1779-2109
+  - GetDeaths: Returns the number of deaths.
+  - SetDeaths: Sets the number of deaths.
+  - AddDeath: Increments the death count and updates the side's death count.
+  - GetEjections: Returns the number of ejections.
+  - SetEjections: Sets the number of ejections.
+  - AddEjection: Increments the ejection count and updates the side's ejection count.
+  - GetExperienceMultiplier: Calculates the experience multiplier based on experience points.
+  - GetRipcordModel: Gets the ripcord model associated with the ship.
+- lines 2110-2446
+  - IshipIGC::GetLaunchSlot: Returns the next launch slot for a ship.
+  - IshipIGC::PickDefaultOrder: Determines and sets default orders for a ship based on its type (miner, builder, layer, wingman).
+  - IshipIGC::GetOre: Returns the current amount of ore carried by the ship.
+  - GetLocalStationToHide: Finds a friendly station to hide at if the ship is damaged.
+  - PickDefaultOrder for miners: Handles specific logic for miners including mining asteroids and unloading at stations.
+  - PickDefaultOrder for builders: Attempts to build structures near asteroids or other resources.
+  - PickDefaultOrder for layers: Sets commands for layers to move towards targets.
+  - PickDefaultOrder for wingmen: Delegates handling of default orders to the mission site, likely for training or co-op scenarios.
+- lines 2447-2673
+  - SetCommand: Sets the command for the ship.
+  - GetMyMission: Returns the mission the ship is currently involved in.
+  - SendChatf: Sends a chat message to all team members.
+  - IsGhost: Checks if the ship has died more times than allowed by its mission parameters.
+  - InGarage: Determines if the ship is in a garage.
+  - GetEndurance: Calculates the endurance of the ship based on its hull type and lifepod capabilities.
+  - IsUsingAreaOfEffectWeapon: Checks if the ship is equipped with an area-of-effect weapon.
+  - SetSkills: Sets the skills for shooting, turning, and going to a target.
 
 #### `src/Igc/sideigc.cpp`
 
@@ -6726,33 +8037,25 @@ NOTES:
 
 #### `src/Igc/sounds.h`
 
-**PURPOSE:** The `sounds.h` file in Allegiance is responsible for managing the loading, playing, and unloading of sound effects within the game. It includes definitions for various sound IDs and provides functions to play specific sounds by their names.
+PURPOSE: The file `sounds.h` defines sound IDs and resources used in the Allegiance game for various in-game events and voice-over messages.
 
-**KEY PARTS:**
-- **Class:** `SoundManager`
-  - Manages the lifecycle of sound effects.
-  
-- **Function:** `PlaySound(const std::string& soundName)`
-  - Plays a specified sound effect by its name, logging an error if the sound is not found.
-  
-- **Function:** `LoadSounds()`
-  - Loads all predefined sounds into memory for efficient playback.
-  
-- **Function:** `UnloadSounds()`
-  - Unloads all loaded sounds to free up memory.
-  
-- **Macro:** `DEFSOUND(soundName)`
-  - Defines a new sound ID with the given name, used to create constants for each sound effect.
-  
-- **Macro:** `DEFEMPTYSOUND(soundName)`
-  - Defines an empty sound slot that cannot be played, used for unused music slots.
+KEY PARTS:
+- DEFSOUND: Macro to define sound IDs.
+- DEFEMPTYSOUND: Macro to define unused sound IDs.
+- newShip: Sound ID for a new ship being created.
+- jump: Sound ID for a player jumping.
+- voAwsome: Voice-over sound indicating something is awesome.
+- voYoureCrazy: Defines a sound for when someone says they are crazy.
+- voThatHurt: Defines a sound for when something hurts.
+- droneReport4Duty: Defines a sound for a drone reporting for duty.
+- salCommenceScan: Defines a sound for sensors online commencing scan.
+- oink1: Defines a sound for a pig response.
+- tm_slide_1_01: Defines a sound for a training mission slide.
 
-**CONNECTS TO:**
-- Other systems or files it depends on or serves: Audio subsystems and game events handling.
+CONNECTS TO: Other game systems and files that use these sound IDs, such as the audio engine or voice-over scripts.
 
-**NOTES:**
-- The file contains a large number of `DEFSOUND` macros, indicating a comprehensive set of sound effects.
-- There are commented-out sections related to turrets and builders that were likely part of a previous version but have been removed or disabled.
+NOTES:
+- Multiple TODOs exist to remove unused music sounds or reactivate commented-out sounds.
 
 #### `src/Igc/stationIGC.cpp`
 
@@ -7017,48 +8320,106 @@ NOTES: None.
 
 ### src/Inc
 
-**Folder Overview:** The `src/Inc` folder contains header files for various components and systems used in the Allegiance game, including messaging, database operations, utility functions, and more.
+The `src/Inc` folder contains header files essential for various aspects of the Allegiance game, including networking, messaging, and database operations.
 
-- **ClubMessages.h**: Manages communication between the AllClub system and the Allegiance game.
-- **IBN.H**: Defines macros for incremental build numbers during patching.
-- **MessageVersion.h**: Specifies the version of message structures used in the game.
-- **Messages.h**: Contains definitions for various message types used in the game's communication system.
-- **PigsIDL.idl**: Defines interfaces and classes for managing player behavior, ship actions, and session management.
-- **ScrRun.idl**: Provides functionality for file system operations through a scripting library.
-- **SlmVer.h**: Contains version information used by the VerRes.rc resource script to set the FileVersion and ProductVersion of the Allegiance game.
-- **Utility.h**: Includes utility functions and macros used throughout the Allegiance game.
-- **XMLPtrs.h**: Defines smart pointer declarations for Microsoft XML interfaces in the Allegiance game.
-- **allegdb.h**: Manages database operations using OLE DB.
-- **assert.h**: Prevents the definition of `assert` by including a different header file that provides the actual implementation.
-- **dpaddr.h**: Defines interfaces and constants for DirectPlay8Address, used to represent network addresses in Microsoft's DirectPlay networking API.
-- **messagecore.h**: Manages connections, groups, and message sending/receiving within the game session using DirectPlay.
-- **quickchat.h**: Contains definitions for various classes related to quick chat functionality in the Allegiance game.
-- **regkey.h**: Defines constants and macros related to registry keys used by the Allegiance game for configuration and settings storage.
-- **sharemem.h**: Manages shared memory between a test tool and a performance monitoring DLL in the Allegiance game.
-- **steam_appid.txt**: Contains the Steam App ID for the Allegiance game.
+- AGCIDL.idl: Defines interfaces and enumerations for game objects, abilities, events, and utilities.
+- PigsIDL.idl: Manages pig players, their behaviors, teams, missions, and ships.
+- dplay8.h: Contains declarations for DirectPlay 8 interfaces used for networking.
+- Messages.h: Defines message types for client-server communication.
+- messagecore.h: Central to managing all messaging operations within the game.
+
+Largest files: AGCIDL.idl (2753 lines), PigsIDL.idl (1462 lines), dplay8.h (1456 lines), Messages.h (1056 lines), messagecore.h (743 lines).
 
 #### `src/Inc/AGCIDL.idl`
 
-**PURPOSE:** The `AGCIDL.idl` file defines the interfaces and data types used by the Allegiance game engine for object management, event handling, and communication with host applications.
+PURPOSE: Defines interfaces and enumerations for various game objects, abilities, events, and utilities used in Allegiance.
 
-**KEY PARTS:**
-- **Name:** AGCObjectType  
-  - Description: Enumerates different types of objects in the game.
-- **Name:** IAGCGlobal  
-  - Description: Main interface for host applications to interact with the Allegiance game engine.
-- **Name:** IAGCEventSink  
-  - Description: Interface for host applications to receive triggered events asynchronously.
-- **Name:** IAGCVector  
-  - Description: Interface for handling vector operations such as initialization, arithmetic, normalization, and comparison.
-- **Name:** IAGCGame  
-  - Description: Main game interface, providing access to various collections of game entities (ships, sectors, teams) and methods for sending chat and commands.
+KEY PARTS:
+- AGCObjectType: Enumerates different types of game objects.
+- IAGCVector: Interface for vector operations.
+- IAGCOrientation: Interface for orientation matrix properties.
+- IAGCEvent: Interface for game event handling.
+- IAGCGameParameters: Interface for managing game parameters.
+- ITCSessionInfo: Interface exposing session connection details.
 
-**CONNECTS TO:** `<igc.h>` for constants that should be kept in sync with the IDL definitions. Other parts of the Allegiance codebase for implementing these interfaces and handling game objects.
+CONNECTS TO: Allegiance game engine and other related files.
 
-**NOTES:**
-- The file includes TODO comments indicating potential areas for code duplication or inconsistencies.
-- Interfaces are primarily defined using COM syntax, which is typical for Microsoft applications.
-- Several interfaces have commented-out methods that are likely placeholders for future implementation.
+NOTES:
+- Contains both public and private interfaces, indicating additional functionality not exposed to the user.
+- Some properties have default values specified, which might be an oversight or intentional design choice.
+- Uses HRESULT return types typical of COM programming.
+
+PARTS (in file order):
+
+- lines 1-343
+  - AGCObjectType: Enumerates different types of objects in the game.
+  - AGCHullAbility: Enumerates abilities that can be assigned to hulls.
+  - AGCAxis: Enumerates axes for orientation and movement.
+  - AGCEquipmentType: Enumerates types of equipment that can be mounted on ships or stations.
+  - AGCTreasureType: Enumerates different types of treasures in the game.
+  - AGCChatTarget: Enumerates targets for chat messages.
+  - AGCEventID: Enumerates different types of events that can occur in the game.
+  - FileAttributes: Enumerates attributes that can be applied to files.
+- lines 344-710
+  - AGCObjectType: Enumerates types of game objects.
+  - AGCHullAbility: Bitmask for hull abilities.
+  - AGCAsteroidAbility: Bitmask for asteroid abilities.
+  - AGCAxis: Enumerates axes for movement and controls.
+  - AGCEquipmentType: Enumerates types of equipment.
+  - AGCTreasureType: Enumerates types of treasures.
+  - AGCChatTarget: Enumerates chat targets.
+  - AGCGameStage: Enumerates game stages.
+- lines 711-1086
+  - IAGCVector: Interface for a vector object with properties and methods for operations like addition, subtraction, normalization, etc.
+  - IAGCOrientation: Interface for an orientation matrix with properties for forward, backward, up, right vectors.
+  - IAGCEvent: Interface for game events with properties for ID, time, description, and parameters.
+  - IAGCGameParameters: Interface for game parameters with various properties like min/max players, power-ups, resources, etc.
+  - The interfaces use HRESULT return types which are common in COM programming but may not be familiar to non-COM developers.
+  - There are multiple private interfaces (IAGCVectorPrivate, IAGCOrientationPrivate) that suggest there is additional functionality not exposed through the public interfaces.
+  - Some properties have default values specified in their declarations, which is unusual and might indicate a mistake or oversight.
+- lines 1087-1449
+  - IAGCCommand: Interface to an AGC Command object.
+  - IAGCCommandPrivate: Private interface to an AGC Command object.
+  - IAGCVersionInfo: Interface for version information.
+  - IAGCDBParams: Interface for database parameters.
+  - IAGCEventLogger: Interface for logging events.
+  - IAGCEventLoggerHook: Interface for hooking event logging.
+  - IAGCEventLoggerPrivate: Private interface for event logging.
+  - IAGCRangePrivate: Private interface to an AGC Range object.
+- lines 1451-1787
+  - IAGCEventIDRanges: Interface for managing a collection of event ID ranges.
+  - IntersectsWithValue: Determines if a specific value intersects with any range in the set.
+  - IntersectsWithRangeValues: Determines if a specified range intersects with any range in the set.
+  - IntersectsWithRange: Determines if a specified range object intersects with any range in the set.
+  - ITCCollection: Base interface for most collection interfaces, providing methods like Count and _NewEnum.
+  - ITCStrings: Interface to manage a collection of strings, including adding, removing, and manipulating strings.
+  - ITCPropBagOnRegKey: Interface to create a property bag on a registry key, allowing operations like creating, opening, and saving objects.
+  - ITCSessionInfo: Interface exposing information about the connection of a session object, including user name, computer name, application name, creation time, duration, and cookie.
+- lines 1788-2168
+  - ITCSessionInfos: Interface for accessing session information.
+  - ITCCollectionPersistHelper: Interface for collection persistence helper functionality.
+  - ITCUtility: Utility interface providing various utility functions.
+  - IAdminSessionHelper: Helper interface for administrative session management.
+  - IAGCPrivate: Internally-used interface on an AGC object.
+  - IAGCCommon: Base interface for common AGC properties and methods.
+  - IAGCCollection: Base interface for AGC collection interfaces.
+  - IAGCBase: Interface for basic AGC object properties.
+- lines 2169-2560
+  - IAGCHullType: Interface for hull types with properties like capabilities and max ammo.
+  - IAGCTreasure: Interface for treasures with properties like type and amount.
+  - IAGCTreasures: Collection interface for multiple treasures.
+  - IAGCDamage: Interface for damage objects with a fraction property.
+  - IAGCScanner: Interface extending IAGCDamage, adding scanner-related properties.
+  - IAGCProbe: Interface extending IAGCScanner, adding probe-specific properties like emission point and lifespan.
+  - IAGCProbes: Collection interface for multiple probes.
+  - IAGCGame: Main game interface with properties and methods to manage game state.
+- lines 2561-2752
+  - IAGCTeam Interface: Defines methods and properties for managing a team in the game.
+  - IAGCTeams Interface: Provides access to a collection of teams.
+  - IAGCAsteroid Interface: Represents an asteroid with properties like ore amount and capabilities.
+  - IAGCAsteroids Interface: Manages a collection of asteroids.
+  - Smart Pointer Declarations: Defines smart pointer types for COM interfaces, aiding in memory management.
+  - TODOs or Unusual Code: The commented-out sections suggest potential future features or unfinished code. The use of cpp_quote to include C++ code within an IDL file is unusual and specific to Microsoft's tools.
 
 #### `src/Inc/ClubMessages.h`
 
@@ -7083,14 +8444,13 @@ NOTES:
 
 #### `src/Inc/IBN.H`
 
-PURPOSE: This file contains a preprocessor macro definition for incremental build numbers used during the patching process of the Allegiance game.
+PURPOSE: tiny file (5 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- INCBUILDNUM: A macro that defines an incremental build number for patches. It must be manually set when rebuilding the project without a full source synchronization (ssync).
-
-CONNECTS TO: None
-
-NOTES: none
+    // INCBUILDNUM can be used when rebuilding w/o a full ssync.
+    // eg: from 1.00.nnnn.0 to 1.00.nnnn.1, etc.
+    //
+    // INCBUILDNUM must be hand-set (ie: it is not done by slm automatically)
+    #define INCBUILDNUM 0  // incremental build numbers for patches on build machine
 
 #### `src/Inc/MessageVersion.h`
 
@@ -7105,54 +8465,67 @@ NOTES: None
 
 #### `src/Inc/Messages.h`
 
-**PURPOSE:** The `Messages.h` file in Allegiance defines various message structures and macros used for communication between the client and server. These messages facilitate login, player information exchange, ship updates, chat functionality, and other game-related interactions.
+PURPOSE: The file `Messages.h` contains definitions for various message types used in the Allegiance game's client-server communication system.
 
-**KEY PARTS:**
-- **Class/Struct:** `PassengerData` - Holds information about passengers on a ship.
-- **Macro:** `DEFINE_FEDMSG` - Used to define message structures with specific IDs and fields.
-- **Message:** `LOGONREQ`, `LOGONACK` - For client-server login communication.
-- **Message:** `PLAYERINFO` - Contains detailed player statistics.
-- **Struct:** `StaticMapInfo` - Holds information about available maps.
-- **Message:** `STATIC_MAP_INFO` - Server sends map details to clients.
-- **Enum:** `ShipDeleteReason` - Defines reasons for ship deletion.
-- **Message:** `SHIP_DELETE` - Notifies clients that a ship has been deleted.
-- **Message:** `PING` - Used for network latency testing.
-- **Struct:** `ChatData` - Holds data related to chat messages.
-- **Message:** `CHATMESSAGE` - Sent by clients to broadcast chat messages.
-- **Enum:** `BucketItemType` - Defines types of items that can be donated to buckets.
+KEY PARTS:
+- PassengerData: Stores information about passengers on a ship.
+- LOGONREQ and LOGONACK: Handle player logon requests and responses.
+- BUY_LOADOUT and BUY_LOADOUT_ACK: Manage loadout purchases by clients.
+- OBJECT_SPOTTED and SET_CLUSTER: Notify clients of spotted objects and update cluster information.
 
-**CONNECTS TO:** Other game systems, particularly the network subsystem and player management system.
+CONNECTS TO: `Messages.cpp`, which contains implementations for these message types.
 
-**NOTES:** None.
+NOTES: None.
 
 #### `src/Inc/PigsIDL.idl`
 
-**Purpose:** The file `src/Inc/PigsIDL.idl` defines interfaces and types used in the Allegiance game for managing pig behaviors, player interactions, ship control, and session management.
+PURPOSE: Defines interfaces and enumerations for managing pig players, their behaviors, teams, missions, and ships within the Allegiance game.
 
-**Key Parts:**
-- **IPigBehaviorType**: Interface for a pig behavior type object.
-- **IPigBehaviorTypes**: Collection interface for multiple pig behavior types.
-- **IPigBehaviorScriptType**: Inherits from IPigBehaviorType with additional properties for script files.
-- **IPigBehaviorHost**: Provides utility methods like beep, create pig, trace, and random number generation.
-- **IPigBehavior**: Main interface for a pig behavior object, including properties and methods to handle activation and game events.
-- **IPigBehaviors**: Collection interface for multiple pig behaviors.
-- **IPigBehaviorStack**: Stack interface for managing a collection of pig behaviors.
-- **IPig**: Interface representing a player object with methods like logon, logoff, and create/join missions.
-- **PigMapType**: Enumerated type defining different mission map types.
-- **IPigMissionParams**: Interface for setting mission parameters.
-- **IPigSession**: Main interface for managing the session, including creating pigs and handling events.
-- **IPigEvent**: Interface for event objects with methods to set expressions and check expiration.
-- **IPigTimer**: Subinterface of IPigEvent for timer objects.
-- **PigThrust**: Enumerated type defining different thrust actions a ship can perform.
-- **Class: IPigShip**: Interface for controlling a ship in the game, including methods like Thrust, Boost, and FireWeapon.
-- **Class: IPigShipEvent**: Interface for handling events related to a ship's actions.
-- **Class: IPigVector**: Interface representing a vector in 3D space with properties X, Y, Z.
-- **Class: IPigAccount**: Interface for managing user accounts with properties Name and Password.
-- **Class: IPigHullTypes**: Interface for managing a collection of ship hull types.
+KEY PARTS:
+- IPigBehaviorType: Interface to a pig behavior type object.
+- IPig: Interface representing a pig player object.
+- IPigMissionParams: Interface for mission parameters.
+- IPigShip: Interface for controlling a ship in Allegiance.
+- PigMapType: Enumerated type for mission map types.
 
-**Connects To:** Other game systems and files related to player management, mission handling, and ship control.
+CONNECTS TO: None
 
-**Notes:** The file includes TODO comments indicating areas that need further development or implementation. There are also commented-out methods related to pitch, yaw, and roll suggesting additional control options that were not implemented.
+NOTES: Contains both C++ and C# code, with some TODO comments.
+
+PARTS (in file order):
+
+- lines 1-340
+  - dispid_PigsIDL: Enumeration of dispatch identifiers for PigsIDL.
+  - PigState: Enumerates states a pig player can be in.
+  - IPigBehaviorType: Interface to a pig behavior type object.
+  - IPigBehaviorTypes: Interface to a collection of pig behavior script objects.
+  - IPigBehaviorScriptType: Interface to a pig behavior script object, extending IPigBehaviorType.
+  - IPigBehaviorHost: Interface to a pig behavior host object.
+  - IPigBehavior: Interface to a pig behavior object.
+- lines 341-745
+  - IPigBehavior: Interface for behavior objects associated with a pig player.
+  - IPigBehaviors: Interface to a collection of pig behavior objects.
+  - IPigBehaviorStack: Interface to a stack of pig behavior objects.
+  - IPig: Interface representing a pig player object.
+  - IPigs: Interface to a collection of pig player objects.
+  - IPigTeam: Interface representing a team object.
+  - IPigTeams: Interface to a collection of team objects.
+  - PigMapType: Enumerated type for mission map types.
+- lines 746-1124
+  - IPigMissionParams: Interface for mission parameters.
+  - IPigSession: Main interface for session management.
+  - IPigEvent: Interface for event handling.
+  - IPigTimer: Interface for timer events.
+  - PigThrust: Enumerates thrust actions.
+  - TODO: Does this go into teams? - Comment in IPigMission interface.
+- lines 1126-1460
+  - IPigShip: Interface for controlling a ship in Allegiance.
+  - IPigShipEvent: Interface for handling events related to a ship's actions.
+  - IPigVector: Interface representing a 3D vector.
+  - IPigAccount: Interface for managing user accounts.
+  - IPigAccountDispenser: Interface for dispensing and managing user accounts.
+  - IPigHullTypes: Interface for accessing a collection of hull types.
+  - TC_COM_SMARTPTR_TYPEDEF: Macro to define smart pointers for COM interfaces.
 
 #### `src/Inc/ScrRun.idl`
 
@@ -7173,33 +8546,26 @@ NOTES: None
 
 #### `src/Inc/SlmVer.h`
 
-PURPOSE: This file contains version information used by the VerRes.rc resource script to set the FileVersion and ProductVersion for the Allegiance game.
+PURPOSE: tiny file (12 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- rmj: Major release number.
-- rmm: Minor release number.
-- rel: Release number.
-- rup: Release update number, formatted as an octal date (year, month, day).
-- szVerName: Version name, currently empty.
-- szVerUser: User or developer initials.
-
-CONNECTS TO: VerRes.rc
-
-NOTES: None.
+    // mmf modified version, these set FileVersion and ProductVersion used by VerRes.rc
+    #define rmj		1
+    #define rmm		9		// Imago (R#)
+    #define rel     1040158.00       // mmf added to designate release number for a given build
+    #define rup		311412  // mmf make sure this has 6 digits otherwise version number conversion for esc display may fail,
+    						// rup is specified in octal, so for instance 11/9/2010 (US format)
+    						// Year: 2010 - use last two digits: 10, convert to octal = 12.
+    						// Month: 11 - convert to octal = 13
+    						// Day: 9 - convert to octal = 11
+    						// Actual rup value = 121311.
+    #define szVerName	""
+    #define szVerUser	"CURTC3"
 
 #### `src/Inc/Utility.h`
 
-PURPOSE: This file includes common utility definitions and declarations used across the Allegiance project.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `Utility.h`: Contains general-purpose utility functions and macros that are widely used throughout the game.
-- `StringHelper`: A class providing various string manipulation functions.
-- `MathUtils`: A namespace containing mathematical utility functions.
-- `DebugLog`: A function for logging debug information, which can be enabled or disabled.
-
-CONNECTS TO: `_Utility/Utility.h`, which likely contains platform-specific implementations of these utilities.
-
-NOTES: None.
+    #include "../_Utility/Utility.h"
 
 #### `src/Inc/XMLPtrs.h`
 
@@ -7234,14 +8600,10 @@ NOTES:
 
 #### `src/Inc/assert.h`
 
-PURPOSE: This file is an empty include file designed to prevent the redefinition of the `assert` macro by including a different header file that actually defines it.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: src/Inc/zassert.h - The actual header file that defines the `assert` macro.
-
-NOTES: none
+    // Empty include file so that no-one defines assert!
+    #include <zassert.h>
 
 #### `src/Inc/dpaddr.h`
 
@@ -7260,39 +8622,57 @@ NOTES: None.
 
 #### `src/Inc/dplay8.h`
 
-**PURPOSE:** The `dplay8.h` file in Allegiance contains declarations for the DirectPlay8 interfaces and related data structures used for network communication within the game. It defines class identifiers (CLSID), interface identifiers (IID), message handlers, player IDs, operation handles, and various constants and flags relevant to DirectPlay operations.
+PURPOSE: The file `dplay8.h` contains declarations for DirectPlay 8 interfaces and structures used for client-server communication and peer-to-peer networking in applications.
 
-**KEY PARTS:**
-- **Name:** CLSID_DirectPlay8Client, CLSID_DirectPlay8Server, CLSID_DirectPlay8Peer
-  - **Description:** Class identifiers for the client, server, and peer interfaces in DirectPlay.
-  
-- **Name:** IID_IDirectPlay8Client, IID_IDirectPlay8Server, IID_IDirectPlay8Peer
-  - **Description:** Interface identifiers defining methods for the client, server, and peer interfaces.
+KEY PARTS:
+- CLSID_DirectPlay8Client, CLSID_DirectPlay8Server, CLSID_DirectPlay8Peer: Class IDs for different DirectPlay 8 components.
+- PFNDPNMESSAGEHANDLER: Callback function type for handling messages.
+- DPN_APPLICATION_DESC: Describes an application and its session settings.
+- IDirectPlay8Client, IDirectPlay8Server, IDirectPlay8Peer: COM interfaces for client, server, and peer functionalities.
+- DPNMSG_ADD_PLAYER_TO_GROUP, DPNMSG_ASYNC_OP_COMPLETE: Message types indicating player addition to a group and completion of asynchronous operations.
 
-- **Name:** PFNDPNMESSAGEHANDLER
-  - **Description:** Function pointer type for message handling callbacks in DirectPlay applications.
-  
-- **Name:** DPNID, DPNHANDLE
-  - **Description:** Data types representing player IDs and operation handles respectively.
-  
-- **Name:** DPN_MSGID_OFFSET, DPN_MSGID_ADD_PLAYER_TO_GROUP, etc.
-  - **Description:** Constants defining message identifiers for various DirectPlay messages.
+CONNECTS TO: DirectPlay 8 service provider implementations.
 
-- **Name:** DPNOP_SYNC
-  - **Description:** Flag indicating synchronous operations in DirectPlay.
-  
-- **Class:** DPN_APPLICATION_DESC
-  - **Description:** Describes session settings such as flags, GUIDs, player limits, and session name.
-  
-- **Class:** IDirectPlay8Client
-  - **Description:** Interface for client operations in DirectPlay.
+NOTES: None.
 
-**CONNECTS TO:**
-- Other Allegiance game files that utilize DirectPlay for network communication.
+PARTS (in file order):
 
-**NOTES:**
-- Contains TODO comments indicating areas needing further development or review.
-- Includes unusual code snippets, such as `#if !defined(__cplusplus) || defined(CINTERFACE)` to differentiate between C and C++ implementations.
+- lines 1-392
+  - CLSID_DirectPlay8Client: Class ID for DirectPlay8 client.
+  - CLSID_DirectPlay8Server: Class ID for DirectPlay8 server.
+  - CLSID_DirectPlay8Peer: Class ID for DirectPlay8 peer.
+  - IID_IDirectPlay8Client: Interface ID for DirectPlay8 client.
+  - IID_IDirectPlay8Server: Interface ID for DirectPlay8 server.
+  - IID_IDirectPlay8Peer: Interface ID for DirectPlay8 peer.
+  - PFNDPNMESSAGEHANDLER: Callback function type for handling messages.
+  - DPNID: Type for player IDs.
+- lines 393-730
+  - DPN_APPLICATION_DESC: Describes an application and its session settings.
+  - BUFFERDESC: Defines a buffer for data transfer.
+  - DPN_CAPS: Stores capabilities of a DirectPlay8 service provider.
+  - DPN_CONNECTION_INFO: Contains statistics about the connection.
+  - DPN_GROUP_INFO: Holds information about a group in a session.
+  - DPN_PLAYER_INFO: Contains details about a player in a session.
+  - DPNMSG_ADD_PLAYER_TO_GROUP: Message indicating a player has been added to a group.
+  - DPNMSG_ASYNC_OP_COMPLETE: Indicates completion of an asynchronous operation.
+- lines 731-1058
+  - IDirectPlay8Client: COM interface for DirectPlay8 client functionality.
+  - IDirectPlay8Server: COM interface for DirectPlay8 server functionality.
+  - IDirectPlay8Peer: COM interface for DirectPlay8 peer functionality.
+  - DPNMSG_ENUM_HOSTS_RESPONSE: Structure for handling responses from EnumHosts method.
+  - DPNMSG_GROUP_INFO: Structure for group information messages.
+  - DPNMSG_HOST_MIGRATE: Structure for host migration messages.
+  - DPNMSG_INDICATE_CONNECT: Structure for indicating a connection attempt.
+  - DPNMSG_INDICATED_CONNECT_ABORTED: Structure for indicating a connection abort.
+- lines 1059-1455
+  - IDirectPlay8Client: Interface for client operations.
+  - IDirectPlay8Server: Interface for server operations.
+  - IDirectPlay8Peer: Interface for peer-to-peer operations.
+  - IDirectPlay8ThreadPool: Interface for managing thread pools.
+  - IDirectPlay8NATResolver: Interface for NAT traversal.
+  - DPN_OK: Success code.
+  - DPNERR_ABORTED: Operation aborted error.
+  - TODOs or unusual code: No specific TODOs or unusual code noted in this snippet.
 
 #### `src/Inc/messagecore.h`
 
@@ -7363,34 +8743,38 @@ NOTES: None.
 
 #### `src/Inc/steam_appid.txt`
 
-PURPOSE: This file contains the Steam App ID for the Allegiance game. It is used to identify the game within the Steam platform.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: steam_api.cpp (used to initialize and interact with Steam services)
-
-NOTES: none
+    700480
 
 ### src/Inc/cpp-httplib
 
-The `src/Inc/cpp-httplib` folder contains the source code for the cpp-httplib library, which is used in Allegiance for HTTP client and server functionality.
+This folder contains essential components for HTTP client and server operations in Allegiance, a 2000 Microsoft multiplayer space game. The primary file is `httplib.h`, which provides core functionalities for creating HTTP requests and handling responses.
 
-- **cpp-httplib.h**: Provides core functionalities for creating HTTP requests and handling responses.
-- **LICENSE.txt**: Contains the MIT License agreement for the cpp-httplib library.
+- httplib.h: Contains the definitions for classes, functions, and data structures necessary for HTTP client and server operations.
+- LICENSE.txt: Includes the license terms for using the `httplib.h` library.
 
 #### `src/Inc/cpp-httplib/LICENSE.txt`
 
-PURPOSE: This file contains the license information for the cpp-httplib library used in Allegiance.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- MIT License: Specifies the terms under which the software can be used and distributed.
-- Copyright (c) 2017 yhirose: Indicates the copyright holder of the library.
-- Permission to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software.
-
-CONNECTS TO: cpp-httplib library in Allegiance project.
-
-NOTES: None.
+    The MIT License (MIT)
+    Copyright (c) 2017 yhirose
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 
 #### `src/Inc/cpp-httplib/httplib.h`
 
@@ -7418,10 +8802,10 @@ NOTES: None.
 
 ### src/Inc/ogg
 
-The `src/Inc/ogg` folder contains core definitions and functions for handling Ogg bitstream operations, essential for audio streaming in the Allegiance game. This includes encoding, decoding, and managing pages of Ogg bitstreams.
+This folder contains core definitions and functions for working with Ogg bitstreams in Allegiance, a 2000 Microsoft multiplayer space game.
 
-- `ogg.h`: Defines structures and functions for Ogg bitstream operations, including packing and unpacking bits, managing pages, streams, packets, and synchronization.
-- `os_types.h`: Provides platform-independent data types and memory management macros, ensuring consistent definitions across different operating systems.
+- ogg.h: Provides essential definitions and functions for handling Ogg bitstreams, which are crucial for multimedia applications like streaming audio and video.
+- os_types.h: Defines platform-independent types and macros for memory management and integer types used in the OggVorbis software codec.
 
 #### `src/Inc/ogg/ogg.h`
 
@@ -7453,12 +8837,10 @@ NOTES: None.
 
 ### src/Inc/vorbis
 
-The `src/Inc/vorbis` folder contains essential header files for handling audio data in Ogg Vorbis format within the Allegiance game. It provides both the codec library for encoding and decoding audio, as well as a C API for managing Ogg Vorbis streams using stdio-based callbacks.
+This folder contains essential headers and declarations for handling audio data in the OggVorbis format within the Allegiance game. It provides both C++ and C APIs for encoding and decoding audio streams.
 
-- `codec.h`: Defines structures like `vorbis_info`, `vorbis_dsp_state`, `vorbis_block`, and `vorbis_comment` to manage audio stream properties and data blocks.
-- `vorbisfile.h`: Offers a C API for opening, seeking, and decoding Ogg Vorbis streams, including functions like `ov_open()`, `ov_read()`, and `ov_pcm_seek()`.
-- `codec.c`: Contains the implementation of the Vorbis codec library, handling the core encoding and decoding processes.
-- `vorbisfile.c`: Implements the C API for managing Ogg Vorbis streams using custom callbacks, allowing integration with different data sources.
+- codec.h: Contains the core declarations for the Vorbis codec library, enabling developers to work with audio encoding and decoding.
+- vorbisfile.h: Offers a C API for managing Ogg Vorbis audio files using standard I/O callbacks, facilitating operations like opening, seeking, and decoding.
 
 #### `src/Inc/vorbis/codec.h`
 
@@ -7491,14 +8873,9 @@ NOTES: None.
 
 ### src/Lang/Usa/allegiance
 
-The `src/Lang/Usa/allegiance` folder contains resource definitions for the Allegiance game's user interface elements and settings, specifically tailored for the USA language version.
+The Allegiance game uses a resource system to manage strings and dialog items across various parts of the application. The `resource.h` file is central to this system, defining string IDs and dialog item IDs that are used throughout the game.
 
-- **resource.h**: Contains identifiers for various resources used in the game's UI, such as dialog IDs and control identifiers.
-- **allegiance.rc**: Links the resource definitions from `resource.h` to actual graphical and string resources.
-- **strings.h**: Defines string constants used throughout the game, localized for the USA version.
-- **dialogs.cpp**: Implements dialog boxes used in the game's UI, such as the resource picker and progress bar dialogs.
-- **settings.cpp**: Manages user settings and preferences, including controls like dropdown menus and checkboxes.
-- **log.cpp**: Handles logging functionality, managing different severity levels of log messages.
+- resource.h: Contains definitions for string IDs and dialog item IDs used in the game's user interface and text output.
 
 #### `src/Lang/Usa/allegiance/resource.h`
 
@@ -7518,12 +8895,9 @@ NOTES: None.
 
 ### src/Lib/AllegianceSecurity
 
-The `src/Lib/AllegianceSecurity` folder contains classes and functions related to Digital Rights Management (DRM) checks for the Allegiance game, ensuring that only authorized copies of the game are played.
+The `src/Lib/AllegianceSecurity` folder in the Allegiance game source code is dedicated to digital rights management (DRM) and file integrity verification. It ensures that game content remains protected and that files are not tampered with.
 
-- **DrmChecker**: This class is responsible for retrieving a DRM wrap checksum.
-- **DrmVerifier**: This class verifies a given DRM value to ensure it matches the expected checksum.
-- **FileHash**: Represents a file along with its associated hash, used for integrity verification.
-- **FileHashTable**: Manages and checks file hashes to ensure that all files in the game are intact and have not been tampered with.
+- AllegianceSecurity.h: Contains definitions for classes related to DRM and file integrity verification, including functionality for checking DRM wrappers and verifying files against expected hashes or signatures.
 
 #### `src/Lib/AllegianceSecurity/AllegianceSecurity.h`
 
@@ -7544,37 +8918,27 @@ None.
 
 ### src/Lib/lua
 
-The `src/Lib/lua` folder in Allegiance contains the Lua library, which is used for scripting and game logic. This allows developers to extend and customize the game's functionality through Lua scripts.
+The `src/Lib/lua` folder in Allegiance contains Lua-related libraries and resources used within the game. Lua is a lightweight scripting language often embedded into applications to provide scripting capabilities.
 
-- `lua.c`: The main source file for the Lua interpreter.
-- `lauxlib.h`: Header file containing auxiliary functions for use with the Lua C API.
-- `lualib.h`: Header file defining the standard libraries provided by Lua.
-- `luac.c`: Source file for the Lua compiler, which converts Lua scripts into bytecode.
-- `luaconf.h`: Configuration header file that defines various settings and options for the Lua interpreter.
-- `lua.h`: Main header file for the Lua C API, providing declarations for interacting with the Lua interpreter.
+- LICENSE.txt: Contains the licensing information for the Lua library files in this folder, including details on copyright and usage rights.
 
 #### `src/Lib/lua/LICENSE.txt`
 
-PURPOSE: This file contains the license information for the Lua software used in Allegiance.
+PURPOSE: tiny file (4 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Copyright notice and permission details for using the Lua software.
-- Warranty disclaimer for the software.
-
-CONNECTS TO: The Lua library used throughout the Allegiance codebase.
-
-NOTES: None.
+    Copyright   1994 2017 Lua.org, PUC-Rio.
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, 
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYR
 
 ### src/Lib/lua/include
 
-**Folder Overview:** The `src/Lib/lua/include` folder in Allegiance contains essential header files for integrating Lua scripting into the game engine. These headers provide the necessary definitions, function prototypes, and utilities for building Lua libraries and managing Lua states.
+This folder contains essential header files for integrating and utilizing Lua scripting in the Allegiance game. Lua is a powerful, lightweight scripting language used extensively within the game for various functionalities.
 
-**Important Files:**
-- **lauxlib.h**: Contains auxiliary functions and macros for creating Lua libraries, including error handling, type checking, and string manipulation.
-- **lua.h**: Defines the core API for interacting with the Lua scripting language, including data types, function prototypes, and stack operations.
-- **lua.hpp**: Provides C++ bindings for the Lua API, allowing C++ programs to interact with Lua scripts seamlessly.
-- **luaconf.h**: Configures and customizes the Lua environment by defining macros that control behavior such as data types, compatibility settings, and platform-specific optimizations.
-- **lualib.h**: Declares the interface and function prototypes for Lua standard libraries, which are essential for extending Lua's functionality within Allegiance.
+- luaconf.h: Configures and defines system-specific parameters, default paths, API marks, and compatibility options for the Lua interpreter.
+- lua.h: Provides the core definitions and declarations necessary for interacting with Lua scripts from C/C++ code in Allegiance.
+- lauxlib.h: Offers auxiliary functions and macros to facilitate the creation of Lua libraries within the game, enhancing error handling and type checking.
+- lualib.h: Defines the interface and function prototypes for Lua standard libraries included in Allegiance, enabling developers to utilize these libraries seamlessly.
 
 #### `src/Lib/lua/include/lauxlib.h`
 
@@ -7609,17 +8973,16 @@ NOTES: None.
 
 #### `src/Lib/lua/include/lua.hpp`
 
-PURPOSE: This file provides C++ bindings for the Lua scripting language, allowing C++ programs to interact with Lua scripts.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `lua.hpp`: The main header file that includes the standard Lua headers (`lua.h`, `lualib.h`, and `lauxlib.h`).
-- `extern "C"`: Ensures that the Lua C API functions are properly exposed to C++ code, preventing name mangling.
-
-CONNECTS TO:
-- Other files in the Allegiance project that require Lua scripting capabilities.
-
-NOTES:
-- None.
+    // lua.hpp
+    // Lua header files for C++
+    // <<extern "C">> not supplied automatically because Lua also compiles as C++
+    extern "C" {
+    #include "lua.h"
+    #include "lualib.h"
+    #include "lauxlib.h"
+    }
 
 #### `src/Lib/lua/include/luaconf.h`
 
@@ -7673,43 +9036,36 @@ NOTES: None.
 
 ### src/Lib/nlohmann/json
 
-The `src/Lib/nlohmann/json` folder contains the source code for the nlohmann JSON library, which is used for parsing and generating JSON data in the Allegiance game.
+The `src/Lib/nlohmann/json` folder contains a single file related to JSON handling in Allegiance.
 
-- json.hpp: Contains the main header file for the nlohmann JSON library, providing classes and functions to work with JSON data.
-- basic_json.hpp: Defines the `basic_json` class template, which represents a JSON value.
-- adl_serializer.hpp: Implements an automatic type deduction serializer for the `basic_json` class.
-- date.hpp: Provides utilities for handling dates and times within JSON objects.
-- detail/adapters/nlohmann_json.h: Contains adapter classes for integrating nlohmann JSON with other libraries or frameworks.
-- detail/conversions/from_json.hpp: Defines functions to convert JSON data into C++ types.
-- detail/conversions/to_json.hpp: Defines functions to convert C++ types into JSON data.
-- detail/json_pointer.hpp: Implements the JSON Pointer specification, allowing for the selection of specific parts of a JSON document.
-- detail/macro_scope.hpp: Provides macros for managing scope and lifetime of resources within the library.
-- detail/meta.hpp: Contains meta-programming utilities used throughout the library.
-- detail/value_t.hpp: Defines an enumeration type representing different types of JSON values (e.g., object, array, string, number).
-- json_pointer.hpp: Re-exported from `detail/json_pointer.hpp`, providing a convenient way to access this functionality.
 
 #### `src/Lib/nlohmann/json/LICENSE.MIT.txt`
 
-PURPOSE: This file contains the MIT License text for the nlohmann/json library, which is used for parsing and generating JSON data in the Allegiance game.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: src/Lib/nlohmann/json.hpp - The header file that includes this license.
-
-NOTES: none
+    MIT License
+    Copyright (c) 2013-2017 Niels Lohmann
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
 
 ### src/Lib/nlohmann/json/include
 
-**Overview:** The `src/Lib/nlohmann/json/include` folder contains the implementation of a JSON library in C++ used for serialization and deserialization of JSON data within the Allegiance game. This library provides a comprehensive framework to handle various types of JSON values and includes utilities for accessing and manipulating these values.
+The `src/Lib/nlohmann/json/include` folder contains essential components for handling JSON data in Allegiance, a 2000 Microsoft multiplayer space game. This part of the game or toolset facilitates serialization and deserialization of JSON data, providing a robust framework to manage various types of JSON values.
 
-**Important Files:**
-- **json.hpp:** Contains the core implementation of the JSON library, including type definitions, comparison operators, template metaprogramming utilities, and serialization/deserialization functions.
-- **adl_serializer.hpp:** Implements automatic detection and usage of ADL (Argument Dependent Lookup) for custom types during serialization and deserialization.
-- **binary.hpp:** Provides functionality to serialize and deserialize binary data within JSON objects.
-- **json_pointer.hpp:** Implements the JSON Pointer specification, allowing for precise access and manipulation of JSON values using string-based paths.
-- **json_ref.hpp:** Offers a reference wrapper for JSON values, enabling efficient handling of large JSON documents without unnecessary copying.
-- **to_string.hpp:** Provides utility functions to convert various C++ types into their string representations for use in JSON serialization.
+- json.hpp: Implements a comprehensive JSON library in C++, enabling the conversion between JSON formatted strings and native C++ data structures.
 
 #### `src/Lib/nlohmann/json/include/json.hpp`
 
@@ -7749,39 +9105,36 @@ NOTES: none
 
 ### src/Lib/sol
 
-The `src/Lib/sol` folder contains the source code for the SOL library, which is used in Allegiance. The library facilitates the creation of bindings between C++ and Lua, enabling Lua scripts to interact with C++ code seamlessly.
+The Allegiance source code folder `src/Lib/sol` contains a single file named `LICENSE.txt`, which is a tiny file (16 lines) containing the license information for the game or toolset.
 
-- `sol.hpp`: This header file defines the core functionality of the SOL library, including classes and functions necessary for creating and managing bindings.
-- `detail/stack.hpp`: Contains implementation details related to the stack management in the SOL library, which is crucial for handling data conversions between Lua and C++.
-- `detail/function_signature.hpp`: Implements mechanisms for determining function signatures at compile time, allowing for accurate binding of C++ functions to Lua.
-- `detail/protected_function.hpp`: Provides functionality for creating protected functions in Lua, ensuring that certain functions can only be called from within specific contexts or with specific permissions.
-- `detail/call_proxy.hpp`: Defines a proxy class used for calling C++ functions from Lua, handling the conversion of arguments and return values between the two environments.
-- `detail/stack_proxy.hpp`: Implements a stack proxy to manage the Lua stack during function calls, ensuring that the stack is properly restored after each call.
+- LICENSE.txt: Contains the license terms and conditions under which the Allegiance software can be used, distributed, and modified.
 
 #### `src/Lib/sol/LICENSE.txt`
 
-PURPOSE: This file contains the license text for the SOL library, which is used in Allegiance.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- MIT License: Describes the terms under which the software can be used and distributed.
-- Copyright (c) 2013-2017 Rapptz, ThePhD, and contributors: Identifies the copyright holders.
-- Permission granted for various actions with the software: Lists the rights provided to users of the software.
-
-CONNECTS TO: None. This file is a standalone license document.
-
-NOTES: None.
+    The MIT License (MIT)
+    Copyright (c) 2013-2017 Rapptz, ThePhD, and contributors
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+    FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+    COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+    IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ### src/Lib/sol/include
 
-**Overview:** The `src/Lib/sol/include` folder contains header files for the Sol library, which provides C++ bindings and utilities for Lua scripting in the Allegiance game. This library facilitates type checking, stack manipulation, function binding, and error handling between C++ and Lua.
+The `src/Lib/sol/include` folder contains essential components for integrating Lua scripting into Allegiance, a 2000 Microsoft multiplayer space game. This integration allows developers to extend the game's functionality through custom Lua scripts.
 
-**Important Files:**
-- **sol.hpp**: Main header file defining the core functionality of the Sol library.
-- **stack_reference.hpp**: Defines the `stack_reference` class for managing references to items on the Lua stack.
-- **basic_reference.hpp**: Defines the `basic_reference` class for managing references to items in the Lua registry.
-- **meta.hpp**: Contains meta-programming utilities such as type traits and tuple operations.
-- **function_detail.hpp**: Provides detailed implementations for function binding and handling.
-- **usertype_detail.hpp**: Handles user-defined types and their bindings to Lua.
+- sol.hpp: The primary header file of the Sol library, which serves as the bridge between C++ and Lua. It provides utilities for type checking, stack manipulation, function bindings, and other interactions, enabling safe and efficient communication between the two languages.
 
 #### `src/Lib/sol/include/sol.hpp`
 
@@ -7824,26 +9177,15 @@ NOTES: None.
 
 ### src/Lib/steam
 
-**Folder Summary:** The `src/Lib/steam` directory contains header files that define interfaces and utilities for interacting with Steam, a popular platform for digital games and social networking. These interfaces allow developers to access various functionalities such as user accounts, game achievements, matchmaking, and more.
+The `src/Lib/steam` folder contains essential interfaces and implementations for interacting with Steam services within the Allegiance game. It facilitates communication between the game and the Steam client, enabling features such as user authentication, matchmaking, remote storage, and more.
 
-**Important Files:**
-- **isteamapplist.h:** Defines an interface for accessing installed applications in the Steam client.
-- **isteamapps.h:** Provides methods to interact with app data, including checking subscription status and DLC ownership.
-- **isteamclient.h:** Main interface for loading and accessing Steamworks API's from the Steam client.
-- **isteamcontroller.h:** Interface for interacting with Steam Controllers.
-- **isteamfriends.h:** Accesses information about individual users, including friends and game server data.
-- **isteamgamecoordinator.h:** Allows applications to send and receive messages from the game coordinator.
-- **isteaminventory.h:** Manages player inventories within Steam.
-- **isteammusic.h:** Controls music playback within the Steam client.
-- **isteammusicremote.h:** Interface for a Steam Music Remote, allowing remote control of the music player.
-- **isteamnetworking.h:** Manages network connections between game clients and servers using Steam's networking capabilities.
-- **isteamparentalsettings.h:** Provides interfaces for querying and managing parental settings.
-- **isteamscreenshots.h:** Interacts with Steam's screenshot functionality.
-- **isteamugc.h:** Allows interaction with Steam's User Generated Content (UGC) system.
-- **isteamutils.h:** Contains utility functions provided by Steam, such as retrieving system information and handling API calls.
-- **steam_api.h:** Defines the main header for accessing various Steam services.
-- **steam_api_internal.h:** Contains internal declarations and definitions for managing Steam interfaces.
-- **steam_gameserver.h:** Defines the interface and functionality for a Steam game server.
+- steam_api_interop.cs: Provides interop methods for calling Steam API functions from managed code using P/Invoke.
+- steamclientpublic.h: Contains declarations for various enumerations, macros, and classes used in the Steam client API.
+- steam_api_flat.h: Declares various Steam API functions for interacting with the Steam client and related services.
+- isteammatchmaking.h: Defines interfaces for managing game lobbies and server lists through Steam's matchmaking system.
+- isteamremotestorage.h: Defines interfaces for accessing user-generated content (UGC) in Steam's remote storage system.
+
+Largest files: steam_api_interop.cs (11168 lines), steamclientpublic.h (1239 lines), steam_api_flat.h (830 lines), isteammatchmaking.h (751 lines), isteamremotestorage.h (681 lines).
 
 #### `src/Lib/steam/isteamapplist.h`
 
@@ -8050,14 +9392,9 @@ NOTES: None.
 
 #### `src/Lib/steam/isteammasterserverupdater.h`
 
-PURPOSE: This file is no longer used in the Allegiance project.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: none
-
-NOTES: The file has been marked with an error directive indicating it is not used any more.
+    #error "This file isn't used any more"
 
 #### `src/Lib/steam/isteammatchmaking.h`
 
@@ -8563,14 +9900,14 @@ NOTES: None.
 
 ### src/Pigs/PigAccts
 
-The `src/Pigs/PigAccts` folder contains source code for managing player accounts in the Allegiance game, focusing on account creation, retrieval, and management through COM-based interfaces.
+This folder contains source code related to managing player accounts in Allegiance, a 2000 Microsoft multiplayer space game. It includes classes and functions for creating, accessing, and dispensing player accounts.
 
-- **PigAccount.cpp**: Implements the `CPigAccount` class to manage individual player accounts.
-- **PigAccount.h**: Defines the `CPigAccount` class interface for retrieving account details.
-- **PigAccount.rgs**: Registers the Pig Account component in the Windows registry.
-- **PigAccountDispenser.cpp**: Manages a collection of game accounts and provides methods to retrieve available accounts.
-- **PigAccountDispenser.h**: Defines the `CPigAccountDispenser` class for managing and dispensing account information.
-- **PigAccountDispenser.rgs**: Registers the Pig Account Dispenser component in the Windows registry.
+- PigAccount.cpp: Implements the CPigAccount class, which manages individual player account details.
+- PigAccountDispenser.cpp: Manages a collection of player accounts, loading data from INI files and dispensing available accounts.
+- PigAccts.cpp: Contains the main entry point and initialization logic for a Windows application related to managing pig accounts.
+- pch.h: Precompiled header file providing common includes and definitions used across multiple source files in this module.
+
+Largest files: PigAccountDispenser.cpp (270 lines), PigAccts.cpp (122 lines), PigAccount.cpp (120 lines), PigAccountDispenser.h (90 lines), PigAccount.h (76 lines).
 
 #### `src/Pigs/PigAccts/PigAccount.cpp`
 
@@ -8686,89 +10023,87 @@ NOTES: None.
 
 #### `src/Pigs/PigAccts/PigAccts.h`
 
-PURPOSE: This file is a header file for the PigAccts module in Allegiance, which likely handles player account management.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PigAccts.h: Contains declarations for classes and functions related to player accounts.
-- PigsIDL.h: Interface Definition Language headers used for communication between different parts of the game.
-- PigsLib.h: Library headers providing essential functionality for the game.
-
-CONNECTS TO: Other modules or systems that interact with player accounts, such as authentication services or game server components.
-
-NOTES: None.
+    #ifndef __PigAccts_h__
+    #define __PigAccts_h__
+    #pragma once
+    /////////////////////////////////////////////////////////////////////////////
+    #include <PigsIDL.h>
+    #include <PigsLib.h>
+    /////////////////////////////////////////////////////////////////////////////
+    #endif // !__PigAccts_h__
 
 #### `src/Pigs/PigAccts/PigAccts.rgs`
 
-PURPOSE: This file is a Windows Registry Script that defines the application ID and associated executable for the Pig Account Server in Allegiance.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: AppID
-  - Defines the application ID for the Pig Account Server.
-- Name: {9BA731AE-E7CB-11d2-A508-00C04F68DEB0}
-  - Unique identifier for the Pig Account Server.
-- Name: 'PigAccts.EXE'
-  - Specifies the executable file for the Pig Account Server.
-- Name: AppID
-  - Reiterates the application ID, ensuring consistency.
-
-CONNECTS TO:
-- Windows Registry: This script modifies the Windows Registry to register the Pig Account Server application.
-
-NOTES:
-- None.
+    HKCR
+    {
+    	NoRemove AppID
+    	{
+    		{9BA731AE-E7CB-11d2-A508-00C04F68DEB0} = s 'Pig Account Server'
+    		'PigAccts.EXE'
+    		{
+    			val AppID = s {9BA731AE-E7CB-11d2-A508-00C04F68DEB0}
+    		}
+    	}
+    }
 
 #### `src/Pigs/PigAccts/PigAcctsPS.def`
 
-PURPOSE: This file defines a proxy/stub DLL for the Allegiance game's PigAcctsPS component, which is responsible for account management and related operations.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- DllGetClassObject: Retrieves a class object for the specified interface.
-- DllCanUnloadNow: Determines if the DLL can be unloaded by OLE.
-- GetProxyDllInfo: Provides information about the proxy DLL.
-- DllRegisterServer: Registers the server components with the system.
-- DllUnregisterServer: Unregisters the server components from the system.
-
-CONNECTS TO: Allegiance game engine, specifically for account management and related services.
-
-NOTES: None.
+    LIBRARY      "PigAcctsPS"
+    DESCRIPTION  'Proxy/Stub DLL'
+    EXPORTS
+    	DllGetClassObject       @1	PRIVATE
+    	DllCanUnloadNow         @2	PRIVATE
+    	GetProxyDllInfo         @3	PRIVATE
+    	DllRegisterServer		@4	PRIVATE
+    	DllUnregisterServer		@5	PRIVATE
 
 #### `src/Pigs/PigAccts/SrcInc.cpp`
 
-PURPOSE: This file contains source code for libraries used in the Allegiance project, including components related to account management and user authentication.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TCAtl.cpp: Implements core functionality of the ATL (Active Template Library).
-- TCNullStreamImpl.cpp: Provides an implementation for a null stream, which might be used for logging or other purposes where output is not needed.
-- UserAcct.cpp: Handles user account creation, management, and authentication.
-
-CONNECTS TO: Other files in the Allegiance project that require these libraries for functionality.
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the CPP files for all source code-based
+    // libraries used in the project. Any corresponding header files for the
+    // libraries should be placed in SrcInc.h.
+    //
+    #include "pch.h"
+    #include <TCAtl.cpp>
+    #include <..\TCAtl\TCNullStreamImpl.cpp>
+    #include <..\TCAtl\UserAcct.cpp>
 
 #### `src/Pigs/PigAccts/SrcInc.h`
 
-PURPOSE: This file includes necessary header files for libraries used in the Allegiance project, specifically related to account management and object mapping.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `TCAtl.h`: Main include file for the TCAtl library.
-- `ObjectMap.h`: Header file for the ObjectMap class, which manages a map of objects.
-- `UserAcct.h`: Header file for the UserAcct class, which handles user account management.
-
-CONNECTS TO: Other files in the Allegiance project that require these libraries and classes.
-
-NOTES: None.
+    #pragma once
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the include files for all source code-based
+    // libraries used in the project. Any corresponding CPP files for the
+    // libraries should be placed in SrcInc.cpp.
+    //
+    #include <TCAtl.h>
+    #include <..\TCAtl\ObjectMap.h>
+    #include <..\TCAtl\UserAcct.h>
 
 #### `src/Pigs/PigAccts/pch.cpp`
 
-PURPOSE: This file is a precompiled header file for the Allegiance game's PigAccts module. It includes standard headers and conditionally includes specific Windows headers based on build configurations.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary include file that defines common headers used across the project.
-- `_ATL_STATIC_REGISTRY`: Conditional inclusion of Windows registry-related headers if the static registry feature is enabled.
-
-CONNECTS TO: pch.pch (precompiled header file), pch.obj (object file containing precompiled type information).
-
-NOTES: None.
+    // pch.cpp : source file that includes just the standard includes
+    //  pch.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
+    #ifdef _ATL_STATIC_REGISTRY
+      #include <statreg.h>
+      // #include <statreg.cpp>
+    #endif
+    // #include <atlimpl.cpp>
 
 #### `src/Pigs/PigAccts/pch.h`
 
@@ -8805,36 +10140,47 @@ NOTES: None.
 
 #### `src/Pigs/PigAccts/test.vbs`
 
-PURPOSE: This VBScript file is used to test and display a list of account names using the `Pigs.AccountDispenser` object.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `accts`: An instance of the `Pigs.AccountDispenser` class, which is responsible for managing accounts.
-- `List(names)`: A subroutine that takes an array of names as input, prints each name to the console, and counts the total number of names listed.
-
-CONNECTS TO: `src/Pigs/PigAccts/AccountDispenser.vbs`
-
-NOTES: None.
+    Set accts = CreateObject("Pigs.AccountDispenser")
+    ' Jump into the debugger
+    Stop
+    Sub List(names)
+      c = 0
+      For Each name In names
+        WScript.Echo name
+        c = c + 1
+      Next
+      WScript.Echo c & " names listed"
+    End Sub
 
 ### src/Pigs/PigClient/PigClient
 
-The `src/Pigs/PigClient/PigClient` folder contains the client-side code for the Allegiance game, focusing on managing player interactions and connections with the server.
+This folder contains client-side code for managing pigs in Allegiance, a multiplayer space game. It includes classes for handling commands, managing game sessions, and encapsulating ship information.
 
-- **App.xaml.cs**: Manages the lifecycle of the PigClient application.
-- **LaunchCommand.cs**: Implements a command wrapper to encapsulate actions that can be conditionally executed.
-- **MainWindow.xaml.cs**: Handles user interactions and manages connections to the PigSrv process, including pig creation and event handling.
-- **PigInfo.cs**: Encapsulates information about a player's ship in the game, providing properties and commands for interaction.
-- **Setup.txt**: Contains commands to register necessary DLLs and configure the Allegiance client and server.
+- LaunchCommand.cs: Encapsulates actions that can be conditionally executed.
+- PigInfo.cs: Holds details about a player's ship in the game.
 
 #### `src/Pigs/PigClient/PigClient/App.xaml.cs`
 
-PURPOSE: This file defines the main application class for the PigClient, which is a part of the Allegiance game client.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- App: The main application class that inherits from System.Windows.Application. It serves as the entry point for the PigClient application and handles application-level events and resources.
-
-CONNECTS TO: None
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Data;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Windows;
+    namespace PigClient
+    {
+        /// <summary>
+        /// Interaction logic for App.xaml
+        /// </summary>
+        public partial class App : Application
+        {
+        }
+    }
 
 #### `src/Pigs/PigClient/PigClient/LaunchCommand.cs`
 
@@ -8889,33 +10235,31 @@ NOTES: None.
 
 #### `src/Pigs/PigClient/PigClient/Setup.txt`
 
-PURPOSE: This file contains a series of commands to register DLLs and configure Allegiance game client components.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- regsvr32 .\AGC\AGC.dll /u: Unregisters the AGC.dll.
-- regsvr32 .\AGC\AGC.dll: Registers the AGC.dll.
-- regsvr32 .\Test\TCObj\TCObj.dll /u: Unregisters the TCObj.dll.
-- regsvr32 .\Test\TCObj\TCObj.dll: Registers the TCObj.dll.
-- regsvr32 .\Pigs\PigsLib\PigsLib.dll /u: Unregisters the PigsLib.dll.
-- regsvr32 .\Pigs\PigsLib\PigsLib.dll: Registers the PigsLib.dll.
-- PigAccts.exe -RegServer [USER] [PASS]: Registers the PigAccts application with the provided credentials.
-- PigSrv.exe -RegServer [USER] [PASS]: Registers the PigSrv application with the provided credentials.
-
-CONNECTS TO:
-- AGC.dll, TCObj.dll, PigsLib.dll: These DLLs are being registered and unregistered.
-- PigAccts.exe and PigSrv.exe: These executables are being run to register their respective components.
-
-NOTES:
-- None.
+    regsvr32 .\AGC\AGC.dll /u
+    regsvr32 .\AGC\AGC.dll
+    regsvr32 .\Test\TCObj\TCObj.dll /u
+    regsvr32 .\Test\TCObj\TCObj.dll
+    regsvr32 .\Pigs\PigsLib\PigsLib.dll /u
+    regsvr32 .\Pigs\PigsLib\PigsLib.dll
+    PigAccts.exe -RegServer [USER] [PASS]
+    PigSrv.exe -RegServer [USER] [PASS]
+    Create Scripts directory at /PigSrv
+    Copy *.pig into Scripts
+    // AppID = Pigs
+    // {F132B4E3-C6EF-11D2-85C9-00C04F68DEB0}
+    // HKCR/AppID/{F132B4E3-C6EF-11D2-85C9-00C04F68DEB0}/ArtPath
+    // HKCR/AppID/{F132B4E3-C6EF-11D2-85C9-00C04F68DEB0}/MissionServer property
+    // HKCR/AppID/{F132B4E3-C6EF-11D2-85C9-00C04F68DEB0}/Account
+    // HKCR/AppID/{F132B4E3-C6EF-11D2-85C9-00C04F68DEB0}/ZoneAuthServer
+    // HKCR/AppID/{F132B4E3-C6EF-11D2-85C9-00C04F68DEB0}/MaxPigs
 
 ### src/Pigs/PigClient/PigClient/Properties
 
-**Overview:** The `src/Pigs/PigClient/PigClient/Properties` folder contains essential configuration and resource management files for the Allegiance game's client application, specifically tailored for a WPF-based interface.
+This folder contains properties and configuration files for the PigClient project in Allegiance. It manages assembly information, localized resources, and user settings.
 
-**Important Files:**
-- **AssemblyInfo.cs**: Manages assembly metadata such as title, version, copyright, and visibility settings.
-- **Resources.Designer.cs**: Provides access to localized resources used throughout the application.
-- **Settings.Designer.cs**: Defines and manages application-specific settings that can be customized by users.
+- AssemblyInfo.cs: Contains metadata and settings for the WpfApp1 project.
 
 #### `src/Pigs/PigClient/PigClient/Properties/AssemblyInfo.cs`
 
@@ -8960,39 +10304,15 @@ NOTES: None.
 
 ### src/Pigs/PigConfig
 
-### Folder Overview
+This folder contains source code related to configuration settings in Allegiance's Pig client. It includes various dialog boxes and property sheets for managing different aspects of the game's configuration.
 
-The `src/Pigs/PigConfig` folder contains source code for the configuration tool in Allegiance, allowing players to manage various settings such as general configurations, server settings, and event configurations.
+- AboutDlg.cpp: Implements a dialog box displaying information about the Allegiance game.
+- PageEvents.cpp: Manages the event configuration page, handling user interactions with a tree and list control to display and configure events.
+- PigConfigSheet.cpp: Implements a configuration dialog sheet for Allegiance's Pig client, allowing users to configure general settings, events, and servers.
+- PageServers.cpp: Configures server settings such as lobby and account servers.
+- PageGeneral.cpp: Manages general settings related to pigs and their environment.
 
-### Key Files and Their Functions:
-
-- **AboutDlg.cpp**: Implements the About dialog box, which displays information about the game.
-  - **CAboutDlg Class**: Represents the About dialog box.
-  - **DoDataExchange Function**: Handles data exchange between controls and variables.
-
-- **PageEvents.cpp**: Manages the event configuration page within the game.
-  - **CPageEvents Class**: Inherits from `CPropertyPage` and manages an event configuration property page.
-  - **OnOK Function**: Saves changes and updates the event logger when the OK button is clicked.
-  - **PopulateTreeAndList Function**: Populates the tree and list controls with event data from an XML document.
-
-- **PageGeneral.cpp**: Implements a property page for general configuration settings in Allegiance's Pigs module.
-  - **CPageGeneral Class**: Represents the property page for general configuration.
-  - **OnInitDialog Function**: Initializes the dialog with values from the session object.
-
-- **PigConfig.cpp**: Contains the implementation of the main application class for the configuration tool.
-  - **CPigConfigApp Class**: Main application class that handles initialization and cleanup.
-  - **InitInstance Function**: Initializes COM and creates a modeless dialog box for the property sheet.
-
-- **PigConfigSheet.cpp**: Implements the configuration sheet dialog for Allegiance's Pig client, allowing users to configure various settings and manage servers.
-  - **CPigConfigSheet Class**: Manages the main configuration dialog window.
-  - **Create Function**: Attempts to create a Pig session and adds property pages to the sheet.
-
-- **pch.cpp**: Precompiled header file that includes standard headers to speed up compilation.
-  - `#include "pch.h"`: Includes the precompiled header file containing common headers used across multiple source files in this module.
-
-- **pch.h**: Defines macros and includes necessary headers for setting up the development environment.
-  - `_WIN32_WINNT`: Defines the minimum required version of Windows for compatibility.
-  - `GetErrorText Function`: Formats an error code into a human-readable string.
+Largest files: PageEvents.cpp (926 lines), PigConfigSheet.cpp (240 lines), PageServers.cpp (155 lines), PageGeneral.cpp (144 lines), PageEvents.h (134 lines).
 
 #### `src/Pigs/PigConfig/AboutDlg.cpp`
 
@@ -9188,14 +10508,13 @@ NOTES: None.
 
 #### `src/Pigs/PigConfig/pch.cpp`
 
-PURPOSE: This file is a precompiled header (pch.cpp) for the Allegiance game's Pigs module. It includes standard headers to speed up compilation by caching their parsed results.
+PURPOSE: tiny file (5 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include "pch.h"`: Includes the precompiled header file, which contains common headers used across multiple source files in the Pigs module.
-
-CONNECTS TO: pch.pch (precompiled header file).
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // pch.cpp : source file that includes just the standard includes
+    //  pch.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
 
 #### `src/Pigs/PigConfig/pch.h`
 
@@ -9229,36 +10548,23 @@ NOTES: None.
 
 ### src/Pigs/PigGuid
 
-This folder contains implementation details for GUID management in the Allegiance game, which is responsible for generating and managing unique identifiers used throughout the game.
+This folder contains source code related to GUIDs (Globally Unique Identifiers) used in Allegiance for identifying game objects and entities.
 
-- `PigGUID.c`: Contains the implementation of the `PigGUID` class, which is responsible for creating and managing GUIDs.
-- `GenerateGUID()`: A function to generate a new GUID.
-- `IsValidGUID()`: A function to check if a given string is a valid GUID.
-- `GUIDToString()`: A function to convert a GUID to its string representation.
+- PigGUID.c: Defines a simple structure and functions for managing GUIDs, essential for uniquely identifying objects within the game.
 
 #### `src/Pigs/PigGuid/PigGUID.c`
 
-PURPOSE: This file contains implementation of GUID-related functionality for the Allegiance game's Pigs subsystem.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PigGUID: Class responsible for managing and generating globally unique identifiers.
-- GenerateGUID: Function to create a new GUID.
-- IsValidGUID: Function to validate a given GUID.
-
-CONNECTS TO: src/Pigs/PigGuid/PigGUID.h
-
-NOTES: None.
+    #include <PigsIDL_i.c>
+    #include <PigsLib_i.c>
 
 ### src/Pigs/PigJSDocGenerator
 
-The `src/Pigs/PigJSDocGenerator` folder in Allegiance's source code is responsible for generating JavaScript and TypeScript documentation from IDL files. It includes configuration handling, parsing of interface blocks, and writing output files with JSDoc and TSDoc comments.
+The `src/Pigs/PigJSDocGenerator` folder contains tools for generating JSDoc and TypeScript documentation from IDL files in Allegiance. This helps ensure that developers have up-to-date documentation for the game's interfaces, typedefs, and enums.
 
-- **Configuration.cs**: Manages loading configuration settings from an XML section named "settings" and provides static properties for application use.
-- **Program.cs**: Acts as the main entry point, orchestrating the reading of input files, parsing IDL content, and writing output documentation files.
-- **Signature.cs**: Represents method signatures with properties like name, return type, parameters, help string, and flags.
-- **Parameter.cs**: Represents individual parameters of a method or property with properties for name, type, and flags indicating parameter characteristics.
-- **ParseInterfaceBlock(string lines)**: Parses individual interface blocks to extract method signatures and generate documentation comments.
-- **FixupJavascriptType(string type)**: Converts C++ types to JavaScript types suitable for documentation generation.
+- Configuration.cs: Manages reading and parsing configuration settings from an XML section, including output file paths for TypeScript definitions and JavaScript.
+- Program.cs: Handles the core logic of generating JSDoc and TypeScript documentation by parsing IDL files and writing the documentation to specified output files.
 
 #### `src/Pigs/PigJSDocGenerator/Configuration.cs`
 
@@ -9300,73 +10606,97 @@ NOTES: None.
 
 ### src/Pigs/PigJSDocGenerator/Entities
 
-The `src/Pigs/PigJSDocGenerator/Entities` folder in Allegiance contains classes that are essential for generating JSDoc documentation from C# source code within the game. These classes help in representing various entities such as enumeration values, interfaces, parameters, signatures, and more, which are then used to create detailed documentation comments for JavaScript files.
+This folder contains classes related to generating JSDoc documentation for entities in Allegiance. It appears to be part of a toolset used to document game objects and their properties.
 
-- `EnumValue.cs`: Represents a single enumeration value and is crucial for documenting enums.
-- `Interface.cs`: Defines an interface with properties for name and help string, aiding in the documentation of interfaces.
-- `Parameter.cs`: Models function parameters including their names, types, and roles (output or return value), facilitating parameterized method documentation.
-- `Signature.cs`: Captures method signatures and properties, including their names, parameters, return types, and help strings, essential for comprehensive method documentation.
+- EnumValue.cs: Defines the structure for representing enum values.
+- Interface.cs: Specifies the interface for entities that can have properties and methods documented.
+- Parameter.cs: Describes parameters that can be associated with methods or functions.
+- Signature.cs: Holds the signature of a method or function, including its name, return type, and parameters.
 
 #### `src/Pigs/PigJSDocGenerator/Entities/EnumValue.cs`
 
-PURPOSE: The EnumValue class is used to represent a single enumeration value in the PigJSDocGenerator project. It contains properties for the name and value of an enumeration member.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: A string representing the name of the enumeration value.
-- Value: A string representing the value associated with the enumeration name.
-
-CONNECTS TO: This class is likely used by other parts of the PigJSDocGenerator project to handle and manipulate enumeration values for generating JSDoc documentation.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace PigJSDocGenerator.Entities
+    {
+        public class EnumValue
+        {
+            public string Name;
+            public string Value;
+        }
+    }
 
 #### `src/Pigs/PigJSDocGenerator/Entities/Interface.cs`
 
-PURPOSE: This file defines a simple class to represent an interface in the context of generating JSDoc documentation for Allegiance game entities.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: Represents the name of the interface.
-- HelpString: Contains additional help or description text related to the interface.
-
-CONNECTS TO: PigJSDocGenerator project, specifically used in generating documentation for game entities.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace PigJSDocGenerator.Entities
+    {
+        public class Interface
+        {
+            public string Name;
+            public string HelpString;
+        }
+    }
 
 #### `src/Pigs/PigJSDocGenerator/Entities/Parameter.cs`
 
-PURPOSE: This file defines a class `Parameter` used in the PigJSDocGenerator project to represent function parameters. It includes properties for the parameter's name, type, and flags indicating whether it is an output parameter or the return value.
+PURPOSE: tiny file (15 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `Name`: Stores the name of the parameter.
-- `Type`: Specifies the data type of the parameter.
-- `IsOutput`: A boolean flag indicating if the parameter is used to pass data out of a function.
-- `IsReturnValue`: A boolean flag indicating if the parameter represents the return value of a function.
-
-CONNECTS TO: This file likely connects to other parts of the PigJSDocGenerator project that handle documentation generation for functions, possibly through classes like `Function` or `Method`.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace PigJSDocGenerator.Entities
+    {
+        public class Parameter
+        {
+            public string Name;
+            public string Type;
+            public bool IsOutput = false;
+            public bool IsReturnValue = false;
+        }
+    }
 
 #### `src/Pigs/PigJSDocGenerator/Entities/Signature.cs`
 
-PURPOSE: The file defines a class `Signature` used in the PigJSDocGenerator project to represent method signatures for generating JSDoc comments.
+PURPOSE: tiny file (18 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `GetProperty`: Indicates if the signature represents a property getter.
-- `SetProperty`: Indicates if the signature represents a property setter.
-- `IsFunction`: Indicates if the signature represents a function.
-- `Name`: The name of the method or property.
-- `Paramaters`: A list of parameters for the method, each represented by an instance of the `Parameter` class.
-- `ReturnType`: The return type of the method.
-- `HelpString`: Additional documentation string.
-
-CONNECTS TO: This file is part of the PigJSDocGenerator project and likely interacts with other files that handle parsing source code to extract method signatures for JSDoc generation.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace PigJSDocGenerator.Entities
+    {
+        public class Signature
+        {
+            public bool GetProperty = false;
+            public bool SetProperty = false;
+            public bool IsFunction = false;
+            public string Name;
+            public List<Parameter> Paramaters = new List<Parameter>();
+            public string ReturnType;
+            public string HelpString;
+        }
+    }
 
 ### src/Pigs/PigJSDocGenerator/Properties
 
-The `src/Pigs/PigJSDocGenerator/Properties` folder contains configuration and metadata for the PigJSDocGenerator project, which is likely a tool used to generate JSDoc documentation for JavaScript code within the Allegiance game.
+This folder contains properties and configuration files for the PigJSDocGenerator project in Allegiance. The PigJSDocGenerator is a tool used to generate JavaScript documentation from C# source code.
 
-- **AssemblyInfo.cs**: This file specifies assembly-level attributes such as the title, description, visibility to COM components, GUID, and version.
+- AssemblyInfo.cs: Contains assembly information such as the title, description, version, and company name for the PigJSDocGenerator project.
 
 #### `src/Pigs/PigJSDocGenerator/Properties/AssemblyInfo.cs`
 
@@ -9392,20 +10722,15 @@ NOTES: None
 
 ### src/Pigs/PigSrv
 
-The `src/Pigs/PigSrv` folder contains source code for managing pigs in Allegiance, including their behavior, scripting, and interactions within the game environment.
+This folder contains source code related to the Allegiance game's PigSrv component, which manages game objects and behaviors in the client-server architecture of the game.
 
-- **BeeperJS.pig**: Contains a JScript behavior script for pigs that handles non-existant state transitions.
-- **Defend.pig**: Manages pig AI actions based on different states like logging in, joining missions, buying hulls, and launching.
-- **IActiveScriptSiteImpl.h**: Implements the `IActiveScriptSite` interface to manage script execution within Allegiance.
-- **MissParms.js**: Configures mission parameters for game sessions in Allegiance.
-- **Pig.cpp**: Implements the main player ship class (`CPig`) handling state management and communication with the server.
-- **Pig.h**: Defines the CPig class representing a player, including behavior and state management.
-- **PigBehaviorScript.cpp**: Manages the initialization, execution, and cleanup of scripts associated with pig behaviors.
-- **PigBehaviorType.h**: Declares the base class for pig behavior types in Allegiance's PigSrv object model.
-- **PigEngine.cpp**: Manages overall game engine operations including script loading and session handling.
-- **PigEventOwner.cpp**: Implements functionality to manage events in Allegiance, including creation, removal, and processing of events.
-- **PigSession.cpp**: Manages a session in the Allegiance game, delegating most functionality to an engine object.
-- **PigShip.cpp**: Handles ship-related operations for pigs, including moving, attacking, and interacting with other ships and stations.
+- Pig.cpp: Implements the CPig class, central to managing game objects and behaviors.
+- PigEngine.cpp: Manages the overall state and behavior of the game server, handling script loading and session management.
+- PigBehaviorScriptType.cpp: Manages behavior scripts for pigs, including loading, unloading, and processing XML-based scripts.
+- PigShip.cpp: Handles the behavior and actions of ships controlled by players, including initialization and command execution.
+- PigSession.cpp: Manages sessions in the game server, handling initialization, event management, and session-related operations.
+
+Largest files: Pig.cpp (3197 lines), PigShip.cpp (1212 lines), PigEngine.cpp (1148 lines), PigBehaviorScriptType.cpp (816 lines), PigBehaviorScript.cpp (596 lines).
 
 #### `src/Pigs/PigSrv/BeeperJS.pig`
 
@@ -9471,46 +10796,127 @@ NOTES:
 
 #### `src/Pigs/PigSrv/MissParms.js`
 
-PURPOSE: This file initializes and displays mission parameters for a game session in Allegiance.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- objMissParms: Creates an instance of the MissionParams object to manage mission settings.
-- TeamCount: Sets the number of teams in the mission.
-- MaxTeamPlayers: Specifies the maximum number of players per team.
-- MinTeamPlayers: Defines the minimum number of players required per team.
-- MapType: Determines the type of map for the mission.
-- Validate(): Validates the mission parameters to ensure they meet the game's requirements.
-- WScript.Echo: Outputs the mission parameters to the console.
-
-CONNECTS TO: MissionParams ActiveX object
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // Create the Mission Parameters object
+    var objMissParms = new ActiveXObject("Pigs.MissionParams");
+    objMissParms.TeamCount      = 2;
+    objMissParms.MaxTeamPlayers = 16;
+    objMissParms.MinTeamPlayers = 1;
+    objMissParms.MapType        = 0;
+    objMissParms.Validate();
+    // Display the properties
+    WScript.Echo("TeamCount      = " + objMissParms.TeamCount      + "\n"
+               + "MaxTeamPlayers = " + objMissParms.MaxTeamPlayers + "\n"
+               + "MinTeamPlayers = " + objMissParms.MinTeamPlayers + "\n"
+               + "MapType        = " + objMissParms.MapType);
 
 #### `src/Pigs/PigSrv/Pig.cpp`
 
-**File:** src/Pigs/PigSrv/Pig.cpp
+PURPOSE: The file `Pig.cpp` contains the implementation of the `CPig` class, which is central to managing game objects and behaviors in Allegiance's Pig game object.
 
-**PURPOSE:** Contains the implementation of the `CPig` class, which represents the player's ship in the Allegiance game. Handles various aspects such as state transitions, chat commands, and updates.
+KEY PARTS:
+- CPig: Main class for handling game logic and behavior.
+- ReceiveSendAndUpdate: Handles receiving, sending, and updating within a timer loop.
+- SendChat: Sends chat messages to specified targets or recipients.
+- Stack_get_Count, Stack_get__NewEnum, Stack_Push, Stack_Pop, Stack_get_Top: Manage behaviors in a stack.
+- CPig::ThreadCreatePig: Creates a new pig object and initializes it.
+- CPig::ThreadProc: Main thread procedure for managing pig behavior and state transitions.
+- CPig::ProcessAppMessage: Handles application messages for the Pig class.
+- CPig::Logon, Logoff: Manage player login and logout.
+- CPig::CreateMission, JoinMission: Handle mission creation and joining.
+- CPig::SetSkills: Sets the skills for the ship.
 
-**KEY PARTS:**
-- **Class: CPig**: Main class representing the player's ship.
-  - **Function: Create**: Creates a new instance of `CPig` on a separate thread.
-  - **Function: FinalConstruct**: Initializes the `CPig` object after creation.
-  - **Function: FinalRelease**: Cleans up resources when the `CPig` object is destroyed.
-  - **Function: ReceiveSendAndUpdate**: Handles receiving messages, sending updates, and updating the game state.
-  - **Function: WaitInTimerLoop**: Manages a timer loop for processing messages and updating the game state.
-  - **Function: SendChat**: Sends chat messages with optional voice effects.
+CONNECTS TO:
+- Allegiance game engine systems for handling game objects, behaviors, and network communication.
 
-- **Class: XThreadParams**: Struct used to pass parameters between the creator thread and the pig thread, including behavior script type and command line arguments.
+NOTES:
+- Unusual code: The use of `reinterpret_cast` for message parameter parsing.
 
-**CONNECTS TO:** 
-- BaseClient (for client-side logic)
-- FedMessaging (for network communication)
-- DPLAY (for multiplayer interactions)
+PARTS (in file order):
 
-**NOTES:** 
-- Contains TODOs for potential future enhancements or bug fixes.
-- Debug prints and assertions indicate active debugging or validation checks.
+- lines 1-367
+  - CPig: Main class for the Pig game object.
+  - XThreadParams: Parameters used between the creator thread and the pig thread.
+  - Create: Static method to create a new instance of CPig.
+  - FinalConstruct: Called when the object is being constructed.
+  - FinalRelease: Called when the object is being destroyed.
+  - SetCurrentState: Sets the current state of the Pig game object.
+  - GetOink: Returns a random oink sound ID.
+  - ReceiveSendAndUpdate: Handles receiving, sending, and updating operations.
+- lines 368-736
+  - CPig: Main class for handling game logic and behavior.
+  - ReceiveSendAndUpdate: Handles receiving, sending, and updating within a timer loop.
+  - SendChat: Sends chat messages to specified targets or recipients.
+  - Stack_get_Count: Returns the count of behaviors in the stack.
+  - Stack_get__NewEnum: Creates an enumerator for iterating through behaviors.
+  - Stack_Push: Adds a new behavior to the stack.
+  - Stack_Pop: Removes the top behavior from the stack.
+  - Stack_get_Top: Retrieves the top behavior from the stack.
+- lines 738-1085
+  - CPig::ThreadCreatePig: Creates a new pig object and initializes it.
+  - CPig::ThreadProc: Main thread procedure for managing pig behavior and state transitions.
+  - CPig::HandleThreadMessage: Handles messages sent to the pig thread.
+  - IPigAccountDispenser: Interface for dispensing pig accounts.
+  - IPigAccount: Interface representing a pig account.
+  - CPigBehaviorScript: Class for managing pig behaviors.
+  - PigState: Enumerated type representing different states of a pig.
+  - wm_TerminateBehavior: Message to terminate a behavior.
+- lines 1086-1430
+  - CPig::ProcessAppMessage: Handles application messages for the Pig class.
+  - CPig::OnChat_AreYouAPig: Processes a chat command to check if the sender is a pig.
+  - CPig::OnChat_Evaluate: Evaluates an expression sent via chat and replies with the result.
+  - CPig::FindMissionName: Checks if a given mission name exists in the mission map.
+  - CPig::CacheMaxShipAngleThresholds: Caches the maximum ship angle threshold from the thresholds array.
+  - CPig::CacheMaxShipDistanceThresholds: Caches the maximum ship distance threshold from the thresholds array.
+  - TODOs: "imago 10/14" - Indicates a potential todo or comment left by an author named imago on 10/14.
+  - Unusual code: The use of reinterpret_cast for message parameter parsing, which can lead to undefined behavior if not handled carefully.
+- lines 1431-1791
+  - CPig::CacheMaxShipsUpdateLatencyThresholds: Caches the maximum ships update latency thresholds.
+  - CPig::SendBytes: Sends bytes to a specified dplay wrapper.
+  - CPig::InterfaceSupportsErrorInfo: Checks if an interface supports error information.
+  - CPig::OnSessionLost: Handles session loss events.
+  - CPig::ModifyShipData: Modifies ship data for the pig pilot type.
+  - CPig::OnQuitMission: Handles mission quit events.
+  - CPig::GetArtPath: Retrieves the art path.
+  - CPig::OnBeginAutoUpdate: Begins auto-update process.
+- lines 1792-2151
+  - CPig::MessageBox: Handles message boxes for the game.
+  - CPig::ChangeStation: Manages changes in ship stations.
+  - CPig::ChangeCluster: Handles changes in ship clusters.
+  - CPig::TerminateModelEvent: Notifies behaviors when a model is terminated.
+  - CPig::DamageShipEvent: Notifies behaviors about ship damage.
+  - CPig::KillShipEvent: Notifies behaviors about ship kills.
+  - CPig::HitWarpEvent: Notifies behaviors when hitting a warp point.
+  - CPig::GameOver: Sets the game state to waiting for mission on game over.
+- lines 2153-2517
+  - CPig::put_UpdatesPerSecond: Sets the number of updates per second.
+  - CPig::get_UpdatesPerSecond: Retrieves the current number of updates per second.
+  - CPig::get_HullTypes: Returns a collection of hull types.
+  - CPig::get_Money: Gets the player's money balance.
+  - CPig::Logon: Logs the player into the game server.
+  - CPig::Logoff: Logs the player out of the game server.
+  - CPig::CreateMission: Creates a new mission.
+  - CPig::JoinMission: Joins an existing mission.
+- lines 2518-2871
+  - CPig::JoinTeam(BSTR bstrCivName, BSTR bstrTeamOrPlayer): Joins a team or creates one if necessary.
+  - CPig::QuitGame(): Quits the current game.
+  - CPig::Launch(): Launches the player's ship from docked state.
+  - CPig::IsMissionOwner(BOOL bOwner): Checks if the player is the mission owner.
+  - CPig::IsTeamLeader(BOOL bLeader): Checks if the player is the team leader.
+  - vecAvailableMissions: A vector of available missions with positions.
+  - pMissionInfo: Pointer to the selected mission.
+  - m_evtJoiningMission: Event for joining a mission.
+- lines 2872-3196
+  - CPig::SetSkills: Sets the skills for the ship.
+  - CPig::Shutdown: Initiates a shutdown during the next message loop iteration.
+  - CPig::get_Game: Retrieves the game interface.
+  - CPig::get_Me: Retrieves the player's ship interface.
+  - CPig::get_ChatTarget: Gets the current chat target.
+  - CPig::get_Host: Provides access to the behavior host.
+  - CPig::StartCustomGame: Starts a custom game with specified parameters.
+  - CPig::StartGame: Initiates a game based on current mission settings.
 
 #### `src/Pigs/PigSrv/Pig.h`
 
@@ -9543,14 +10949,27 @@ NOTES: None.
 
 #### `src/Pigs/PigSrv/PigBehavior.h`
 
-PURPOSE: Declares the base class for pig behavior in the Allegiance game server.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CPigBehavior: Base class for all pig behaviors. Currently only supports scripted behaviors through CPigBehaviorScript.
-
-CONNECTS TO: CPigBehaviorScript
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // PigBehavior.h : Declaration of the CPigBehavior class
+    #pragma once
+    #ifndef __PigBehavior_h__
+    #define __PigBehavior_h__
+    /////////////////////////////////////////////////////////////////////////////
+    // CPigBehavior
+    //
+    // Defines the base functionality of pig behavior classes.
+    //
+    // Currently, scripted behaviors are the only types supported by the PigSrv
+    // object model. So, CPigBehavior has only one class derived from it - the
+    // CPigBehaviorScript class.
+    //
+    class CPigBehavior
+    {
+    };
+    /////////////////////////////////////////////////////////////////////////////
+    #endif //__PigBehavior_h__
 
 #### `src/Pigs/PigSrv/PigBehaviorHost.cpp`
 
@@ -9619,19 +11038,25 @@ NOTES:
 
 #### `src/Pigs/PigSrv/PigBehaviorSchema.xml`
 
-PURPOSE: This XML schema defines the structure and rules for Pig Behavior scripts in Allegiance. It specifies how behaviors are registered, what commands they can invoke, and the script content.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ElementType name="script": Defines a text-only element for script content.
-- ElementType name="InvokeCommand": Defines a text-only element for command invocation.
-- ElementType name="registration": Contains zero or more InvokeCommand elements to register behavior commands.
-- AttributeType name="language": Required attribute specifying the scripting language.
-- AttributeType name="base": Optional attribute specifying the base class for the behavior.
-- ElementType name="pigbehavior": Root element containing attributes for language and base, and child elements for registration and script.
-
-CONNECTS TO: Other XML schema files or configuration files that reference Pig Behavior scripts.
-
-NOTES: None.
+    <Schema name="PigBehavior"
+      xmlns="urn:schemas-microsoft-com:xml-data"
+      xmlns:dt="urn:schemas-microsoft-com:datatypes">
+      <ElementType name="script" content="textOnly" model="open"/>
+      <ElementType name="InvokeCommand" content="textOnly"/>
+      <ElementType name="registration" content="eltOnly">
+        <element type="InvokeCommand" minOccurs="0" maxOccurs="*"/>
+      </ElementType>
+      <AttributeType name="language" required="yes" dt:type="string"/>
+      <AttributeType name="base" required="no" dt:type="string"/>
+      <ElementType name="pigbehavior" content="eltOnly">
+        <attribute type="language"/>
+        <attribute type="base"/>
+        <element type="registration" minOccurs="0" maxOccurs="1"/>
+        <element type="script" minOccurs="1" maxOccurs="*"/>
+      </ElementType>
+    </Schema>
 
 #### `src/Pigs/PigSrv/PigBehaviorScript.cpp`
 
@@ -9654,17 +11079,22 @@ NOTES: None.
 
 #### `src/Pigs/PigSrv/PigBehaviorScript.h`
 
-PURPOSE: This file defines the CPigBehaviorScript class, which implements behavior scripts for pigs in the Allegiance game. It provides methods to execute scripts, manage timers, and handle various game events.
+PURPOSE: This header file declares the CPigBehaviorScript class, which represents a behavior script for a pig in the Allegiance game.
 
 KEY PARTS:
-- CPigBehaviorScript: Main class implementing IPigBehavior, IDispatch, ISupportErrorInfo, IActiveScriptSite, and other interfaces.
-- Init: Initializes the behavior script with a type, pig, command line, and optional derived script.
-- Eval: Evaluates a script expression and returns the result.
-- OnActivation/OnDeactivation: Handles activation and deactivation events of the behavior.
-- OnStateXXX: Handles state transition events like logging on, joining mission, etc.
-- GetLastScriptError, GetScriptDispatch, GetDerived, GetMostDerived: Utility methods to retrieve script error information, dispatch interface, derived scripts, and most derived script.
+- CPigBehaviorScript: Manages behavior scripts for pigs.
+- Init: Initializes the behavior script with necessary parameters.
+- Term: Terminates the behavior script.
+- GetLastScriptError: Retrieves the last script error.
+- GetScriptDispatch: Returns the script dispatch interface.
+- GetDerived: Gets the derived behavior script.
+- GetMostDerived: Finds the most derived behavior script.
+- CreateScriptingEngine: Creates a scripting engine for the script.
+- ShutdownScriptingEngine: Shuts down the scripting engine.
+- ResolveScriptMethod: Resolves a script method by name and parameters.
+- SetCurrentTimer: Sets the current timer for the script.
 
-CONNECTS TO: PigEngine, CPigBehaviorType, CPig, CPigTimer, CPigBehaviorScriptType, IPigBehaviorHost, IAGCShip, etc.
+CONNECTS TO: PigBehavior.h, PigEventOwnerImpl.h, IActiveScriptSiteImpl.h
 
 NOTES: None.
 
@@ -9850,15 +11280,27 @@ NOTES: None
 
 #### `src/Pigs/PigSrv/PigBehaviorType.h`
 
-PURPOSE: Declares the base class for pig behavior types in the Allegiance game server.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CPigBehaviorType: Base class defining functionality for pig behavior types.
-- CPigBehaviorScriptType: Derived class supporting scripted behaviors.
-
-CONNECTS TO: None
-
-NOTES: none
+    /////////////////////////////////////////////////////////////////////////////
+    // PigBehaviorType.h : Declaration of the CPigBehaviorType class
+    #pragma once
+    #ifndef __PigBehaviorType_h__
+    #define __PigBehaviorType_h__
+    /////////////////////////////////////////////////////////////////////////////
+    // CPigBehaviorType
+    //
+    // Defines the base functionality of pig behavior type classes.
+    //
+    // Currently, scripted behaviors are the only types supported by the PigSrv
+    // object model. So, CPigBehaviorType has only one class derived from it -
+    // the CPigBehaviorScriptType class.
+    //
+    class CPigBehaviorType
+    {
+    };
+    /////////////////////////////////////////////////////////////////////////////
+    #endif //__PigBehaviorType_h__
 
 #### `src/Pigs/PigSrv/PigDirectPlay.h`
 
@@ -10329,15 +11771,16 @@ NOTES:
 
 #### `src/Pigs/PigSrv/PigSrv.h`
 
-PURPOSE: This file is a header file for the PigSrv component of Allegiance, which likely handles server-related functionality.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `PigSrv.h`: The primary header file for the PigSrv component.
-- `<PigsIDL.h>` and `<PigsLib.h>`: Includes necessary interface definitions and libraries for the PigSrv component to function correctly.
-
-CONNECTS TO: PigsIDL, PigsLib
-
-NOTES: None.
+    #ifndef __PigSrv_h__
+    #define __PigSrv_h__
+    #pragma once
+    /////////////////////////////////////////////////////////////////////////////
+    #include <PigsIDL.h>
+    #include <PigsLib.h>
+    /////////////////////////////////////////////////////////////////////////////
+    #endif // !__PigSrv_h__
 
 #### `src/Pigs/PigSrv/PigSrv.rgs`
 
@@ -10372,18 +11815,16 @@ NOTES: None.
 
 #### `src/Pigs/PigSrv/PigSvrps.def`
 
-PURPOSE: This file defines the exports for a proxy/stub DLL used in Allegiance's PigSrvPS module.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- DllGetClassObject: Retrieves a class object.
-- DllCanUnloadNow: Determines if the DLL can be unloaded.
-- GetProxyDllInfo: Provides information about the proxy DLL.
-- DllRegisterServer: Registers the server components of the DLL.
-- DllUnregisterServer: Unregisters the server components of the DLL.
-
-CONNECTS TO: Allegiance's PigSrvPS module.
-
-NOTES: none
+    LIBRARY      "PigSrvPS"
+    DESCRIPTION  'Proxy/Stub DLL'
+    EXPORTS
+    	DllGetClassObject       @1	PRIVATE
+    	DllCanUnloadNow         @2	PRIVATE
+    	GetProxyDllInfo         @3	PRIVATE
+    	DllRegisterServer		@4	PRIVATE
+    	DllUnregisterServer		@5	PRIVATE
 
 #### `src/Pigs/PigSrv/PigTimer.cpp`
 
@@ -10530,32 +11971,34 @@ NOTES:
 
 #### `src/Pigs/PigSrv/SrcInc.cpp`
 
-PURPOSE: This file contains source code for various libraries used in the Allegiance project, including ATL (Active Template Library) components.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TCAtl.cpp: Implements core functionality of the ATL library.
-- PropertyClass.cpp: Provides support for property classes within the ATL framework.
-- TCNullStreamImpl.cpp: Implements a null stream implementation for use with ATL streams.
-- UserAcct.cpp: Handles user account management functionalities.
-
-CONNECTS TO: Other source files and libraries that utilize these components, such as those related to game logic or UI elements.
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the CPP files for all source code-based
+    // libraries used in the project. Any corresponding header files for the
+    // libraries should be placed in SrcInc.h.
+    //
+    #include "pch.h"
+    #include <TCAtl.cpp>
+    #include <..\TCAtl\PropertyClass.cpp>
+    #include <..\TCAtl\TCNullStreamImpl.cpp>
+    #include <..\TCAtl\UserAcct.cpp>
 
 #### `src/Pigs/PigSrv/SrcInc.h`
 
-PURPOSE: This file includes header files for various libraries used in the Allegiance project's PigSrv component.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TCAtl.h: Core ATL (Active Template Library) headers.
-- PropertyClass.h: Header for property classes.
-- TCNullStreamImpl.h: Implementation of a null stream class.
-- ObjectMap.h: Header for object mapping utilities.
-- UserAcct.h: Header for user account management.
-
-CONNECTS TO: src/Pigs/PigSrv/SrcInc.cpp
-
-NOTES: None.
+    #pragma once
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the include files for all source code-based
+    // libraries used in the project. Any corresponding CPP files for the
+    // libraries should be placed in SrcInc.cpp.
+    //
+    #include <TCAtl.h>
+    #include <..\TCAtl\PropertyClass.h>
+    #include <..\TCAtl\TCNullStreamImpl.h>
+    #include <..\TCAtl\ObjectMap.h>
+    #include <..\TCAtl\UserAcct.h>
 
 #### `src/Pigs/PigSrv/Test.js`
 
@@ -10590,19 +12033,25 @@ NOTES:
 
 #### `src/Pigs/PigSrv/TestList.js`
 
-PURPOSE: This file is a test script written in JavaScript for the Allegiance game's Pig Server. It demonstrates how to create and list pigs using the server's ActiveX objects.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `objSession`: Represents the connection to the Pig Server.
-- `CreatePig()`: Creates a new pig with default behavior.
-- `Pigs`: Collection of currently running pigs on the server.
-- `Name`: Property of each pig, representing its name.
-
-CONNECTS TO: Allegiance game's Pig Server via ActiveX objects.
-
-NOTES:
-- The commented-out code suggests that session information and application name were intended to be set but are not used in this script.
-- There is no security or network handling mentioned.
+    // Create the Session Information object
+    //var objInfo = new ActiveXObject("Pigs.SessionInfo");
+    //objInfo.ApplicationName = WScript.ScriptFullName;
+    // Connect to the Pig Server
+    var objSession = new ActiveXObject("Pigs.Session");
+    //objSession.SessionInfo = objInfo;
+    // Create several pigs with the "Default" behavior
+    WScript.Echo("Creating several pigs...");
+    for (i = 0; i < 3; ++i)
+      var objPig = objSession.CreatePig();
+    // List the pigs that are currently running
+    WScript.Echo("Listing the " + objSession.Pigs.Count + " pigs that are currently running...");
+    for (var it = new Enumerator(objSession.Pigs); !it.atEnd(); it.moveNext())
+    {
+      var objItem = it.item();
+      WScript.Echo("Name = \"" + objItem.Name + "\"");
+    }
 
 #### `src/Pigs/PigSrv/beeper.js`
 
@@ -10673,15 +12122,17 @@ NOTES:
 
 #### `src/Pigs/PigSrv/pch.cpp`
 
-PURPOSE: This file is a precompiled header file for the Allegiance game's PigSrv project. It includes standard headers and conditionally includes additional headers based on build configurations.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include "pch.h"`: Includes the primary precompiled header file.
-- `#ifdef _ATL_STATIC_REGISTRY`: Conditionally includes headers related to static registry support if the `_ATL_STATIC_REGISTRY` macro is defined.
-
-CONNECTS TO: pch.pch (precompiled header), pch.obj (precompiled type information).
-
-NOTES: None.
+    // pch.cpp : source file that includes just the standard includes
+    //  pch.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
+    #ifdef _ATL_STATIC_REGISTRY
+      #include <statreg.h>
+      //#include <statreg.cpp>
+    #endif
+    //#include <atlimpl.cpp>
 
 #### `src/Pigs/PigSrv/pch.h`
 
@@ -10719,48 +12170,34 @@ NOTES: None.
 
 #### `src/Pigs/PigSrv/thrust.js`
 
-PURPOSE: This file is a script that connects to a Pig Server and controls a specific pig named "jtasler-nt-000" by thrusting it forward.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- objSession: Connects to the Pig Server.
-- objPig: Represents the pig controlled by the script.
-- Thrust(5): Applies 5 units of thrust to the pig's ship.
-
-CONNECTS TO: Pigs.Session, Pigs.SessionInfo
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // Create the Session Information object
+    //var objInfo = new ActiveXObject("Pigs.SessionInfo");
+    //objInfo.ApplicationName = WScript.ScriptFullName;
+    /////////////////////////////////////////////////////////////////////////////
+    // Connect to the Pig Server
+    var objSession = new ActiveXObject("Pigs.Session");
+    //objSession.SessionInfo = objInfo;
+    /////////////////////////////////////////////////////////////////////////////
+    // Get the pig
+    var objPig = objSession.Pigs("jtasler-nt-000");
+    WScript.Echo(objPig + ": State is \"" + objPig.PigStateName + "\"");
+    // Thrust the pig forward
+    objPig.Ship.Thrust(5);
 
 ### src/Pigs/Piglets
 
-**Folder Overview:** The `src/Pigs/Piglets` directory contains JScript behavior scripts for Allegiance's Piglets system, which controls the AI and actions of bots within the game. These scripts handle state transitions, mission joining, hull selection, launching, and various in-game behaviors.
+This folder contains various behavior scripts and configuration files for Allegiance's Piglets AI system. These scripts define how different piglet entities behave in the game, including their state transitions, actions, and interactions with the environment.
 
-**Important Files:**
-- **Creator.pig:** Manages the creation and initial logon of a piglet to the mission server.
-- **DPSeq.pig:** Simulates chat behavior for a ship by sending periodic messages.
-- **Default.pig:** Defines default actions and state transitions for a piglet's behavior.
-- **DistanceLatency.pig:** Handles state transitions and actions related to logging on, joining missions, selecting hulls, launching, and maintaining flight.
-- **FaceOutpost.pig:** Causes the piglet to face an outpost when it stops thrusting.
-- **JoinGame.pig:** Manages state transitions for logging onto the mission server and joining missions.
-- **LogonOnly.pig:** Ensures a piglet logs on to the mission server upon creation.
-- **Teleporter.pig:** Handles state transitions, hull selection, launching, and various actions like thrusting and deploying ripcord probes.
-- **aaa.js:** Contains configuration settings and event handlers for a bot named "Perpetual Bot DM."
-- **aaa.pig:** Integrates with COM to provide helper functions for controlling pig behavior.
-- **alephjumper.pig:** Causes the piglet to find an aleph, fly through it, and return to the original sector.
-- **b1.pig:** Custom bot behavior script for combat and resource management.
-- **bugman.pig:** Controls a piglet named Bugman's actions during various states.
-- **bulldozer.pig:** Manages the behavior of Bulldozer when docked and flying.
-- **chatter.pig:** Handles state transitions and actions related to logging on, joining missions, selecting hulls, launching, and chatting.
-- **colbug-a.pig:** Controls piglets towards asteroids.
-- **colbug-p.pig:** Manages the behavior of piglet Colbug-P when flying.
-- **colbug-s.pig:** Defines the behavior of piglets when they are flying.
-- **colltest.js:** Handles chat messages received by a ship.
-- **defaultv.vb:** VBScript behavior script for piglets, defining actions and state transitions.
-- **demo.pig:** Behavior script for docked and flying states with additional features like Eliza chat responses.
-- **dev.pig:** General behavior script for piglets with various functionalities commented out.
-- **dm.pig:** Bot script for playing as a Deep Space Interceptor in Deathmatch mode.
-- **docker.pig:** Controls undocking and docking processes, managing traffic control communally.
-- **framerate-dummy.pig:** JScript behavior script for testing game mechanics.
-- **fr
+- scout2.pig: Manages the behavior of a scout piglet, handling mission joining, team management, launching, flying, damage responses, sector changes, enemy detection, and resource scanning.
+- marksn1.pig: Defines the AI logic for a piglet in a specific match configuration, including mission joining, state transitions, and behaviors like scanning sectors, finding targets, and engaging enemies.
+- framerate.pig: Tests frame rate performance by defining behaviors and actions for a piglet during various states.
+- bulldozer.pig: Controls the behavior of a Bulldozer piglet, managing its actions based on its state and environment.
+- mark3.pig: Defines the AI logic for a piglet during various states such as logging on to the mission server, joining missions, selecting hulls, launching into combat, and engaging enemies.
+
+Largest files: scout2.pig (749 lines), marksn1.pig (610 lines), framerate.pig (533 lines), mark3.pig (402 lines), bulldozer.pig (334 lines).
 
 #### `src/Pigs/Piglets/Creator.pig`
 
@@ -10907,16 +12344,24 @@ NOTES:
 
 #### `src/Pigs/Piglets/aaa.pig`
 
-PURPOSE: This file is a configuration and script file for a custom behavior in the Allegiance game, specifically for a piglet named aaa.pig. It sets up the environment and logic for this piglet.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `PigJSDocGenerator`: A tool to update intellisense based on modifications to IDL files.
-- `IDL.js`, `common.js`, `imago.js`, `AutoStartCustomGame.js`: Helper scripts that provide functionality and support for the main logic of the piglet.
-- `aaa.js`: The core logic file containing the main behavior and functionality of the piglet.
-
-CONNECTS TO: Other piglet files, IDL files, and game systems through the included helper scripts.
-
-NOTES: None.
+    <pigbehavior language="JScript">
+    //imagotrigger@gmail.com 10/14 imago.pig originally from manuel.pig and mark.pig Microsoft
+    // These files provide an intellisense bridge to COM. Use PigJSDocGenerator to update the intellisense if you modify an IDL file. -->
+    <script src="include\IDL.js"/>
+    // Helper functions to make your pig go.
+    <script src="include\common.js"/>
+    <script src="include\imago.js"/>
+    <script src="include\AutoStartCustomGame.js"/>
+    // The main logic of the pig lives in this file.
+    <script src="aaa.js"/>
+    <script>
+    <![CDATA[
+    // Refer to aaa.js for the core logic.
+    ]]>
+    </script>
+    </pigbehavior>
 
 #### `src/Pigs/Piglets/alephjumper.pig`
 
@@ -11065,17 +12510,12 @@ NOTES: None.
 
 #### `src/Pigs/Piglets/colltest.js`
 
-PURPOSE: This file contains a JavaScript function that handles chat messages received by a ship in the Allegiance game.
+PURPOSE: tiny file (4 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `OnReceiveChat(strText, objShip)`: A function that is triggered when a chat message is received. It takes two parameters: `strText` (the text of the chat message) and `objShip` (the ship object that received the message).
-  - Inside the function, there is a variable `a` initialized to 2.
-
-CONNECTS TO:
-- None
-
-NOTES:
-- The file has a source map (`colltest.js.map`) associated with it, which is used for debugging purposes.
+    function OnReceiveChat(strText, objShip) {
+        var a = 2;
+    }
+    //# sourceMappingURL=colltest.js.map
 
 #### `src/Pigs/Piglets/defaultv.pig`
 
@@ -11300,35 +12740,23 @@ NOTES: None.
 
 #### `src/Pigs/Piglets/scout2.pig`
 
-**PURPOSE:** The `scout2.pig` file contains the behavior script for a scout ship in Allegiance. It manages the scout's state transitions, navigation, resource detection, and communication with other ships.
+PURPOSE: Manages the behavior and state transitions of a scout piglet in Allegiance, handling activation, mission joining, team management, launching, flying, damage responses, sector changes, enemy detection, and resource scanning.
 
-**KEY PARTS:**
-- **Class:** `Pig`
-  - Manages the scout's lifecycle and state transitions.
-- **Function:** `OnActivate(objPrevPig)`
-  - Initializes the scout when activated.
-- **Function:** `OnStateMissionList(eStatePrevious)`
-  - Joins or creates a mission for the scout.
-- **Function:** `OnInitialThrottle()`
-  - Manages flight mechanics and navigation.
-- **Class/Function:** `FindAlephTargets`
-  - Determines the next target for the scout based on its current state.
-- **Class/Function:** `CorrectOrbit`
-  - Continuously faces the target using the `Face` method.
-- **Class/Function:** `ProperVelocity`
-  - Sets the proper velocity for the ship to a constant throttle level.
-- **Class/Function:** `ThrustOrbit`
-  - Maintains the proper speed of the ship and handles exceptions.
+KEY PARTS:
+- OnActivate: Initializes data structures and transitions to the Flying state.
+- OnStateMissionList: Joins or creates missions for the scout.
+- OnStateTeamList: Ensures the piglet is in a team if not already.
+- OnStateDocked: Launches the pig once it becomes docked.
+- OnDoLaunch: Helper function to launch the pig after a delay.
+- OnStateFlying: Sets up initial throttle and starts timers for navigation, resource scanning, and enemy detection.
+- OnInitialThrottle: Configures continuous orbit correction, target finding, enemy scanning, and asteroid ore scanning.
+- OnReceiveCommand: Handles chat commands from other ships, including status control, Eliza responses, autodonation, and sector reports.
+- UpdateSectorLists: Rebuilds lists of visited, not visited, and claimed sectors based on current game state.
+- ScanForEnemies: Counts enemies in the sector and sets retreat status if threat level is high.
 
-**CONNECTS TO:**
-- Other behavior scripts and game systems for communication and state management.
+CONNECTS TO: Allegiance game engine systems for ship management, mission handling, team coordination, and game state updates.
 
-**NOTES:**
-- Uses JScript, which is an older scripting language. Consider migrating to C#.
-- The script uses `ActiveXObject` for creating dictionaries, suggesting a COM object environment.
-- Contains commented-out code related to sector scanning timers.
-- Uses `VBArray` for iterating over keys in `NotVisitedSectors.Keys()`, indicating potential type compatibility issues.
-- Calls `CommitSuicide` when there is no ammo, indicating resource management needs improvement.
+NOTES: None.
 
 #### `src/Pigs/Piglets/stem.pig`
 
@@ -11383,18 +12811,14 @@ NOTES:
 
 ### src/Pigs/Piglets/include
 
-This folder contains JavaScript files related to various aspects of the Allegiance game's Piglets AI system, which manages AI-controlled players within missions.
+This folder contains JavaScript and VBScript files related to game automation and management in Allegiance. It includes scripts for starting games automatically, handling chat commands, managing player teams, and implementing AI behavior.
 
-- AutoStartCustomGame.js: Manages automatic game start based on player counts.
-- GetIntoTeam.js: Handles state transitions and mission management for piglets.
-- IDL.js: Provides TypeScript-like enum support for JavaScript enums.
-- asteroids.js: Tracks and manages asteroid resources in the game.
-- autostartgame.vbs: VBScript code to automatically start a game once minimum players join.
-- chatcommand.js: Manages chat commands and status messages.
-- common.js: Contains utility functions and constants used by the Piglets AI system.
-- dijkstra.js: Implements Dijkstra's algorithm for pathfinding in the game map.
-- eliza.js: Placeholder comment indicating no chat bot implementation.
-- imago.js: Manages the lifecycle and actions of piglets within a mission.
+- AutoStartCustomGame.js: Automates the start of a custom game by checking team player counts.
+- AutoStartGame.js: Automatically starts a game when the minimum number of players per team join.
+- IDL.js: Bridges COM Enums into JavaScript for use in Allegiance development.
+- imago.js: Manages AI behavior, mission joining, and ship launching for Piglets in Allegiance.
+
+Largest files: imago.js (342 lines), IDL.js (336 lines), common.js (318 lines), dijkstra.js (206 lines), asteroids.js (196 lines).
 
 #### `src/Pigs/Piglets/include/AutoStartCustomGame.js`
 
@@ -11549,14 +12973,9 @@ NOTES:
 
 #### `src/Pigs/Piglets/include/eliza.js`
 
-PURPOSE: This file is a placeholder comment indicating that Allegiance does not have a chat bot implemented.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: none
-
-NOTES: The file contains a single comment stating that there is no chat bot in Allegiance.
+    // We don't have a chat bot :(
 
 #### `src/Pigs/Piglets/include/imago.js`
 
@@ -11580,11 +12999,11 @@ NOTES:
 
 ### src/Pigs/Piglets/moldy
 
-The `src/Pigs/Piglets/moldy` folder contains behavior scripts for piglets in the Allegiance game, specifically focusing on their AI logic during various states such as mission joining, hull selection, and space combat.
+This folder contains JScript behavior scripts for piglets in Allegiance, focusing on mission-related actions and state transitions.
 
-- **Mark0.pig**: Defines the behavior of a generic piglet named Mark0. Handles state transitions, selects the best hull, docks to buy a hull, and launches into space.
-- **Mark1.pig**: Similar to Mark0 but with slight variations in behavior, such as setting initial throttle to 0% after full throttle.
-- **scout.pig**: Manages the AI for scout pigs, including scouting for enemies, checking asteroids for valuable ores, finding Alephs for resource gathering, and adjusting orbits.
+- scout.pig: Defines the behavior of a scout pig, including mission joining, hull selection, and scanning for asteroids and enemy stations.
+- Mark0.pig: Handles various state transitions and actions for a piglet named Mark0, such as logging on to the mission server and controlling ship launches.
+- Mark1.pig: Similar to Mark0.pig, defines behavior for a piglet named Mark1 during different states like joining missions and selecting the best hull.
 
 #### `src/Pigs/Piglets/moldy/Mark0.pig`
 
@@ -11640,17 +13059,16 @@ NOTES: None.
 
 ### src/Pigs/PigsLib
 
-**Folder Overview: src/Pigs/PigsLib**
+This folder contains source code for Allegiance's PigsLib library, which provides functionality related to game objects and behaviors.
 
-This folder contains source code for Allegiance's PigsLib library, which provides functionality related to mission parameters and other game objects.
+- PigMissionParams.cpp: Implements mission parameters management.
+- PigMissionParams.h: Defines the COM object class for managing mission parameters.
+- PigObject.cpp: Implements basic functionality for a pig object in the game.
+- PigObject.h: Declares and defines the COM object for a pig object.
+- PigsLib.cpp: Contains the implementation of the DLL for PigsLib, providing game-specific functionalities.
+- PigsLib.idl: Defines interface definitions and coclasses for various game entities.
 
-**Important Files:**
-- **PigMissionParams.cpp**: Implements mission parameters including team counts, map types, and game rules.
-- **PigObject.cpp**: Manages the creation and destruction of Pig objects within the game.
-- **PigsLib.cpp**: Manages the module state for COM objects and provides entry points for DLL initialization and termination.
-- **PigsLib.idl**: Defines interface definitions and coclasses for PigsLib, including mission parameters, ships, and accounts.
-- **dlldatax.c**: Wraps `dlldata.c` to handle proxy stub registration and management for Allegiance's PigsLib component.
-- **pch.h**: Precompiled header file that includes standard system headers and specific Allegiance-related headers.
+Largest files: PigsLib.h (401 lines), PigMissionParams.cpp (313 lines), PigsLib.idl (265 lines), PigsLib.cpp (165 lines), PigMissionParams.h (131 lines).
 
 #### `src/Pigs/PigsLib/PigMissionParams.cpp`
 
@@ -11801,19 +13219,15 @@ NOTES: None.
 
 #### `src/Pigs/PigsLib/PigsLib.def`
 
-PURPOSE: This file defines the module parameters and exports for a DLL named PigsLib.
+PURPOSE: tiny file (7 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- LIBRARY "PigsLib": Specifies the name of the DLL.
-- EXPORTS: Lists functions that are accessible from outside the DLL.
-  - DllCanUnloadNow: Determines if the DLL can be unloaded by COM clients.
-  - DllGetClassObject: Retrieves a class object for a specified interface.
-  - DllRegisterServer: Registers the DLL with the system.
-  - DllUnregisterServer: Unregisters the DLL from the system.
-
-CONNECTS TO: COM (Component Object Model) systems and other DLLs that interact with it.
-
-NOTES: None.
+    ; PigsLib.def : Declares the module parameters for the DLL.
+    LIBRARY      "PigsLib"
+    EXPORTS
+      DllCanUnloadNow     PRIVATE
+      DllGetClassObject   PRIVATE
+      DllRegisterServer   PRIVATE
+      DllUnregisterServer PRIVATE
 
 #### `src/Pigs/PigsLib/PigsLib.h`
 
@@ -11860,60 +13274,69 @@ NOTES: None.
 
 #### `src/Pigs/PigsLib/PigsLibPS.def`
 
-PURPOSE: This file defines the exports for a Proxy/Stub DLL in Allegiance, which is used to manage COM objects and provide remote procedure calls.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- DllGetClassObject: Retrieves an IUnknown pointer to the requested class object.
-- DllCanUnloadNow: Determines if it is safe to unload the DLL.
-- GetProxyDllInfo: Provides information about the proxy DLL.
-- DllRegisterServer: Registers the server components with the system.
-- DllUnregisterServer: Unregisters the server components from the system.
-
-CONNECTS TO: COM objects and the Allegiance game engine.
-
-NOTES: None.
+    LIBRARY      "PigsLibPS"
+    DESCRIPTION  'Proxy/Stub DLL'
+    EXPORTS
+      DllGetClassObject       @1  PRIVATE
+      DllCanUnloadNow         @2  PRIVATE
+      GetProxyDllInfo         @3  PRIVATE
+      DllRegisterServer       @4  PRIVATE
+      DllUnregisterServer     @5  PRIVATE
 
 #### `src/Pigs/PigsLib/Resource.h`
 
-PURPOSE: This file contains resource definitions used by the PigsLib module of Allegiance. It includes string IDs for team-related messages and an identifier for mission parameters.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- IDS_E_TEAMCOUNT: String ID for the message indicating the number of teams.
-- IDS_E_MAXTEAMPLAYERS: String ID for the maximum number of players per team.
-- IDS_E_MINTEAMPLAYERS: String ID for the minimum number of players per team.
-- IDS_E_MINMAXREVERSED: String ID for the error message when the minimum number of players is greater than the maximum.
-- IDR_PigMissionParams: Resource identifier for mission parameters.
-
-CONNECTS TO: PigsLib.rc, which uses these resource definitions.
-
-NOTES: None.
+    //{{NO_DEPENDENCIES}}
+    // Microsoft Developer Studio generated include file.
+    // Used by PigsLib.rc
+    //
+    #define IDS_E_TEAMCOUNT                 4108
+    #define IDS_E_MAXTEAMPLAYERS            4109
+    #define IDS_E_MINTEAMPLAYERS            4110
+    #define IDS_E_MINMAXREVERSED            4111
+    #define IDR_PigMissionParams            2000
+    // Next default values for new objects
+    //
+    #ifdef APSTUDIO_INVOKED
+    #ifndef APSTUDIO_READONLY_SYMBOLS
+    #define _APS_NEXT_RESOURCE_VALUE        2002
+    #define _APS_NEXT_COMMAND_VALUE         32768
+    #define _APS_NEXT_CONTROL_VALUE         3000
+    #define _APS_NEXT_SYMED_VALUE           101
+    #endif
+    #endif
 
 #### `src/Pigs/PigsLib/SrcInc.cpp`
 
-PURPOSE: This file includes source code for various libraries used in the Allegiance project.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TCAtl.cpp: Contains implementation of the ATL (Active Template Library) classes.
-- PropertyClass.cpp: Implements a class for managing properties.
-- TCNullStreamImpl.cpp: Provides an implementation for null streams, which are streams that do nothing.
-
-CONNECTS TO: SrcInc.h
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the CPP files for all source code-based
+    // libraries used in the project. Any corresponding header files for the
+    // libraries should be placed in SrcInc.h.
+    //
+    #include "pch.h"
+    #include <TCAtl.cpp>
+    #include <..\TCAtl\PropertyClass.cpp>
+    #include <..\TCAtl\TCNullStreamImpl.cpp>
 
 #### `src/Pigs/PigsLib/SrcInc.h`
 
-PURPOSE: This file is a header file that includes necessary include files for all source code-based libraries used in the Allegiance project. It also specifies where corresponding CPP files for these libraries should be placed.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `TCAtl.h`: Main include file for ATL (Active Template Library).
-- `PropertyClass.h`: Header for property classes.
-- `TCNullStreamImpl.h`: Header for null stream implementation.
-- `ObjectMap.h`: Header for object map functionality.
-
-CONNECTS TO: Other system libraries and components used in the Allegiance project, primarily through the inclusion of these headers.
-
-NOTES: None.
+    #pragma once
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the include files for all source code-based
+    // libraries used in the project. Any corresponding CPP files for the
+    // libraries should be placed in SrcInc.cpp.
+    //
+    #include <TCAtl.h>
+    #include <..\TCAtl\PropertyClass.h>
+    #include <..\TCAtl\TCNullStreamImpl.h>
+    #include <..\TCAtl\ObjectMap.h>
 
 #### `src/Pigs/PigsLib/dlldatax.c`
 
@@ -11932,29 +13355,43 @@ NOTES: None.
 
 #### `src/Pigs/PigsLib/dlldatax.h`
 
-PURPOSE: This header file is part of a Microsoft COM proxy/stub library for Allegiance's Pigs module. It defines the necessary functions and macros for managing the DLL as a COM server.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `PrxDllMain`: Entry point function for the DLL.
-- `PrxDllCanUnloadNow`: Determines if the DLL can be unloaded.
-- `PrxDllGetClassObject`: Retrieves an instance of a class object.
-- `PrxDllRegisterServer`: Registers the DLL as a COM server.
-- `PrxDllUnregisterServer`: Unregisters the DLL as a COM server.
-
-CONNECTS TO: Allegiance's Pigs module, which uses this COM proxy/stub library for inter-process communication and object management.
-
-NOTES: None.
+    #if !defined(AFX_DLLDATAX_H__25072D60_AB2F_11D2_97EF_00A0C932A52F__INCLUDED_)
+    #define AFX_DLLDATAX_H__25072D60_AB2F_11D2_97EF_00A0C932A52F__INCLUDED_
+    #if _MSC_VER >= 1000
+      #pragma once
+    #endif // _MSC_VER >= 1000
+    #ifdef _MERGE_PROXYSTUB
+    extern "C"
+    {
+    BOOL WINAPI PrxDllMain(HINSTANCE hInstance, DWORD dwReason,
+      LPVOID lpReserved);
+    STDAPI PrxDllCanUnloadNow(void);
+    STDAPI PrxDllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv);
+    STDAPI PrxDllRegisterServer(void);
+    STDAPI PrxDllUnregisterServer(void);
+    }
+    #endif
+    //{{AFX_INSERT_LOCATION}}
+    // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+    #endif // !defined(AFX_DLLDATAX_H__25072D60_AB2F_11D2_97EF_00A0C932A52F__INCLUDED_)
 
 #### `src/Pigs/PigsLib/pch.cpp`
 
-PURPOSE: This file is a precompiled header (pch.cpp) for the Allegiance game's PigsLib project. It includes standard headers and conditionally includes specific ATL (Active Template Library) headers based on build configurations.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None explicitly highlighted in this snippet
-
-CONNECTS TO: pch.h, statreg.h, atlimpl.cpp, atlwin.cpp
-
-NOTES: none
+    /////////////////////////////////////////////////////////////////////////////
+    // pch.cpp : source file that includes just the standard includes
+    //  pch.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
+    #ifdef _ATL_STATIC_REGISTRY
+      #include <statreg.h>
+    //  #include <statreg.cpp>
+    #endif
+    //#include <atlimpl.cpp>
+    //#include <atlwin.cpp>
 
 #### `src/Pigs/PigsLib/pch.h`
 
@@ -11976,23 +13413,15 @@ NOTES: None.
 
 ### src/Pigs/Scripts
 
-### Overview:
-The `src/Pigs/Scripts` folder contains various JavaScript and VBScript files used for managing different aspects of the Allegiance game server, such as account management, pig creation, event logging, and server configuration.
+This folder contains JavaScript and VBScript scripts used in Allegiance for managing various aspects of the game server and client interactions. The scripts handle tasks such as account management, pig creation, deployment, logging, and more.
 
-### Key Files:
+- DeployPigs.js: Orchestrates the deployment of ActivePigs on multiple servers.
+- ForEach.js: Executes a command line on multiple remote servers listed in a semicolon-separated string.
+- AllSrvVerInfo.js: Retrieves and displays version information for specified files using Allegiance's administrative session object.
+- RemListAccts.js: Lists available and in-use accounts from the Pig Account Dispenser.
+- ListAccts.js: Provides functionality to list accounts from a specified server.
 
-1. **AccountServer.js**: Manages the AccountServer property of the Pig Server, allowing users to display or change its value.
-2. **AllSrvVerInfo.js**: Retrieves and displays version information for a specified file using the Allegiance game's administrative session object.
-3. **ArtPath.js**: Manages the ArtPath property of the Pig Server, enabling users to display or set its value.
-4. **CreatePig.js**: Creates a pig with a specified behavior in the Allegiance game.
-5. **DeployPigs.js**: Automates the deployment of ActivePigs on multiple servers, handling command-line arguments and logging results.
-6. **EventLog.js**: Manages and displays event log parameters in the Allegiance game server.
-7. **EventLogDB.js**: Manages database parameters for event logging in Allegiance.
-8. **ForEach.js**: Executes a specified command line on multiple remote servers listed in a semicolon-separated string.
-9. **ListAccts.js**: Lists available and in-use accounts from the Pig Account Dispenser.
-10. **LobbyMode.js**: Manages and displays the current lobby mode of the Allegiance game server.
-
-These scripts provide essential functionality for managing various aspects of the Allegiance game server, including account management, pig creation, event logging, and server configuration.
+Largest files: DeployPigs.js (579 lines), ForEach.js (186 lines), AllSrvVerInfo.js (132 lines), RemListAccts.js (129 lines), ListAccts.js (123 lines).
 
 #### `src/Pigs/Scripts/AccountServer.js`
 
@@ -12426,47 +13855,52 @@ NOTES:
 
 #### `src/Pigs/Scripts/debugger.js`
 
-PURPOSE: This JavaScript file is designed to connect to a Pig Server and retrieve information about pigs within the game. It then pauses execution at a debugger statement for further inspection.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `app`: An ActiveXObject representing the connection to the Pig Server.
-- `pigs`: A collection of pig objects retrieved from the server.
-- `itPigs`: An enumerator used to iterate through the collection of pigs.
-- `pig`: The first pig object in the iterator, or null if no pigs are present.
-- `ship`: The ship associated with the first pig, or null if there is no pig.
-
-CONNECTS TO: Pig Server
-
-NOTES:
-- There is a TODO comment for creating and setting session information.
-- A line of code to create an ActiveXObject for session information is commented out.
-- The file uses the `debugger` statement to pause execution for debugging purposes.
+    // TODO: Create the Session Information object
+    //var info = new ActiveXObject("TCObj.SessionInfo");
+    //info.ApplicationName = WScript.ScriptFullName;
+    // Connect to the Pig Server
+    var app = new ActiveXObject("Pigs.Session");
+    // TODO: app.SessionInfo = objInfo;
+    // Get the collection of pigs
+    var pigs = app.Pigs;
+    // Get an iterator on the collection of pigs
+    var itPigs = new Enumerator(pigs);
+    // Get the first pig in the iterator
+    var pig = itPigs.item();
+    // Get the first pig's ship
+    var ship = pig ? pig.Ship : null;
+    // Jump straight into the debugger
+    debugger;
 
 #### `src/Pigs/Scripts/debugger.vbs`
 
-PURPOSE: This VBScript file is used to connect to the Pig Server and access a specific pig's ship for debugging purposes.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: app - Connects to the Pig Server.
-- Name: pigs - Retrieves the collection of pigs from the server.
-- Name: pig - Represents the first pig in the collection.
-- Name: ship - Represents the ship associated with the selected pig.
-- Name: itPigs - Calls a method to get an item, though its purpose is unclear without additional context.
-
-CONNECTS TO: Pig Server
-
-NOTES: The script includes a 'Stop' command which will pause execution at this point for debugging purposes. There are no TODOs or security/network handling comments noted in the provided code snippet.
+    ' Connect to the Pig Server
+    Set app = CreateObject("Pigs.Session")
+    ' Get the collection of pigs
+    Set pigs = app.Pigs
+    ' Get the first pig in the collection
+    Dim pig, ship
+    If pigs.Count Then
+        Set pig = pigs(0)
+        Set ship = pig.ship
+    Else
+        Set pig = Nothing
+        Set ship = Nothing
+    End If
+    Set pig = itPigs.item()
+    ' Jump straight into the debugger
+    Stop
 
 #### `src/Pigs/Scripts/immed.js`
 
-PURPOSE: This file is a JavaScript script used in the Allegiance game for debugging purposes.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: debugger; - Initiates the browser's debugger to pause execution and allow for inspection of variables and call stacks.
-
-CONNECTS TO: none
-
-NOTES: This file contains only a single line that triggers the debugger, making it a straightforward tool for developers to debug JavaScript code within the game.
+    // Jump straight into the debugger
+    debugger;
 
 #### `src/Pigs/Scripts/listpigs.js`
 
@@ -12511,15 +13945,11 @@ NOTES:
 
 #### `src/Pigs/Scripts/session.js`
 
-PURPOSE: This file initializes a connection to the Pig Server using an ActiveXObject and sets up debugging.
+PURPOSE: tiny file (3 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: Pigs.Session - The object used to connect to the Pig Server.
-- debugger; - Activates the debugger for this script.
-
-CONNECTS TO: None
-
-NOTES: none
+    // Connect to the Pig Server
+    var app = new ActiveXObject("Pigs.Session");
+    debugger;
 
 #### `src/Pigs/Scripts/shutdown.js`
 
@@ -12537,11 +13967,12 @@ NOTES: None.
 
 ### src/Reloader
 
-The `src/Reloader` folder in Allegiance is responsible for automatically updating and restarting the game. It handles file operations, error reporting, and orchestrates the update process.
+The `src/Reloader` folder contains source code for a Windows application named Reloader.exe, which is responsible for managing file operations and restarting Allegiance.exe after it exits.
 
-- **Reloader.cpp**: Contains the main logic for updating and restarting Allegiance. It includes functions like `GetArtPath`, `DisplayErrorMsg`, and `WinMain`.
-- **pch.cpp** and **pch.h**: These files serve as precompiled headers, providing essential Windows API and debugging utilities to other source files in the Reloader module.
-- **resource.h**: Defines default values for new resources used by the Reloader resource script.
+- Reloader.cpp: Contains the main logic of the Reloader application, including waiting for Allegiance.exe to exit, moving files from a temporary directory, and restarting Allegiance.
+- resource.h: Defines resources used by the Reloader application, such as strings and icons.
+- pch.cpp: A precompiled header source file that includes commonly used headers for faster compilation.
+- pch.h: A precompiled header include file that lists headers to be precompiled.
 
 #### `src/Reloader/Reloader.cpp`
 
@@ -12565,57 +13996,49 @@ NOTES:
 
 #### `src/Reloader/pch.cpp`
 
-PURPOSE: This file is a precompiled header file for the Allegiance game's Reloader module. It includes common headers and definitions that are used across multiple source files in this module.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary include file for the precompiled header.
-- `ReloaderModule.cpp`: Serves as an entry point for the Reloader module, likely initializing any necessary components or handling module-specific logic.
-
-CONNECTS TO: src/Reloader/ReloaderModule.cpp
-
-NOTES: None.
+    #include "pch.h"
 
 #### `src/Reloader/pch.h`
 
-PURPOSE: This file is a precompiled header for the Allegiance game's Reloader component. It includes essential Windows headers and debugging utilities to streamline compilation.
+PURPOSE: tiny file (6 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- WIN32_LEAN_AND_MEAN: Excludes rarely-used parts of Windows headers to reduce compile time.
-- windows.h: Provides core Windows API functions.
-- crtdbg.h: Includes macros for memory leak detection and other debugging features.
-- stdio.h andstdlib.h: Standard C library headers for input/output and general utilities.
-- shellapi.h: Provides functions for shell operations.
-
-CONNECTS TO: Other Reloader source files that include this precompiled header.
-
-NOTES: None.
+    #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+    #include <windows.h>
+    #include <crtdbg.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <shellapi.h>
 
 #### `src/Reloader/resource.h`
 
-PURPOSE: This file is a Microsoft Visual C++ generated include file used by the Reloader.rc resource script. It defines default values for new resources such as commands, controls, and symbols.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- _APS_NEXT_RESOURCE_VALUE: Next available resource ID.
-- _APS_NEXT_COMMAND_VALUE: Next available command ID.
-- _APS_NEXT_CONTROL_VALUE: Next available control ID.
-- _APS_NEXT_SYMED_VALUE: Next available symbol ID.
-
-CONNECTS TO: Reloader.rc
-
-NOTES: None.
+    //{{NO_DEPENDENCIES}}
+    // Microsoft Visual C++ generated include file.
+    // Used by Reloader.rc
+    // Next default values for new objects
+    //
+    #ifdef APSTUDIO_INVOKED
+    #ifndef APSTUDIO_READONLY_SYMBOLS
+    #define _APS_NEXT_RESOURCE_VALUE        101
+    #define _APS_NEXT_COMMAND_VALUE         40001
+    #define _APS_NEXT_CONTROL_VALUE         1001
+    #define _APS_NEXT_SYMED_VALUE           101
+    #endif
+    #endif
 
 ### src/WinTrek
 
-**Folder Overview:** The `src/WinTrek` directory contains source code for various UI screens, dialogs, and functionalities in Allegiance, focusing on game-specific interactions like character info, squad management, training slideshows, and Steam clan integration.
+The WinTrek folder contains core functionality and user interface components of the Allegiance game client application. It handles various aspects such as game screens, user interactions, network operations, and rendering.
 
-**Important Files:**
-- **CallsignTagInfo.cpp/h**: Manages player callsign tags and Steam group affiliations.
-- **CharInfoScreen.cpp/h**: Handles the display and interaction of character information screens.
-- **CreateGameDialog.h**: Implements a dialog for creating new games in the game client.
-- **PostTrainingSlideshow.cpp/h**: Manages the post-training slideshow screen.
-- **SquadsScreen.cpp/h**: Manages squad management, including viewing, creating, and editing squads.
-- **SteamClans.cpp/h**: Interacts with Steam clans to retrieve available callsign tags for players.
-- **TrainingSlideshow.cpp/h**: Handles training slideshows that initiate training simulations upon dismissal.
+- WinTrek.cpp: Manages game window functionality, camera control, and various game state events.
+- trekigc.cpp: Manages game interactions within a cluster site, including sound effects, explosions, and model management.
+- console.cpp: Manages console interactions and chat functionality within the Allegiance game.
+- CmdView.cpp: Handles rendering various graphical elements such as a grid, ships, and text strings in a 3D space.
+
+Largest files: WinTrek.cpp (11360 lines), trekigc.cpp (5589 lines), teamscreen.cpp (3705 lines), console.cpp (3511 lines), SquadsScreen.cpp (3391 lines).
 
 #### `src/WinTrek/CallsignTagInfo.cpp`
 
@@ -12768,24 +14191,107 @@ NOTES: None.
 
 #### `src/WinTrek/SquadsScreen.cpp`
 
-**PURPOSE:** The `src/WinTrek/SquadsScreen.cpp` file manages the user interface for squad management in the Allegiance game. It handles interactions with squads and players, displaying their details, sorting them, and managing various squad-related actions.
+PURPOSE: Manages and displays squad information for players in Allegiance.
 
-**KEY PARTS:**
-- **Class: SquadsScreen**: Manages the squad selection screen interface.
-- **Function: ~SquadsScreen()**: Cleans up resources when the screen is destroyed.
-- **Function: SquadsScreen(Modeler* pmodeler, const char * szNameDudeX, int idPlayerDudeX, const char * szSquad)**: Initializes the squad screen with necessary data and sets up event handlers.
-- **Class: HistoryDialogPopup**: A popup dialog for displaying ownership history of a squad.
-- **Function: OnButtonOK()**: Handles the OK button click in the HistoryDialogPopup, closing the popup.
-- **Data Member: m_pkeyboardInputOldFocus**: Stores the previous keyboard focus when entering the screen.
-- **Data Member: s_column**: Static variable indicating the currently sorted column for squads.
-- **Data Member: m_listSquads[FILTER_MAX]**: Arrays to store squad data for different filters (all, my, dudex).
-- **Data Member: m_listPlayers**: Stores player data in the listbox.
+KEY PARTS:
+- SquadsScreen: Main class handling the squad screen interface.
+- FilterType: Enumerates filter types (ALL, MY, DUDEX) for squad display.
+- XSquads: Class representing a list of squads.
+- XZonePlayers: Class representing a list of zone players.
+- TEvent<ZString>::Sink and TEvent<ItemID>::Sink: Event sinks for handling ZString and ItemID events.
+- HistoryDialogPopup: Popup dialog for displaying ownership history.
+- OnButtonZoneClub, OnButtonPlayerProfile, etc.: Handles various button click events on the squad screen.
+- FillCombo and FillIntegerArray: Functions to populate combo boxes and integer arrays with data from the modeler.
+- SquadsItemPainter and PlayersItemPainter: Classes for painting items in listboxes.
 
-**CONNECTS TO:** Other UI elements and game systems for handling squad and player interactions.
+CONNECTS TO: Other UI elements and game systems for handling player interactions, squad management, and event processing.
 
-**NOTES:** 
-- There are TODO comments suggesting potential issues with compiler warnings or errors related to event handling.
-- The file contains commented-out sections and conditional compilation directives indicating temporary functionality or placeholders.
+NOTES:
+- Contains TODOs related to ranking discontinuity and forced squad display.
+- Includes commented-out sections with previous logic for handling rankings and filtering.
+
+PARTS (in file order):
+
+- lines 1-395
+  - SquadsScreen: Main class for the Squads Screen.
+  - FilterType: Enumerates different filter types for squad display (ALL, MY, DUDEX).
+  - XSquads: Class representing a list of squads.
+  - XZonePlayers: Class representing a list of zone players.
+  - TEvent<ZString>::Sink: Sink for handling ZString events.
+  - TEvent<ItemID>::Sink: Sink for handling ItemID events.
+  - HistoryDialogPopup: Popup dialog for displaying ownership history.
+  - OnLeavingScreen(): Destructor method for SquadsScreen class.
+- lines 396-784
+  - SquadsScreen: Manages the squad screen interface.
+  - OnButtonZoneClub: Handles click event for Zone Club button.
+  - OnButtonPlayerProfile: Handles click event for Player Profile button.
+  - OnButtonLeaderboard: Handles click event for Leaderboard button.
+  - OnButtonPrev, OnButtonNext, OnButtonTop, OnButtonEditSquad, OnButtonReject, OnButtonAccept, OnButtonCommission, OnButtonDemote, OnButtonTransferControl, OnButtonRequestJoin, OnButtonCancelRequest, OnButtonQuitSquad, OnButtonCreateSquad: Handle various button click events.
+  - OnButtonLog, OnButtonApply, OnButtonJumpURL, OnButtonFindSquad: Handles other specific button click events.
+  - FillCombo, FillIntegerArray: Functions to populate combo boxes and integer arrays with data from the modeler.
+  - SquadsItemPainter, PlayersItemPainter: Classes for painting items in listboxes.
+- lines 785-1133
+  - FindSquadByCreationID: Returns a squad given its creation ID.
+  - FindSquadByRanking: Returns a squad given its ranking.
+  - FindPlayerByID: Returns a player given his ID.
+  - CreateZoneSquad: Creates and adds a new squad to the list.
+  - CreateZonePlayer: Creates and adds a new player to the list.
+  - SEND_FOR_ACTIVE_MEMBER: Sends a message for an active member.
+  - SEND_FOR_SELECTED_MEMBER: Sends a message for a selected member.
+  - ResetHighLowRanges: Resets the highest/lowest ranking ranges.
+- lines 1134-1501
+  - ForwardSquadMessage: Processes server-generated messages for squad screen.
+  - UpdateHighLowRanges: Updates highest and lowest rankings for a squad.
+  - FindSquadByRanking: Finds a squad by ranking in a specific column.
+  - AddSquadToScreen: Adds a squad to the screen if it's within the current range.
+  - SelectSquad: Selects a squad on the screen.
+  - RefreshScreen: Refreshes the squad screen display.
+  - TODOs: "Ranking discontinuity detected in column %d, Ranking of %d" "Warning, Forcing squad to be shown (after search): %s" "Warning, pre-column change squad is not on screen when it should, resending Request for Page: %s"
+- lines 1502-1864
+  - SQUAD_CREATE_ACK: A message type indicating the acknowledgment of a squad creation request.
+  - FindSquadByCreationID: Finds a squad by its creation ID.
+  - DeleteSquad: Deletes a squad from the system.
+  - ResetHighLowRanges: Resets the high and low ranking ranges for squads.
+  - RequestPage: Requests a page of squad data based on the current ranking.
+  - MessageBox: Displays a message box with the given string.
+  - RefreshScreen: Refreshes various UI elements on the screen.
+  - DisableAllOwnerButtons: Disables all buttons that are specific to squad owners.
+- lines 1865-2269
+  - GetWindow(): Returns a pointer to the window object.
+  - LeaderBoardScreenForPlayer(playerName): Displays the leaderboard screen for the specified player.
+  - CharInfoScreenForPlayer(playerID): Displays the character information screen for the specified player.
+  - OnLeavingScreen(): Handles actions when leaving the current screen.
+  - s_pSelectedPlayer: Pointer to the currently selected player.
+  - m_nTab: Current tab index.
+  - FILTER_MY, FILTER_DUDEX, FILTER_ALL: Constants representing different tabs.
+  - m_listSquads: List of squads displayed on the screen.
+- lines 2270-2625
+  - OnButtonBarTabs: Handles tab selection and updates the squad list accordingly.
+  - OnButtonBarPlayers: Manages player sorting by setting priorities.
+  - AddSquadToScreen: Adds a squad to the screen's display list.
+  - DeleteSquad: Removes a squad from the system and updates the display.
+  - IsSquadAssociatedWithPlayer: Checks if a squad is associated with a given player.
+  - RefreshSquadsListBox: Redraws the squad list box on the screen.
+  - TODO: The commented-out code related to ranking and filtering should be reviewed and possibly integrated back into the main functionality.
+  - Unusual Code: The commented-out sections suggest that there was previous logic for handling rankings and filtering, which has been temporarily removed.
+- lines 2626-3007
+  - SquadsScreen: Manages the squad screen and its components.
+  - RefreshPlayersListBox: Updates the list box for players based on current filters and sorting.
+  - CompareStrings: Compares two strings up to a specified number of characters.
+  - FillCombo: Populates a combo box with items from an INameSpace.
+  - FillIntegerArray: Fills an integer array with values from an INameSpace.
+  - CivID2String: Converts a CivID to its corresponding string representation.
+  - SquadRankingCompare, SquadNameCompare, ScoreCompare, WinsCompare, LossesCompare, HoursCompare: Comparison functions for sorting squads based on various attributes.
+  - PlayerNameCompare, PlayerStatusCompare, PlayerLastDateCompare, PlayerRankCompare: Comparison functions for sorting players based on various attributes.
+- lines 3008-3390
+  - SquadsScreen: Manages the squad screen interface and handles player and squad interactions.
+  - RefreshSquadDetailsArea: Updates the details area of the squad screen with information about the selected squad.
+  - SelectSquad: Sets the currently selected squad.
+  - SelectPlayer: Sets the currently selected player.
+  - OnSquadSelected: Handles events when a squad is selected.
+  - OnPlayerSelected: Handles events when a player is selected.
+  - PlayersItemPainter: Custom item painter for the players listbox, responsible for rendering player information.
+  - GetPane: Returns the main pane of the screen.
 
 #### `src/WinTrek/SteamClans.cpp`
 
@@ -12802,17 +14308,23 @@ NOTES: None.
 
 #### `src/WinTrek/SteamClans.h`
 
-PURPOSE: This file defines a class `SteamClans` that handles interactions with Steam clans for managing callsign tags.
+PURPOSE: tiny file (15 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `SteamClans`: Manages available callsign tags and processes clan officer list responses.
-- `m_availableCallsignTags`: Stores the available callsign tags.
-- `OnClanOfficerListResponse`: Handles the response from the Steam API when fetching clan officer lists.
-- `m_SteamCallResultClanOfficerListResponse`: Manages the call result for clan officer list requests.
-
-CONNECTS TO: Steam API for clan data.
-
-NOTES: None.
+    #pragma once
+    #ifdef STEAM_APP_ID
+    // BT - STEAM
+    class SteamClans
+    {
+    private:
+    	TVector<CallsignTagInfo, DefaultEquals, DefaultCompare>	m_availableCallsignTags;
+    	bool m_officerDataReceived = false;
+    	void OnClanOfficerListResponse(ClanOfficerListResponse_t *pCallback, bool bIOFailure);
+    	CCallResult< SteamClans, ClanOfficerListResponse_t > m_SteamCallResultClanOfficerListResponse;
+    public:
+    	SteamClans();
+    	TVector<CallsignTagInfo, DefaultEquals, DefaultCompare> * GetAvailableCallsignTags();
+    };
+    #endif
 
 #### `src/WinTrek/TrainingSlideshow.cpp`
 
@@ -12832,21 +14344,22 @@ NOTES:
 
 #### `src/WinTrek/TrekDlgs.h`
 
-**PURPOSE:** The file `TrekDlgs.h` contains declarations for various dialog classes used in the Allegiance game, including dialogs for managing missions, player loadouts, and handling game events like accepting/rejecting missions.
+PURPOSE: Manages various dialog windows and controls for the Allegiance game interface.
 
-**KEY PARTS:**
-- **Name:** AcceptRejectDlg - Manages player acceptance/rejection of missions.
-- **Name:** GameOverDlg - Handles the game over screen and updates player information.
-- **Name:** LoadoutDlg - Allows players to manage their loadouts during a mission.
-- **Name:** CreateMissionDlg - Provides a dialog for creating new missions.
+KEY PARTS:
+- TrekControlWindow: Base class for control windows with enable/disable functionality.
+- TrekScrollBar: Custom scroll bar implementation using PaneWindow.
+- TrekImgButton: Button that displays an image and can be checked or unchecked.
+- MainDlg: Manages the main game dialog.
+- MissionsDlg: Handles mission-related dialogs and updates.
+- SideStrategyDlg: Manages side strategy settings and player interactions.
+- GameOverDlg: Displays the game over screen.
+- LoadoutDlg: Manages player loadouts and inventory.
+- CreateMissionDlg: Allows players to create new missions.
 
-**CONNECTS TO:**
-- Other UI components like `TrekImgButton` and `TrekGrid`.
-- Game logic classes that handle player and mission data.
+CONNECTS TO: PaneWindow, other dialog components.
 
-**NOTES:**
-- Contains TODO comments indicating areas for refactoring, adding comments, improving error handling, and implementing specific methods.
-- Some placeholders exist for methods like `OnSelMapType()` and `OnPickCiv(int civID)`, suggesting these need implementation.
+NOTES: None.
 
 #### `src/WinTrek/Treki.h`
 
@@ -12867,22 +14380,319 @@ NOTES: None.
 
 #### `src/WinTrek/WinTrek.cpp`
 
-**PURPOSE:** The `src/WinTrek/WinTrek.cpp` file is a central component of the Allegiance game, handling various aspects of the game's functionality including camera controls, quick chat management, and main window operations.
+PURPOSE: Manages game window functionality, camera control, and various game state events.
 
-**KEY PARTS:**
-- **Class: CameraControl**: Manages camera position, orientation, field of view, and jiggle effects.
-- **Function: GetThrottle(ImodelIGC* pmodel)**: Calculates throttle value based on ship speed.
-- **Function: GetCurrentTarget()**: Determines the current target for the player's ship.
-- **Class: QuickChatNode**: Manages quick chat functionality.
-- **Function: DDVidCreateThreadProc(LPVOID param)**: Handles video playback in a separate thread.
-- **Class: TrekWindowImpl**: Manages the main game window, including keyboard input and quick chat.
-- **Class: GameStateCloseSink**: Listens for game state close events and updates UI elements.
-- **Function: UpdateGameStateContainer**: Updates UI elements based on current game state.
-- **Class: WinTrek**: Main class handling game logic, camera controls, and user inputs.
+KEY PARTS:
+- CameraControl: Manages camera properties like position, orientation, field of view, and jiggle effects.
+- TrekWindowImpl: Main class for implementing window functionality, including handling keyboard input, managing screens, and playing video clips.
+- GameStateCloseSink: Handles game state close events by updating win condition grids.
+- LoadAnimatedImage: Loads or retrieves animated images from a cache.
+- PlayMovieClip: Plays video clips in a separate thread under specific conditions.
+- IsInputEnabled: Determines if a given virtual key should be considered enabled based on the current screen state and composition status.
+- Camera: Manages camera properties and transformations.
+- SetCameraMode: Changes the camera mode based on input, updating settings.
+- GetViewMode: Returns the current view mode.
+- UpdateCamera: Updates the camera position and orientation based on ship movement.
+- ComputeExternalChase: Calculates the camera position for a chase view.
+- AddMuzzleFlare: Adds a muzzle flare at a given direction and duration.
+- DoTrekUpdate: Updates the game world based on elapsed time and frame ID.
+- TakeScreenShot: Captures and saves a screenshot of the screen as a 24-bit bitmap.
+- CreateMenu: Creates a new menu with items and handles popup menus.
+- ToggleFilterUnknownChats: Toggles filtering of unknown chats and updates preferences.
 
-**CONNECTS TO:** Other game systems such as the modeler, art paths, sound engine, input handling, and various screens like the main menu, quick chat, and leaderboards.
+CONNECTS TO: Allegiance game engine systems, video playback libraries, input handling subsystems.
 
-**NOTES:** The file contains numerous TODO comments indicating areas for improvement or further development. There are also instances of commented-out code that suggest potential features or fixes that were either not fully implemented or have been temporarily disabled.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-382
+  - CameraControl: Manages camera position, orientation, field of view, and jiggle.
+  - GetCurrentTarget: Returns the current target for the ship, considering visibility and side affiliation.
+  - GetSimilarTargetMask: Determines a bitmask indicating whether a target is friendly, enemy, or neutral based on the ship's side.
+  - CreateMessageBox: Creates a message box with optional default and cancel buttons.
+  - DDVidCreateThreadProc: Handles video playback in a separate thread.
+  - SoundInit::InitializeSoundTemplates: Initializes sound templates for the game.
+  - SoundInit::AddMembers: Adds members to a namespace related to sounds.
+  - AnyViewMinRenderScreenSize: Minimum screen size for rendering views.
+- lines 383-749
+  - CameraControl::SetAnimation: Starts or stops animations for position and FOV.
+  - CameraControl::GetAnimation: Returns the current animation duration.
+  - CameraControl::SetJiggle: Adjusts the camera's jiggle effect based on afterburner power.
+  - CameraControl::SetToModel: Sets the camera's position and orientation to match a model.
+  - CameraControl::SetFOV: , SetPosition, SetOrientation: Modify the camera's properties either immediately or as part of an animation.
+  - CameraControl::GetFOV: , GetPosition, GetOrientation: Retrieve the current camera properties.
+  - CameraControl::GetCameraPosition: , GetCameraOrientation: Return the camera's position and orientation, falling back to internal state if no camera is set.
+  - CameraListener: Implements ISoundListener to provide sound positioning based on the camera's orientation and position.
+- lines 751-1123
+  - TrekWindowImpl: Main class for implementing window functionality.
+  - SuperKeyboardInputFilter: Filters keyboard input for special handling.
+  - KeyboardInputFilter: General keyboard input filter.
+  - QuickChatMenuCommandSink: Handles commands and selections from the quick chat menu.
+  - PlaySonicChat: Plays a specific voice from a Sonic Chat entry.
+  - GetSonicChatText: Retrieves text for a specific voice in a Sonic Chat entry.
+  - OnSuperKeyFilter: Handles special key presses, particularly tab to cycle chat targets.
+  - OpenMainQuickChatMenu: Opens the main quick chat menu.
+- lines 1124-1477
+  - TRef<SonicChatVoice>: Manages chat voice data.
+  - ZString unknown("Unknown chat"): Default string for unknown chat messages.
+  - m_frameID: Frame identifier for rendering updates.
+  - m_timeLastFrame: Time of the last frame update.
+  - m_timeLastDamage: Time of the last damage event.
+  - m_fDeltaTime: Delta time between frames for timing calculations.
+  - m_timeLastActivity: Timer for tracking last user activity.
+  - m_bFFAutoCenter: Boolean to enable or disable auto-centering feature.
+- lines 1478-1845
+  - TMap<ZString, TRef<AnimatedImage> > m_mapAnimatedImages: A map to cache animated images.
+  - LoadAnimatedImage(Number ptime, const ZString& str): Loads an animated image from a file or returns it from the cache if already loaded.
+  - GameStateCloseSink: An event sink that handles game state close events.
+  - InitializeGameStateContainer(): Initializes the game state container with various winning condition tiles.
+  - TerminateGameStateContainer(): Cleans up resources used by the game state container.
+  - WinConditionInfo: Abstract base class for win condition information.
+  - ConquestWinConditionInfo, TerritoryWinConditionInfo, DeathMatchWinConditionInfo: Concrete classes implementing specific win conditions.
+  - ShipWinConditionInfo: Abstract base class for ship-specific win condition information.
+- lines 1846-2202
+  - ClearLine: Clears specific columns of a grid for a given row.
+  - Greater: Compares two ships or sides based on their kills and deaths (for DeathMatch) or artifacts and flags (for other conditions).
+  - AnyInfo: Checks if there is any relevant information to display.
+  - FillWinCondition: Populates a string grid with win condition data for sides and ships.
+  - UpdateGameStateContainer: Updates the game state container by filling various win condition grids.
+  - InitializeSoundTemplates: Initializes sound templates using the modeler.
+  - GetUI: Returns whether the current screen is not combat.
+  - SetScreen: Sets the screen and updates the UI window.
+- lines 2203-2574
+  - MatrixTransform2: Represents a transformation matrix for screen rendering.
+  - TransformImage: Manages image transformations and rendering.
+  - GroupImage: Combines multiple images into a single group.
+  - PaneImage: Creates an image from a pane.
+  - ScreenID: Enumerates different types of screens in the game.
+  - SetUiScreen: Sets the user interface screen.
+  - SetCombatScreen: Sets the combat screen.
+  - screen: Handles switching between different screens, managing resources and state.
+- lines 2575-2937
+  - IsInputEnabled(int vk): Determines if a given virtual key (vk) should be considered enabled.
+  - PlayMovieClip(bool playMovies, bool isWindowed, ZString moviePath): Plays a video clip in a separate thread if certain conditions are met.
+  - TrekWindowImpl(EffectApp papp, const ZString& strCommandLine, const ZString& strArtPath, bool bMovies): Constructor for the main game window class, handling initialization and setup.
+  - IsInputEnabled(int vk): Checks if a key is enabled based on current screen state and composition status.
+  - PlayMovieClip(bool playMovies, bool isWindowed, ZString moviePath): Handles playing video clips in a separate thread under specific conditions.
+  - TrekWindowImpl(EffectApp papp, const ZString& strCommandLine, const ZString& strArtPath, bool bMovies): Initializes the main game window with various settings and configurations.
+  - TODO: BT - 9/17 - Made this a function to support chaining the opening microsoft splash with the longer classic allegiance movie.
+  - TODO: BT - 10/17 - Set to always start windowed, then go full screen after game is initialized. Trying to find the source of the mystery "crash on launch" issues.
+- lines 2939-3331
+  - Camera: Manages camera properties and transformations.
+  - Geo::GetEmpty(): Returns an empty geometry object.
+  - WrapGeo: Wraps a geometry object to allow for additional transformations or behaviors.
+  - MatrixTransform: Applies matrix transformations to a geometry object.
+  - KeyboardInputFilter: Filters keyboard input based on certain criteria.
+  - SuperKeyboardInputFilter: A specialized keyboard input filter for the game.
+  - CreateJoystickImage: Creates an image representing a joystick.
+  - InitializeImages(): Initializes various images used in the game.
+- lines 3333-3690
+  - TrekWindowImpl: Main window implementation class.
+  - InitializeImages(): Initializes various image resources.
+  - SetCursor(const char pszCursor): Sets the cursor to a specified image.
+  - RestoreCursor(): Restores the cursor from a resource.
+  - SavePreference(const ZString& szName, DWORD dwValue): Saves an integer preference value.
+  - LoadPreference(const ZString& szName, DWORD dwDefault): Loads an integer preference value with a default.
+  - IsWine(): Checks if the application is running under Wine.
+  - Terminate(): Cleans up and terminates various resources.
+- lines 3691-4032
+  - contextRejectPlayer: Handles player rejection logic.
+  - contextMakeLeader: Sets a player as the leader of their team.
+  - contextMute: Toggles the mute status of a player.
+  - contextKickPlayer: Kicks a player from the game by sending a quit message.
+  - contextBanPlayer: Bans a player from the game by sending a quit message.
+  - contextDockDrone: Toggles whether a player's ship stays docked.
+  - contextChat: Initiates a chat with the selected player's ship.
+  - Error: Displays an error message and exits fullscreen mode.
+- lines 4034-4386
+  - TakeScreenShot(): Captures and saves a screenshot of the screen as a 24-bit bitmap.
+  - ShowMainMenu(): Creates and displays the main menu with various options like help, options, game details, and quit.
+  - IsPlayerSteamModerator(): Checks if the current player is a Steam moderator by verifying their group ID.
+  - ShowPlayerContextMenu(PlayerInfo  playerInfo): Displays a context menu for a player in the lobby, offering options like accept, reject, make leader, mute, kick, or ban (if moderator).
+  - ShowPlayerPaneContextMenu(PlayerInfo  playerInfo): Displays a context menu for a player in the player pane, offering options like dock/launch, chat, and accept/reject based on side and ship type.
+  - TODO: Move Steam-related globals to where other globals are hiding.
+  - Unusual code: The screenshot functionality is currently disabled and commented out, with Steam's SteamScreenshots API being used instead.
+- lines 4387-4740
+  - CreateMenu: Creates a new menu.
+  - AddMenuItem: Adds an item to a menu.
+  - OpenPopup: Opens a popup menu at a specified position.
+  - GetMousePosition: Retrieves the current mouse position.
+  - IsPlayerSteamModerator: Checks if the player is a Steam moderator.
+  - ShowOptionsMenu: Displays the main options menu.
+  - AddAvailablePlayerTagsToMenu: Adds available player tags to a menu.
+  - SetPlayerCallsign: Sets the player's callsign based on an index.
+- lines 4741-5104
+  - ToggleFilterUnknownChats: Toggles filtering of unknown chats and saves the preference.
+  - ToggleFilterLobbyChats: Allows setting lobby chat filter options (1, 2, or 3) and updates preferences accordingly.
+  - IncreaseChatLines: Increases the number of chat lines displayed and updates preferences.
+  - ReduceChatLines: Decreases the number of chat lines displayed and updates preferences.
+  - CycleChatSize: Cycles through different chat font sizes and updates preferences.
+  - ToggleLinearControls: Toggles linear control response and saves the preference.
+  - ToggleStars: Toggles visibility of stars in the UI and saves the preference.
+  - TogglePosters: Toggles visibility of posters in the UI and saves the preference.
+- lines 5106-5468
+  - SetDeadzone(DWORD value): Adjusts the joystick deadzone based on a given value.
+  - ToggleVirtualJoystick(): Toggles the virtual joystick feature and saves the preference.
+  - CloseNotificationSink: A class implementing IIntegerEventSink to handle close notifications.
+  - ToggleOldUi(): Toggles between old and new UI, displays a message box with a close button.
+  - ToggleShowJoystickIndicator(): Toggles the display of the joystick indicator and saves the preference.
+  - ToggleShowGrid(): Toggles the visibility of the grid (only applicable during loading).
+  - SetRadarLOD(DWORD value): Sets the radar level of detail (only applicable during loading).
+  - SetGamma(ZString& value): Sets the gamma level for rendering, saving the preference.
+- lines 5470-5822
+  - AdjustVoiceOverVolume: Adjusts voice over volume with a delta value.
+  - AdjustFFGain: Adjusts forward firing (FF) gain with a delta value.
+  - AdjustMouseSens: Adjusts mouse sensitivity with a delta value.
+  - GetPostersMenuString: Returns menu string for posters setting.
+  - GetDebrisMenuString: Returns menu string for debris density setting.
+  - GetEnvironmentMenuString: Returns menu string for environment setting.
+  - GetMaxTextureSizeMenuString: Returns menu string for maximum texture size setting.
+  - GetMouseSensMenuString: Returns menu string for mouse sensitivity adjustment.
+- lines 5823-6175
+  - CloseMenu(): Closes the current menu.
+  - DoInputConfigure(): Opens a popup for configuring input settings.
+  - OnGameState(): Opens a popup with mission parameters.
+  - ShowPlayerPings(): Displays connection information of players.
+  - OnMenuCommand(IMenuItem pitem): Handles menu commands based on user selection.
+  - GetChatHistoryHUDMenuString(): Returns the current state of chat history HUD as a string.
+  - GetCenterHUDMenuString(): Returns the current state of center HUD as a string.
+  - GetTargetHUDMenuString(): Returns the current state of target HUD as a string.
+- lines 6177-6546
+  - ToggleStars: Toggles the display of stars.
+  - ToggleEnvironment: Toggles the environment rendering.
+  - ToggleOldUi: Switches between old and new UI modes.
+  - ToggleShowJoystickIndicator: Shows or hides joystick indicator.
+  - ToggleBandwidth: Adjusts bandwidth settings (commented out).
+  - ToggleMaxTextureSize: Increases texture size.
+  - ToggleAA: Toggles anti-aliasing.
+  - ToggleCensorChats: Censors chat messages.
+- lines 6547-6908
+  - SetCameraMode: Changes the camera mode based on the input parameter and updates various settings accordingly.
+  - GetViewMode: Returns the current view mode.
+  - SetViewMode: Sets the view mode and handles associated changes like updating overlays, resetting popup containers, and setting camera modes.
+  - EnableDisplacementCommandView: Enables or disables a displacement command view feature.
+  - GetOverlayFlags: Retrieves the current overlay flags for the current view mode.
+  - SetOverlayFlags: Sets the overlay flags for the current view mode and updates associated UI elements.
+  - TurnOnOverlayFlags: Turns on specified overlay flags.
+  - TurnOffOverlayFlags: Turns off specified overlay flags.
+- lines 6909-7260
+  - UpdateCamera: Updates the camera position and orientation based on ship movement.
+  - InternalCamera: Handles internal camera views like chase view.
+  - CommandCamera: Manages command view updates.
+  - ExternalCamera: Controls external camera modes such as target, fly-by, orbit, etc.
+  - ComputeExternalChase: Calculates the camera position for a chase view.
+  - TrackCamera: Positions the camera to track a specific target or missile.
+  - m_turnRateSamples: Array of samples for turn rates.
+  - m_turnRateSampleIndex: Index for current sample in turn rate array.
+- lines 7261-7616
+  - ComputeExternalChase: Computes external chase view for a ship.
+  - AddMuzzleFlare: Adds a muzzle flare at a given direction and duration.
+  - GetFPSString: Generates a string with FPS, MSPF, and other performance metrics.
+  - StartTraining: Starts a training mission.
+  - OrientCommandView: Sets the orientation of the command view camera.
+  - GetDefaultPosition: Gets the default position for the command view.
+  - PositionCommandView: Positions the command view based on target or default.
+  - UpdateCommandView: Updates the command view's position and orientation.
+- lines 7617-7976
+  - m_ptrekInput->SetInputSite(this): Initializes input handling for the current screen.
+  - UpdateMouseEnabled(): Enables or disables mouse interaction based on game state.
+  - m_pscreen->OnFrame(): Calls a frame update method on the current screen object.
+  - CheckCountdownSound(): Handles any countdown sounds that need to be played.
+  - trekClient.HandleAutoDownload(): Manages automatic downloads, adjusting time slices based on fullscreen mode.
+  - ReceiveMessages(): Processes network messages and updates game state accordingly.
+  - DoTrekUpdate(): Updates the game world based on elapsed time and frame ID.
+  - m_pSoundEngine->Update(): Updates sound engine to reflect current game state.
+- lines 7977-8325
+  - ImodelIGC: Interface for game objects.
+  - IasteroidIGC: Interface for asteroid objects.
+  - IafterburnerIGC: Interface for afterburner components.
+  - ThingGeo: Represents graphical representation of a thing.
+  - TRef<ThingGeo>: Smart pointer to ThingGeo.
+  - ThingSitePrivate: Private implementation details for ThingSite.
+  - SetTarget: Sets the target for a ship.
+  - FindTarget: Finds a suitable target based on criteria.
+- lines 8326-8681
+  - WinTrek.cpp: Main file for handling input and camera controls.
+  - bControlsInUse: Boolean indicating if any joystick axes are being used.
+  - trekClient: Instance of a client managing game state and ship controls.
+  - js.controls.jsValues: Joystick values for yaw, pitch, roll, and throttle.
+  - trekClient.trekJoyStick: Current joystick state from the client.
+  - g_fJoystickDeadZone: Threshold for joystick movement to be considered active.
+  - Training::ApproveControls: and Training::ApproveActions: Functions for training mission hooks.
+  - m_cameraControl.SetFOV: Sets the field of view based on throttle input.
+- lines 8683-9036
+  - Color: Represents a color with RGBA values.
+  - Time: A class representing time, likely used for timing and synchronization.
+  - IInputProvider: An interface for input providers.
+  - KeyState: A struct representing the state of a key press.
+  - TrekKey: An enum representing different keys in the game.
+  - CommandID: An enum representing different command IDs.
+  - OT_ship: An enum representing an object type, specifically a ship.
+  - NA: A constant representing "not applicable" or "invalid".
+- lines 9037-9392
+  - trekClient: Manages client-side game state and interactions.
+  - Mount: Enumerates weapon mount positions on a ship.
+  - ET_Weapon: Enumerates weapon equipment types.
+  - HelpPosition: Manages the position of help UI elements based on time.
+  - PagePaneIncluderImpl: Implementation of an interface for including pages in a help pane.
+  - GetVersionString: Returns the version string of the game.
+  - InitializeHelp: Initializes the help system with a help pane and position.
+  - OnHelp: Toggles the visibility of the help UI.
+- lines 9393-9742
+  - suicideF: A boolean flag that seems to indicate a suicide condition.
+  - switch(tk): A switch statement based on the input key tk.
+  - TK_ChatPageUp and TK_ChatPageDown: Handles page up and down for chat list pane.
+  - TK_ToggleMouse: Toggles mouse overlay flags and virtual joystick enablement.
+  - TK_TrackCommandView: Toggles command view tracking and posts a message accordingly.
+  - TK_StartChat: Starts chat and sets focus on trek input.
+  - TK_ToggleLODSlider: Toggles the level of detail slider between empty and current image.
+  - TK_LockVector and TK_ToggleCloak: Handle vector locking and cloak activation based on ship conditions.
+- lines 9743-10081
+  - m_cm: Current camera mode.
+  - m_cameraControl: Object for controlling the camera.
+  - pi: Constant representing π (pi).
+  - SetHeadOrientation(float angle): Function to set the head orientation of the camera.
+  - GetCameraMode(): Function to get the current camera mode.
+  - SetCameraMode(CameraMode cm): Function to set the camera mode.
+  - GetViewMode(): Function to get the current view mode.
+  - SetViewMode(ViewMode vm): Function to set the view mode.
+- lines 10082-10428
+  - TK_ConModeTeleport: Handles teleportation mode.
+  - TK_TargetHostile: Targets the ship that has done the most damage recently.
+  - TK_TargetCenter: Targets the ship closest to the reticle.
+  - TrekFindTarget: Finds and sets a target based on given criteria.
+  - TK_ToggleAutoPilot: Toggles the autopilot mode.
+  - TK_VoteYes: Votes yes in a vote.
+  - TK_VoteNo: Votes no in a vote.
+  - TK_ExecuteCommand: Executes a queued command.
+- lines 10429-10771
+  - suicideF: A boolean flag indicating if a suicide command has been initiated.
+  - m_bCommandGrid: A boolean flag to toggle the visibility of a grid in the game interface.
+  - SetTarget: Function to set the target for a ship, taking parameters for the target model and command ID.
+  - RejectQueuedCommand: Function to reject a queued command, optionally clearing it and sending a negative response.
+  - AcceptQueuedCommand: Function to accept a queued command, executing or setting up the command based on its type.
+  - SetQueuedCommand: Overloaded function to set a queued command with either a model target or money request.
+  - m_pchatListPane: A reference to a chat list pane object.
+  - SetChatListPane: Function to set the chat list pane object.
+- lines 10772-11120
+  - ChatTarget GetLobbyChatTarget(): Returns the current lobby chat target.
+  - float MapJoystick(float value): Maps joystick input values to a usable range.
+  - void SwitchToJoyThrottle(void): Determines whether to use joystick or keyboard throttle control.
+  - bool SenseJoystick(JoystickResults js, bool bInternalCamera, bool bReadKeyboard, bool &bHandleThrottle): Reads and processes joystick and keyboard inputs.
+  - HRESULT HandleMsg(FEDMESSAGE pfm, Time lastUpdate, Time now): Handles incoming messages from the game server.
+  - void TerminateModelEvent(ImodelIGC model): Processes events related to model termination.
+  - void OnDelPlayer(MissionInfo pMissionInfo, SideID sideID, PlayerInfo pPlayerInfo, QuitSideReason reason, const char szMessageParam): Handles player disconnection events.
+  - "// NYI" in HandleMsg function for FM_S_TREASURE_SETS case.
+- lines 11121-11359
+  - TrekWindowImpl::CheckCountdownSound: Manages countdown sounds during missions.
+  - WinTrekClient::ForwardSquadMessage: Forwards squad messages to the squad screen.
+  - WinTrekClient::ForwardCharInfoMessage: Forwards character info messages to the Character Info screen.
+  - WinTrekClient::ForwardLeaderBoardMessage: Forwards leaderboard messages to the Leaderboard screen.
+  - VTSetText: Updates text in a virtual text edit control.
+  - StartSound: Starts playing a sound using a template or ID.
+  - StartLockDown: Displays a lockdown message box.
+  - EndLockDown: Closes the lockdown message box.
 
 #### `src/WinTrek/WinTrek.h`
 
@@ -13038,16 +14848,10 @@ NOTES: None.
 
 #### `src/WinTrek/clientdrones.cpp`
 
-PURPOSE: The file `clientdrones.cpp` is part of the Allegiance game's client-side implementation and handles the management and control of drones for players.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `CClientDroneManager`: Manages the creation, destruction, and state updates of player drones.
-- `CDroneControl`: Handles the AI and user input for controlling individual drone entities.
-- `CDroneData`: Stores data related to each drone, such as health, position, and target information.
-
-CONNECTS TO: `drones.cpp` - This file likely contains definitions or implementations related to the drone classes and structures used by `clientdrones.cpp`.
-
-NOTES: None.
+    #include "pch.h"
+    #include "drones.cpp"
 
 #### `src/WinTrek/cmdview.cpp`
 
@@ -13086,19 +14890,112 @@ NOTES: None
 
 #### `src/WinTrek/console.cpp`
 
-**PURPOSE:** The `console.cpp` file in Allegiance is responsible for managing the console interface, including chat composition, command input, and various UI elements like recipient buttons and verb buttons.
+PURPOSE: Manages console interactions and chat functionality within the Allegiance game.
 
-**KEY PARTS:**
-- **Class: ConsoleDataImpl**: Manages console-related data such as compose state, radar mode, money, lives, kills, and various UI elements.
-- **Function: Update(Time now)**: Updates the console data based on current game state.
-- **Function: SetTipText(const ZString& strHelp)**: Updates the main tip text displayed on the console.
-- **Function: SetComposeState(ComposeState cs)**: Sets the compose state of the console (e.g., composing a command or chat message).
-- **Class: ChatSubject**: Represents a subject of a chat or command, managing recipients and checking if commands are legal for the current group.
-- **Function: LegalRectangle**: Checks if two points form a rectangle with a minimum size.
+KEY PARTS:
+- ConsoleDataImpl: Manages console data and state updates.
+- ChatSubject: Handles chat subjects and recipients.
+- LegalRectangle: Ensures minimum distance between points.
+- ComposeState: Enumerates states for composing text (chat, command).
+- ModelData: Stores model-related data.
+- EventSourceImpl: Implements event handling.
 
-**CONNECTS TO:** Other game systems such as player management, mission handling, and UI rendering.
+CONNECTS TO:
+- Game logic and state management
+- User interface components
 
-**NOTES:** Contains commented-out code for features like `CHAT_ALLIES` and `CHAT_ADMIN`, which are not implemented yet. Uses `OutputDebugString` for debugging output that might be removed in production builds.
+NOTES:
+- Contains TODO comments indicating areas for debugging or future improvements.
+
+PARTS (in file order):
+
+- lines 1-353
+  - ConsoleDataImpl: Likely a private implementation class for managing console data.
+  - ConsolePickImage: A custom image class that handles mouse interactions and hit testing.
+  - ChatSubject: Manages chat subjects, including adding, deleting, and toggling ship subjects in a chat group.
+  - LegalRectangle: Checks if the distance between two points is greater than a minimum size.
+  - c_iRecipientOther, c_iRecipientMe, etc.: Constants defining different recipient types for messages or commands.
+  - ChatTarget: Enumerates possible chat targets like individual, team, allies, etc.
+  - SetRecipient: Method in ChatSubject to set the recipient of a chat message based on various conditions.
+  - AddSubject, DeleteSubject, ToggleSubject: Methods in ChatSubject to manage ship subjects in a chat group.
+- lines 354-733
+  - ChatSubject: Manages chat recipients and subjects.
+  - ConsoleDataImpl: Manages console data and state.
+  - ComposeState: Enumerates states for composing text (chat, command, etc.).
+  - TRef: Template class for reference counting.
+  - ModifiableNumber: Class for modifiable numeric values.
+  - ModifiableString: Class for modifiable string values.
+  - ModelData: Class for model data.
+  - EventSourceImpl: Implementation of event source.
+- lines 735-1098
+  - ConsoleDataImpl: Manages console data and updates UI elements.
+  - Update: Updates various UI elements based on game state.
+  - SetTarget: Sets the current target model.
+  - SetOverlayFlags: Sets overlay flags and adjusts verbs accordingly.
+  - OnSwitchViewMode: Handles switching view modes.
+  - SetTipText: Sets regular tip text.
+  - SetCriticalTipText: Sets critical tip text with scrolling effect.
+  - SetComposeState: Sets compose state for UI interactions.
+- lines 1100-1454
+  - ComposeState GetComposeState(): Returns the current compose state.
+  - OnMoneyChange(PlayerInfo pPlayerInfo): Handles money change events for a player.
+  - OnDelPlayer(MissionInfo pMissionDef, SideID sideID, PlayerInfo pPlayerInfo, QuitSideReason reason, const char szMessageParam): Handles player deletion events during missions.
+  - OnBackButton(): Handles the back button press event, changing the view mode based on whether the game is in training or not.
+  - OnRecipientButton(int nColumn): Sets the recipient of a chat message based on the button pressed.
+  - OnWingCombo(int index): Calls OnRecipientButton for wing recipients using an index.
+  - OnVerbButton(int nColumn): Handles verb buttons, setting the compose state to command and updating the composed chat.
+  - UpdateComposedChat(): Updates the displayed chat text and recipient based on the current compose state and settings.
+- lines 1455-1809
+  - ObjectType otTarget: Represents the type of the target object.
+  - ObjectID oidTarget: Represents the ID of the target object.
+  - ChatTarget ct: Enumerates different types of chat targets (e.g., group, individual).
+  - IshipIGC pship: Pointer to a ship object.
+  - ImodelIGC pmodel: Pointer to a model object.
+  - CommandID cid: Represents a command ID for actions like attack or build.
+  - AbilityBitMask aabm: Bitmask representing abilities of an entity.
+  - ChatSubject m_chsCurrent: Current chat subject, managing the state of the chat composition.
+- lines 1811-2159
+  - UpdateComposedChat(): Updates the composed chat message based on current state.
+  - IsComposingCommand(): Checks if the current composition state is for a command or mouse command.
+  - GetPickedObject(): Returns the currently picked object.
+  - PickModel(ImodelIGC pmodel, int button): Handles picking a model with a mouse click.
+  - ResolvePick(IclusterIGC pcluster, const Point& pointPick, int button): Resolves which model was clicked based on position and button.
+  - PickObject(IclusterIGC pcluster, const Point& pointPick, int button): Picks an object or creates a waypoint based on input.
+  - Button(IInputProvider pprovider, const Point& point, int button, bool bCaptured, bool bInside, bool bDown): Handles mouse button events for navigation and selection.
+- lines 2160-2505
+  - StartComposing: Initiates composing a chat message.
+  - QuitComposing: Ends the current composition of a chat message.
+  - UpdateComposedChat: Updates the display of the composed chat message.
+  - SetComposeState: Sets the state of the chat composition.
+  - SetVerb: Sets the command verb for the chat composition.
+  - SendChat: Sends the composed chat message.
+  - OnChar: Handles character input during chat composition.
+  - StartChat: Starts a new chat session.
+- lines 2506-2840
+  - MatchName: Compares two strings and returns a score indicating how well they match.
+  - SetChatObject: Sets the current chat target to the specified model or cluster.
+  - OnBackspace: Handles backspace key press in chat input.
+  - CycleChatTarget: Cycles through possible chat recipients based on current state.
+  - OnTab: Handles tab key press for autocomplete-like functionality in chat input.
+  - c_badMatch: A constant indicating an invalid match score.
+  - CHAT_WING, CHAT_INDIVIDUAL, etc.: Constants representing different types of chat recipients.
+  - TODO: OutputDebugString calls are commented out, suggesting they were used for debugging and should be removed or uncommented as needed.
+- lines 2841-3177
+  - OnTab: Handles tab completion for chat recipients and commands.
+  - MatchName: Compares a string to possible matches (ship names, allies, etc.) and returns a score indicating how close the match is.
+  - SetComposeState: Changes the state of the chat composition process.
+  - SetVerb: Sets the current verb being composed in the chat.
+  - DisplayImage: A class for displaying images with animation and visibility control.
+  - ConsolePickImage: Handles mouse input events for the console interface.
+  - TODOs: "WLP 2005 - Only talk to enemy pilots - not cons" indicates a potential issue or improvement related to chat recipient selection. "//NYI need ome way to tell the image that it no longer needs to be updated" suggests an unimplemented feature for managing image updates.
+- lines 3178-3511
+  - ConsolePickImage::MouseEnter: Handles mouse enter event.
+  - ConsolePickImage::MouseLeave: Handles mouse leave event.
+  - ConsoleImageImpl: Main implementation class for console image.
+  - SetDisplayMDL: Loads and initializes display models based on a file name.
+  - CreateDisplayImage: Creates and adds a display image to the group displays.
+  - AddChildren: Adds child panes from an object stack to a parent pane.
+  - TODOs: VS.Net 2003 port: error C2465 here.
 
 #### `src/WinTrek/console.h`
 
@@ -13115,24 +15012,55 @@ NOTES: None.
 
 #### `src/WinTrek/consoledata.cpp`
 
-**PURPOSE:** The `consoledata.cpp` file in Allegiance contains implementation details for managing and retrieving data related to game models such as ships, stations, and asteroids. It includes functions for accessing various attributes of these models, identifying their status, and determining their capabilities.
+PURPOSE: The `consoledata.cpp` file contains classes and methods for managing and retrieving data related to models (ships and stations) and their parts within the Allegiance game.
 
-**KEY PARTS:**
-- **Class: ModelData**: Manages data for different types of game models.
-  - Functions like `GetSpeed()`, `GetMaxThrust()`, etc., retrieve specific attributes of the model.
-  - Methods such as `IDTarget()` determine the team status of the target.
+KEY PARTS:
+- ModelData: Manages properties of models, including speed, energy, ammo, fuel, hit points, and shields.
+- PartWrapper: Handles properties and behaviors of individual parts on a model, such as weapon damage, range, and readiness state.
 
-- **Class: PartWrapper**: Wraps around parts (components) of a ship, providing detailed information about each part.
-  - Functions like `IsSelected()`, `IsActive()`, and `IsOutOfAmmo()` check various states of the part.
-  - Methods such as `GetDamage()` and `GetRange()` compute specific properties of the part.
+CONNECTS TO: Other systems or files it depends on or serves:
+- Depends on game engine components for data retrieval and manipulation.
 
-**CONNECTS TO:** 
-- Other game systems for managing ship components, player interactions, and model visibility.
+NOTES: None.
 
-**NOTES:**
-- The file includes TODO comments and unusual practices like casting without checking types.
-- Functions return `-1.0f` or `ZAssert(false)` in cases where certain attributes are not available, indicating potential issues that need handling.
-- Some commented-out code suggests previous intended functionality that has been removed or is no longer implemented.
+PARTS (in file order):
+
+- lines 1-339
+  - ModelData: Class containing methods for retrieving various properties of a model (ship or station).
+  - GetModel(): Returns the model associated with the object.
+  - GetModelTypeInternal() and GetModelType(): Retrieve the type of the model as an enum and float respectively.
+  - GetModelTypeDesc(): Provides a description of the model's type, considering visibility and last seen data.
+  - GetSpeed(): Calculates the speed of the model if it is not static.
+  - GetMaxThrust(), GetMass(), GetRange(): Specific methods for retrieving properties related to movement and size.
+  - GetPercentHitPoints() and GetNumHitPoints(): Methods for determining the health status of the model.
+  - GetPercentShields() and GetNumShields(): Retrieves information about the shields' current state.
+- lines 340-678
+  - ModelData::GetMaxEnergy: Returns the maximum energy of the ship.
+  - ModelData::GetNumEnergy: Returns the current energy level of the ship as a percentage.
+  - ModelData::GetAmmo: Returns the current ammo level as a percentage of the max ammo.
+  - ModelData::GetMaxAmmo: Returns the maximum ammo capacity of the ship.
+  - ModelData::GetNumAmmo: Returns the current ammo count.
+  - ModelData::GetFuel: Returns the current fuel level as a percentage of the max fuel.
+  - ModelData::GetMaxFuel: Returns the maximum fuel capacity of the ship.
+  - ModelData::GetNumFuel: Returns the current fuel amount.
+- lines 679-1021
+  - PartWrapper::GetPartName: Returns the name of the part.
+  - PartWrapper::GetRange: Calculates the range of a weapon or magazine.
+  - PartWrapper::GetDamage: Calculates the damage output of a weapon or magazine.
+  - PartWrapper::GetRate: Returns the rate of fire for a weapon.
+  - PartWrapper::GetCount: Determines the count of parts, considering cargo and pack types.
+  - PartWrapper::GetAfterburnerFuelConsumption: Calculates fuel consumption for afterburners.
+  - PartWrapper::GetAfterburnerFuelLeft: Computes remaining fuel for afterburners.
+  - PartWrapper::GetAfterburnerTopSpeed: Returns the top speed achievable with afterburners.
+- lines 1022-1200
+  - PartWrapper::IsStationKiller: Returns 0 for all cases.
+  - PartWrapper::IsAsteroidKiller: Returns 0 for all cases.
+  - PartWrapper::IsSelected: Determines if a weapon is selected based on mount ID and client state.
+  - PartWrapper::IsActive: Checks if the part is active.
+  - PartWrapper::IsOutOfAmmo: Determines if a weapon or launcher is out of ammo.
+  - PartWrapper::GetReadyState: Returns the readiness state of the part.
+  - PartWrapper::GetMountedFraction: Returns the fraction of the part that is mounted.
+  - PartWrapper::GetArmedFraction: Returns the fraction of the launcher that is armed.
 
 #### `src/WinTrek/consoledata.h`
 
@@ -13286,53 +15214,89 @@ None.
 
 #### `src/WinTrek/gamescreen.cpp`
 
-**PURPOSE:** The `gamescreen.cpp` file manages the user interface and functionality of the game screen in Allegiance, including handling button clicks, updating the game list, connecting to servers, and managing player interactions.
+PURPOSE: The `gamescreen.cpp` file contains the implementation for managing the game screen and handling various UI interactions within Allegiance.
 
-**KEY PARTS:**
-- **Class: GameScreen**: Manages the game screen UI, handles events like button clicks, key presses, and updates the game list based on filters.
-- **Class: GameItemPainter**: Responsible for painting individual items in the game list pane.
-- **Class: FilterDialogPopup**: Provides a popup dialog for filtering games based on criteria like developments, lives, scores count, etc.
-- **Class: FindDialogPopup**: Provides a popup dialog for finding players by name.
-- **Function: OnButtonOK()**: Handles the OK button click in both `FilterDialogPopup` and `FindDialogPopup`, updating filter settings or player search criteria and closing the dialog.
-- **Function: OnButtonCancel()**: Handles the Cancel button click, closing the dialog without making changes.
-- **Function: DoLobbyConnect()**: Connects to the lobby and handles connection failures.
-- **Class: GameScreenFilter**: Filters game missions based on various criteria like development, lives, scores, etc.
-- **Static Function: MissionStatusColor()**: Determines the color status of a mission based on its availability.
-- **Function: UpdateGameList()**: Updates the game list based on current filters and sorting criteria.
-- **Function: GetCountInLobby(List* plist)**: Calculates the total number of players in the lobby and potentially joins the most populated server if quickstart is enabled.
-- **Function: OnButtonJoin()**: Handles the join button click, selecting a mission from the list and initiating the join process.
-- **Function: JoinMission(MissionInfo * pMissionInfo, const char * szMissionPassword = "")**: Joins a selected mission with an optional password.
-- **Function: OnServersList(int cCores, char *Cores, int cServers, char *Servers)**: Handles the server list received from the game server, potentially creating a new game if quickstart is enabled.
-- **Function: OnMissionEnded(MissionInfo* pmission)**: Updates the join button when a mission ends.
+KEY PARTS:
+- GameScreen: Manages the main game screen, including lobby connection, mission selection, and player interaction.
+- FilterDialogPopup: Handles filtering games based on criteria such as zone club status.
+- FindDialogPopup: Manages a popup dialog for finding players.
+- DoLobbyConnect: Logic for connecting to the lobby server.
+- OnEvent: Processes events related to mission selection.
+- UpdateGameList: Updates the game list with sorted items based on user preferences.
+- JoinMission: Joins a selected mission using either password or direct connection.
 
-**CONNECTS TO:** Other systems or files it depends on or serves include `Screen`, `EventTargetContainer`, `TrekClientEventSink`, `IItemEvent::Sink`, `PasswordDialogSink`, and `IHTTPSessionSink`.
+CONNECTS TO:
+- HTTP session object (m_pSession)
+- mdl tables for string values and skill levels
 
-**NOTES:** The code contains several TODO comments, unusual constructs like `KGJV #114`, and commented-out sample data for UI testing. There is also a use of custom classes like `ZString` for string manipulation and handling.
+NOTES:
+- None
+
+PARTS (in file order):
+
+- lines 1-367
+  - GameScreen: Main class for the game screen, inherits from Screen and other interfaces.
+  - GameItemPainter: Class responsible for painting individual items in a list.
+  - FilterDialogPopup: Popup dialog for filtering games based on various criteria.
+  - DrawIcon: Helper function to draw icons on the surface.
+  - m_pSession: Pointer to an HTTP session object.
+  - m_strPendingFileList: String holding pending file list information.
+  - m_strWaitForFile: String indicating the file being waited for.
+  - m_nRetriesLeft: Number of retries left before giving up.
+- lines 368-755
+  - FilterDialogPopup: Manages a popup dialog for filtering games.
+  - FindDialogPopup: Manages a popup dialog for finding players.
+  - GameScreen: Main class representing the game screen, handling various UI elements and interactions.
+  - IsZoneLobby: Checks if the current lobby is a zone club.
+  - OnButtonOK: Handles the OK button click in dialogs.
+  - OnButtonCancel: Handles the Cancel button click in dialogs.
+  - OnButtonJoin: Joins a selected game.
+  - OnButtonNewGame: Starts a new game.
+- lines 756-1122
+  - GameScreen: Manages the game screen UI and handles lobby connection.
+  - DoLobbyConnect: Handles the logic for connecting to the lobby.
+  - OnEvent: Processes events related to mission selection.
+  - OnRefreshTimer: Refreshes the game list timer.
+  - OnSelectMission: Updates button states based on selected mission.
+  - ResetFilters: Resets all filters to default settings.
+  - GameScreenFilter: Filters missions based on various criteria.
+  - MissionStatusColor: Determines the color status of a mission.
+- lines 1123-1483
+  - GameScreen: Manages the game selection screen.
+  - NumPlayersCompare: Compares missions based on the number of players.
+  - SettingsCompare: Compares missions based on their settings.
+  - SortingList: Sorts a list using a given comparison function and reverses if specified.
+  - UpdateGameList: Updates the game list with sorted items based on user preferences.
+  - GetCountInLobby: Calculates the total number of players in the lobby.
+  - OnListChanged: Handles changes to the game list, updating player count.
+  - JoinMission: Joins a selected mission.
+- lines 1484-1896
+  - OnDelRequest: Handles deletion requests for missions.
+  - OnCancelPassword: Cancels a password request and disconnects the client.
+  - OnPassword: Joins a mission with a given password.
+  - FindSkillLevelName: Determines the skill level name based on mission rank.
+  - FindStringValue: Retrieves a string value from a table in mdl.
+  - FindClosestValue: Finds the closest value in multiple mdl lists.
+  - OnLogonGameServer: Initiates joining a game server.
+  - OnLogonGameServerFailed: Handles failed game server logon attempts.
 
 #### `src/WinTrek/gamesite.cpp`
 
-PURPOSE: The `gamesite.cpp` file in Allegiance is responsible for managing the game site, which includes setting up and maintaining the game environment, handling player connections, and coordinating game events.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `CGameSite`: Manages the overall state of the game site, including initializing the game world, handling player connections, and managing game sessions.
-- `CSpaceObject`: Represents an object in space, such as a ship or planet, providing methods for movement, collision detection, and rendering.
-- `CPlayer`: Manages player data, including their ships, resources, and commands.
-- `CGameEvent`: Handles the creation and management of game events, such as battles, resource gathering, and exploration.
-
-CONNECTS TO: `gameserver.cpp`, which handles the server-side logic for managing multiple game sites.
-
-NOTES: None.
+    #include "pch.h"
 
 #### `src/WinTrek/gamesite.h`
 
-PURPOSE: This file contains a method for displaying message boxes within the Allegiance game.
+PURPOSE: tiny file (7 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- GameSite::MessageBox: A function that displays a message box with specified text and caption using the window's MessageBox method.
-
-CONNECTS TO: gamesite.cpp (implementation), ZString class, GetWindow() method
-
-NOTES: None
+    #ifndef _GAMESITE_H_
+    #define _GAMESITE_H_
+    int GameSite::MessageBox(const ZString& strText, const ZString& strCaption, UINT nType)
+    {
+        return GetWindow()->MessageBox(strText, strCaption, nType);
+    }
+    #endif
 
 #### `src/WinTrek/gamestartingscreen.cpp`
 
@@ -13365,16 +15329,25 @@ NOTES:
 
 #### `src/WinTrek/gametypes.h`
 
-PURPOSE: This file defines an interface and some utility functions for managing different game types in the Allegiance game.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- GameType: An abstract base class that defines methods to get the name of a game type, check if it matches mission parameters, and apply its settings to mission parameters. It also includes static methods to find a specific game type based on mission parameters and to retrieve a list of all available game types.
-- FindType: A static method in GameType that returns a reference to a GameType instance matching the given mission parameters.
-- GetGameTypes: A static method in GameType that returns a list of all registered GameType instances.
-
-CONNECTS TO: MissionParams, IObject
-
-NOTES: None.
+    #ifndef	GAMETYPES_H
+    #define	GAMETYPES_H
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    // ImageStringPane
+    //
+    /////////////////////////////////////////////////////////////////////////////
+    class GameType : public IObject
+    {
+    public:
+        virtual ZString GetName() = 0;
+        virtual bool IsGameType(const MissionParams& misparams) = 0;
+        virtual void Apply(MissionParams& misparams) = 0;
+        static TRef<GameType> FindType(const MissionParams& misparams);
+        static TList<TRef<GameType> >& GetGameTypes();
+    };
+    #endif GAMETYPES_H
 
 #### `src/WinTrek/hangarscreen.cpp`
 
@@ -13449,25 +15422,78 @@ NOTES: None.
 
 #### `src/WinTrek/introscreen.cpp`
 
-**PURPOSE:** The `introscreen.cpp` file manages the introduction screen of Allegiance, handling user interactions such as logging in, accessing options, and navigating to different screens.
+PURPOSE: Handles the introduction screen and login/logout processes for Allegiance.
 
-**KEY PARTS:**
-- **ErrorState**: Base class for error states in the UI.
-- **NoErrorState**: Represents a state where there is no error.
-- **YesErrorState**: Represents a state with an error message.
-- **LoggedOutState**: Manages the logged-out state of the user, including error handling and login functionality.
-- **LoggingInState**: Represents the state during which the user is logging in, showing progress steps.
-- **LoggedInState**: Manages the logged-in state, managing mission lists, server lists, and core lists.
-- **LoginHelper**: Manages the login process, handling configuration downloads, server connections, and UI updates.
-- **IntroScreen**: Manages the introduction screen of the game, including UI elements and event handling.
-- **CreditsPopup**: Manages the credits popup screen, including displaying credits and handling close button events.
-- **FindServerPopup**: Manages the server search popup screen, allowing users to find and join LAN servers.
-- **CloseTrainWarnSink**: Handles the warning before closing a training mission, providing an option to launch it or not.
-- **URLMessageSink**: Handles opening a web page when a message box button is clicked.
+KEY PARTS:
+- ErrorState: Manages different error states.
+- LoggedInState: Represents a logged-in state with user information.
+- LoginHelper: Manages the login process, handling steps and events.
+- Logout: Handles the logout process by disconnecting from the lobby.
+- FindServerPopup: Manages finding and joining LAN servers.
+- OnButtonJoin: Handles the join button click event.
+- OnLogon: Initiates logon process by saving character name and showing a connecting dialog.
+- OpenWikiSink: Redirects to training screen on OK click from a message box.
 
-**CONNECTS TO:** Other UI components, login system, network drivers check, and various game screens (e.g., team lobby).
+CONNECTS TO: Allegiance game engine, Steam API for user status checks, network drivers for server discovery.
 
-**NOTES:** The file contains commented-out sections related to previous features like training missions and quickstart buttons. There are conditional compilation directives for Steam Leaderboard and AZ Zone Club. The `CheckNetworkDrivers()` function has a TODO comment suggesting it should be refactored to use asynchronous operations.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-370
+  - ErrorState: Base class for error states.
+  - NoErrorState: Represents a state with no errors.
+  - YesErrorState: Represents a state with an error message.
+  - LoggedOutState: Represents a logged-out state with optional error and login sink.
+  - LoggingInState: Represents the logging-in process with step number and message.
+  - LoggedInState: Represents a logged-in state with various user information and actions.
+  - LoginHelper: Manages the login process, handling different steps and events.
+  - GetLoginSink: Returns an event sink for initiating login.
+- lines 371-744
+  - Logout: Handles the logout process by disconnecting from the lobby and updating the state.
+  - Login: Manages the login process, including checking Steam user status and downloading configuration files.
+  - StartConfigRead: Asynchronously reads the configuration file for game settings.
+  - OnLogonLobby: Called when the player logs into the lobby successfully.
+  - OnLogonLobbyFailed: Handles failed attempts to log into the lobby.
+  - OnServersList: Processes the list of servers and updates the UI accordingly.
+  - GetShowNewGamePopupSink: Provides a callback for showing the new game popup.
+  - IntroScreen: Main class representing the introduction screen, handling user interactions and state management.
+- lines 745-1114
+  - FindServerPopup: Manages the popup for finding and joining LAN servers.
+  - GameNameCompare: Compares two server names for sorting.
+  - Paint: Draws a single server item on a surface.
+  - OnButtonJoin: Handles the join button click event.
+  - OnButtonCancel: Handles the cancel button click event.
+  - FindGames: Searches for LAN servers and updates the server list.
+  - PollForServers: Periodically polls for new servers in the background.
+  - CheckNetworkDrivers: Checks if network drivers are up to date.
+- lines 1115-1460
+  - IntroScreen::OnButtonTraining: Handles the training button click.
+  - IntroScreen::OnButtonDiscord: Handles the Discord button click.
+  - IntroScreen::OnButtonSteamLeaderboard: Handles the Steam leaderboard button click.
+  - IntroScreen::OnButtonExit: Handles the exit button click.
+  - IntroScreen::OnQuickstart: Determines which quickstart option to handle based on configuration.
+  - LoginHelper: Manages login state.
+  - NumberExposer and StringExposer: Expose numeric and string values for UI interaction.
+  - UiStateModifiableValue: Represents a modifiable UI state value.
+- lines 1461-1807
+  - OnPickServer(GUID guidSession): Handles picking a server by setting the session GUID and opening a logon popup.
+  - OnButtonDiscord(): Opens Discord in the default web browser.
+  - OnButtonSteamLeaderboard(): Opens Steam leaderboard page for Allegiance.
+  - OpenWikiSink: A class implementing IIntegerEventSink to handle events from a message box, redirecting to training screen on OK click.
+  - OnButtonTraining(): Handles training button press, either opening training or prompting download if not installed.
+  - OnLogon(const ZString& strName, const ZString& strPassword, BOOL fRememberPW): Initiates logon process by saving character name and showing a connecting dialog.
+  - OnTryLogon(): Attempts to connect to the server with saved credentials after a short delay.
+  - OnAddPlayer(MissionInfo pMissionInfo, SideID sideID, PlayerInfo pPlayerInfo): Handles adding player to mission, redirecting to team screen if self.
+- lines 1808-1926
+  - GetWindow(): Retrieves the window associated with the screen.
+  - OpenPopup(m_pcreditsPopup, false): Opens a popup for credits without animation.
+  - ScreenIDSplashScreen: Identifier for the splash screen.
+  - m_pnumberCurrentHover: Pointer to the current hovered item.
+  - hoverPlayLan, hoverPlayInt, etc.: Values representing different hover states.
+  - USEAZ: Macro indicating whether AZ features are enabled.
+  - OnHoverZoneClub(): Handles hovering over the Zone Club option.
+  - GetPane(): Returns the pane associated with the screen.
 
 #### `src/WinTrek/inventoryimage.cpp`
 
@@ -13504,62 +15530,169 @@ NOTES: None.
 
 #### `src/WinTrek/load.cpp`
 
-**PURPOSE:** The `load.cpp` file in Allegiance is responsible for managing the loadout interface where players can customize their ships by equipping various parts and selecting hull types. It handles user interactions, updates UI elements, and manages the state of the ship's equipment.
-
-**KEY PARTS:**
-- **Class: LoadoutImpl:** Manages the loadout interface, including slots for equipment and handling user interactions.
-- **Class: Slot:** Represents a single slot in the loadout where equipment can be placed. Handles setting and getting parts, updating layout, painting, and mouse events.
-- **Function: GetBuyableName:** Returns the name of an item with its price tag if applicable.
-- **Function: InitializeMDL():** Initializes model-related data such as namespaces, strings, numbers, and images.
-- **Function: InitializePanes():** Sets up UI panes including buttons and geometry.
-- **Function: UpdateHullType():** Updates the display with information about the ship's hull type.
-- **Function: CreateGeoPane(const Point& size, const Point& offset):** Creates a geometry pane for displaying the ship's model.
-- **Function: SetGeo(Geo* pgeo):** Sets the geometry for the ship model and adjusts camera settings accordingly.
-- **Function: UpdateGunnerInfo():** Updates information about gunners on the ship.
-- **Function: SetHullTitle():** Sets the title and description of the hull type.
-- **Function: UpdatePerformanceInfo():** Updates performance-related statistics for the ship's hull and parts.
-
-**CONNECTS TO:** Other UI components, game logic, and model data handling.
-
-**NOTES:** The code contains many repetitive entries for various attributes and commented-out sections that suggest potential areas for refactoring. There are TODOs indicating potential issues or areas for improvement.
-
-#### `src/WinTrek/load.h`
-
-PURPOSE: Defines an interface for a loadout screen in the Allegiance game, which is a subclass of Screen and includes methods to update hull type and retrieve a pane.
+PURPOSE: The `load.cpp` file is responsible for managing ship loadouts, including buying and equipping parts, updating the UI, and handling user interactions.
 
 KEY PARTS:
-- Loadout: A class that inherits from Screen and defines pure virtual functions UpdateHullType and GetPane.
-- CreateLoadout: A function that creates an instance of Loadout using a Modeler and Number object.
+- LoadoutImpl: Main class for managing loadouts.
+- Slot: Represents an equipment slot within a loadout.
+- GetBuyableName: Function to get the name of a buyable item with its cost.
+- InitializeMDL(): Initializes the model data for the loadout.
+- InitializePanes(): Initializes UI panes and buttons.
+- UpdateWeaponPartInfo: Updates weapon-related information.
+- BuyHull: Handles buying a new hull type for the ship.
+- OnButtonLaunch: Processes the launch button click event.
+- HullSwitched: Updates the ship's hull and slots when changed.
 
-CONNECTS TO: Screen, Modeler, Number
+CONNECTS TO:
+- trekClient.GetShip()->GetSourceShip(): Retrieves the source ship for the current loadout.
+- Modeler pmodeler: Pointer to a modeler object used for managing resources and data.
+- Number ptime: Pointer to a number object representing time-related data.
 
 NOTES: None.
 
+PARTS (in file order):
+
+- lines 1-359
+  - LoadoutImpl: Main class for managing loadouts.
+  - Slot: Represents an equipment slot within a loadout.
+  - GetBuyableName: Function to get the name of a buyable item with its cost.
+  - SlotValidForHull: Static function to check if a slot is valid for a given hull type.
+  - SetPart: Sets the part in a slot and updates the image accordingly.
+  - UpdateLayout: Updates the layout of a slot.
+  - Paint: Draws the contents of a slot on a surface.
+  - MouseEnter, MouseLeave, Button: Handle mouse events for slots.
+- lines 360-714
+  - LoadoutImpl: Class representing the implementation of a loadout.
+  - Modeler pmodeler: Pointer to a modeler object used for managing resources and data.
+  - Number ptime: Pointer to a number object representing time-related data.
+  - m_pship: Pointer to a ship object being managed or modified.
+  - trekClient.GetShip()->GetSourceShip(): Retrieves the source ship for the current loadout.
+  - moneyLots: A constant representing a large amount of money.
+  - InitializeMDL(): Initializes the model data for the loadout.
+  - pnsLoadoutData: Name space containing various members to store and manage loadout data.
+- lines 716-1084
+  - TRef<INameSpace>: A reference to a namespace interface.
+  - m_pmodeler: An instance of a modeler class responsible for managing namespaces and loading data.
+  - InitializePanes(): Initializes UI panes and buttons.
+  - GetPane(): Returns the main pane of the screen.
+  - OnFrame(): Updates the frame, specifically updating buttons.
+  - UpdateCivBitmap(): Updates the civilization bitmap based on the current side.
+  - CreateGeoPane(): Creates a geographical pane with a camera and viewport.
+  - SetGeo(Geo pgeo): Sets the geometry for the geo pane.
+- lines 1085-1463
+  - UpdateWeaponPartInfo: Updates weapon-related information.
+  - UpdateMagazinePartInfo: Updates magazine-related information.
+  - UpdateDispenserPartInfo: Updates dispenser-related information.
+  - UpdateChaffLauncherPartInfo: Updates chaff launcher-related information.
+  - UpdateShieldPartInfo: Updates shield-related information.
+  - UpdateCloakPartInfo: Updates cloak-related information.
+  - UpdateAfterburnerPartInfo: Updates afterburner-related information.
+  - UpdatePartInfo: Main function to update part information based on the type of part.
+- lines 1464-1818
+  - BuyHull: Handles buying a new hull type for the ship.
+  - OnButtonLaunch: Processes the launch button click event.
+  - OnButtonBuy: Processes the buy button click event.
+  - OnButtonBack: Handles the back button click event to return to the hangar view.
+  - OnButtonHullList: Opens the hull list menu.
+  - GetNextHullType: Determines the next available hull type based on current selection and station capabilities.
+  - NextHull: Advances or retreats to the next/previous hull type.
+  - CanMount: Checks if a part can be mounted in a specific slot.
+- lines 1819-2267
+  - LoadoutImpl: Main class for handling ship loadouts.
+  - HullSwitched: Updates the ship's hull and slots when changed.
+  - PartsSwitched: Updates the parts in the slots to match the current ship state.
+  - UpdateHullType: Handles updating the hull type, including buttons and performance info.
+  - OnMenuCommand: Handles menu commands for buying/selling parts/hulls.
+  - OnKey: Handles keyboard input for custom loadouts.
+  - CreateLoadout: Factory function to create a new LoadoutImpl instance.
+
+#### `src/WinTrek/load.h`
+
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
+
+    #ifndef _loadout_h_
+    #define _loadout_h_
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // Loadout
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    class Loadout : public Screen {
+    public:
+        virtual void   UpdateHullType(void)      = 0;
+        virtual Pane*  GetPane()             = 0;
+    };
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // Constructor
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    TRef<Loadout> CreateLoadout(Modeler* pmodeler, Number* ptime);
+    #endif
+
 #### `src/WinTrek/loadout.cpp`
 
-**PURPOSE:** The `loadout.cpp` file in Allegiance is responsible for managing the user interface and logic related to purchasing ship parts and technologies. It handles the display of available items, their prerequisites, and the investment process.
+PURPOSE: The file `loadout.cpp` manages the loadout and purchase interface for ships and parts in Allegiance, including handling item selection, investment logic, and updating the UI based on player actions and game state.
 
-**KEY PARTS:**
-- **Class: PartListItem**: Represents an item in a loadout list, containing details about a ship part or component.
-  - **Function: Construct()**: Initializes the `PartListItem` with properties like model name, images, and prerequisite lists.
-  - **Function: BuildPrereqList()**: Builds a list of prerequisites needed to buy the item, checking for missing technologies and dependencies between buckets (stations, parts).
-  - **Function: GetBuildingStatusText()**: Returns text indicating the current building status of a station.
-  - **Function: DrawText(Surface*, const WinRect&)**: Draws the text representation of the `PartListItem` on a surface.
-  - **Function: FillClippedRect(Context*, const WinRect&, const WinRect&, const Color&)**: Helper function to fill a clipped rectangle with a specified color.
-  - **Function: DrawShade(Surface*, const WinRect&)**: Draws shading based on purchase and completion status, handling 'show all' functionality.
+KEY PARTS:
+- PartListItem: Represents an item in a loadout list, providing methods to get associated buyable objects, construct items, build prerequisite lists, and manage station dependencies.
+- PurchasesPaneImpl: Manages the purchases pane interface, including handling button clicks for investment, updating the list based on player actions, and managing hover events.
+- PurchasesPane: Manages the purchase interface for ships and parts, updating the tech tree, enabling or disabling spend buttons, and handling money changes.
+- PartInfoPane: Manages a pane for displaying information about parts or items, including drawing names, descriptions, and applying creation using a factory method.
 
-- **Class: PurchasesPaneImpl**: Manages the user interface for purchasing parts and technologies.
-  - **Function: OnInvest()**: Handles investment of money into selected buckets.
-  - **Function: OnShowAll()**: EF5P feature to show all items regardless of completion status.
-  - **Function: OnHideCompleted()**: EF5P feature to hide completed items.
-  - **Function: OnPartial()**: Handles partial investment of money into selected buckets.
-  - **Function: OnButtonBack()**: Closes the overlay associated with the investment pane.
-  - **Function: OnBucketChange(BucketChange bc, IbucketIGC* b)**: Updates the list pane when a bucket's status changes.
-  - **Function: UpdateTechList()**: Updates the list of available technologies based on the current tab selection.
+CONNECTS TO:
+- Other UI components and game systems to update the loadout and purchase interface based on player actions and game state.
 
-**CONNECTS TO:** Other UI components and systems for managing game state, such as `PurchasesPane`, `PartInfoPaneImpl`, and mission management.
+NOTES:
+- None.
 
-**NOTES:** The file contains several TODO comments indicating areas that need further development. There is unusual code related to conditional checks based on mission parameters and group IDs to control item visibility.
+PARTS (in file order):
+
+- lines 1-348
+  - PartListItem: Represents an item in a loadout list.
+  - GetBuyable(): Returns the buyable object associated with this part list item.
+  - Construct(): Initializes the part list item by loading images and building prerequisite lists.
+  - BuildPrereqList(): Builds a list of prerequisites for purchasing the item, considering tech requirements and station dependencies.
+  - CountDronesOfType(): Counts the number of drones of a specific type owned by the player.
+  - CountStationsOfType(): Counts the number of stations of a specific type owned by the player.
+  - BuildSpotFoundForStationType(): Checks if there is an asteroid suitable for building a station of a given type.
+  - FindBuilderForStationType(): Finds a ship that can build a station of a given type.
+- lines 349-692
+  - PurchasesPaneImpl: Manages the purchases pane interface.
+  - m_pListPane: List pane for displaying items.
+  - m_nTabSel: Selected tab index.
+  - m_pPartInfoPane: Part information pane.
+  - m_pStation: Current station reference.
+  - m_pButtonInvest: Invest button.
+  - m_pButtonTab0 to m_pButtonTab5: Tab buttons for different categories.
+  - m_pButtonClose: Close button.
+- lines 693-1044
+  - PurchasesPaneImpl: Manages the purchase pane interface.
+  - OnInvest(): Handles investment logic for selected items.
+  - OnShowAll(): Updates the list to show all items.
+  - OnHideCompleted(): Alias for OnShowAll(); hides completed items if unchecked.
+  - OnPartial(): Handles partial investment logic.
+  - OnButtonBack(): Closes the overlay associated with the pane.
+  - OnBucketChange(): Updates the list when a bucket changes state.
+  - OnModelTerminated(), OnStationCaptured(), OnDiscoveredStation(), OnDiscoveredAsteroid(): Update the list on model or station events.
+- lines 1045-1392
+  - PurchasesPane: Manages the purchase interface for ships and parts.
+  - OnTechTreeChanged: Updates the tech tree when changed.
+  - CanInvest: Determines if a player can invest in a bucket (ship or part).
+  - UpdateSpendButtons: Enables or disables the spend button based on investment eligibility.
+  - OnMoneyChange: Updates the spend buttons when money changes.
+  - OnListHover: Handles hover events over the list items, displaying information about the selected item.
+  - OnMouseEnterInvestButton and OnMouseLeaveInvestButton: Handle mouse enter and leave events for the invest button.
+  - OnListSelect: Updates the spend buttons when a list item is selected.
+- lines 1394-1514
+  - PartInfoPane: Manages a pane for displaying information about parts or items.
+  - DisplayNothing(): Clears and resets the display of the part info pane.
+  - UpdateLayout(): Updates the layout of the part info pane based on its background image size.
+  - DrawName(Surface, IbuyableIGC) const: Draws the name of a buyable item on the surface.
+  - DrawDescription(Surface, IbuyableIGC) const: Draws the description and details (cost, time to build) of a buyable item on the surface.
+  - Paint(Surface): Handles the painting of the part info pane by drawing its background and any associated text.
+  - Create(ConnectorPane, ConnectorPane): Factory method to create an instance of PartInfoPaneImpl.
+  - Apply(ObjectStack&): Applies the creation of a PartInfoPane using the factory method.
 
 #### `src/WinTrek/loadout.h`
 
@@ -13658,29 +15791,99 @@ NOTES:
 
 #### `src/WinTrek/mappvmaker.cpp`
 
-**File:** src/WinTrek/mappvmaker.cpp
+PURPOSE: Handles the creation and generation of mission data for various map types in Allegiance.
 
-**PURPOSE:** Contains classes and functions for generating different map layouts in the Allegiance game, including team clusters, neutral sectors, and warps.
+KEY PARTS:
+- CwarpPV: Represents a warp point within a mission.
+- ImissionPV: Manages mission data including clusters and warps.
+- CMapPVCluster: Represents a cluster of sectors in the map.
+- ImapPVMaker: Base class for creating different types of maps.
+- IsValid: Validates mission parameters based on map type.
+- Create: Generates a mission based on mission parameters.
+- pvFindPath: Recursive function to find a path between clusters using warps.
+- GenerateMission: Main function to generate a mission based on parameters.
+- GenerateLayout: Sets up team and neutral cluster counts based on map size.
+- LinkClusters: Links clusters together in a ring pattern.
+- CrossLinkClusters: Creates cross-links between teams' sectors.
+- GenerateRingClusters: Generates clusters in a ring layout.
+- CmapPVMakerDoubleRing: Specific implementation for double ring layout.
+- CmapPVMakerHiLo: Handles high/low map generation.
+- CmapPVMakerStar: Handles star-shaped map generation.
+- CmapPVMakerSnowFlake: Generates a snowflake-like map layout.
+- CmapPVMakerEastWest: Generates layout for East West map type.
+- CmapPVMakerSplitBase: Generates layout for Split Base map type.
+- CmapPVMakerFromIGCFile: Generates mission from IGC file.
 
-**KEY PARTS:**
-- **Class: CwarpPV**: Represents a warp point within a mission.
-  - Methods include initialization, cleanup, cluster management, and destination retrieval.
-- **Class: ImissionPV**: Manages mission data, including clusters and warps.
-  - Provides methods for creating, deleting, and retrieving clusters and warps.
-- **Class: CMapPVCluster**: Represents a cluster of sectors within a mission.
-  - Methods include initialization, cleanup, adding and deleting warps.
-- **Classes: CmapPVMaker variants (HiLo, DoubleRing, BigRing, etc.)**: Implement specific map layout generation logic.
-  - Each subclass overrides methods to generate unique layouts.
-- **Function: LinkClusters**: Links clusters together based on the map's configuration.
+CONNECTS TO: None
 
-**CONNECTS TO:** 
-- `CMapPVData`: Data structure for storing mission data.
-- `Modeler`: Used in initializing mission data.
-- `DataClusterIGC` and `DataWarpIGC`: Interfaces for reading map data from IGC files.
+NOTES:
+- "KGJV-: changed, use now MapSize parameter" - Indicates a change to use MapSize instead of MaxPlayersOnTeam.
+- Missing break statements in "case 1:" and "case 2:" in GenerateNeutralClusterScreenPosition for CmapPVMakerHiHigher.
 
-**NOTES:**
-- Contains commented-out code related to player limits and validation checks that were removed or modified.
-- Constants define different map maker IDs, such as `c_mmBrawl`, `c_mmDoubleRing`, etc.
+PARTS (in file order):
+
+- lines 1-341
+  - CwarpPV: Represents a warp point within a mission.
+  - ImissionPV: Manages mission data including clusters and warps.
+  - CMapPVCluster: Represents a cluster of sectors in the map.
+  - ImapPVMaker: Base class for creating different types of maps.
+  - IsValid: Validates mission parameters based on map type.
+  - Create: Generates a mission based on mission parameters.
+  - pvFindPath: Recursive function to find a path between clusters using warps.
+- lines 342-710
+  - CMapPVMaker: Manages the creation and generation of mission data.
+  - GenerateMission: Main function to generate a mission based on parameters.
+  - GenerateLayout: Generates the sector layout for the mission.
+  - GenerateTeamClusterScreenPosition: Calculates screen position for team clusters.
+  - GenerateTeamCluster: Creates a team cluster with specified properties.
+  - GenerateNeutralClusterScreenPosition: Calculates screen position for neutral clusters.
+  - GenerateNeutralCluster: Creates a neutral cluster with specified properties.
+  - GenerateRingClusters: Generates clusters in a ring pattern.
+- lines 712-1066
+  - CmapPVMaker: Main class for creating map layouts.
+  - GenerateLayout: Sets up team and neutral cluster counts based on map size.
+  - LinkClusters: Links clusters together in a ring pattern.
+  - CrossLinkClusters: Creates cross-links between teams' sectors.
+  - GenerateRingClusters: Generates clusters in a ring layout.
+  - CmapPVMakerDoubleRing: Specific implementation for double ring layout.
+  - GenerateTeamClusterScreenPosition: Positions team clusters on the screen.
+  - GenerateNeutralClusterScreenPosition: Positions neutral clusters on the screen.
+- lines 1068-1426
+  - CmapPVMakerHiLo: Handles high/low map generation.
+  - GenerateLayout: Sets up cluster parameters and generates clusters.
+  - GenerateTeamClusterScreenPosition: Calculates screen positions for team clusters.
+  - GenerateNeutralClusterScreenPosition: Calculates screen positions for neutral clusters.
+  - LinkClusters: Links clusters together in a specific pattern.
+  - CmapPVMakerHiHigher: Handles high/higher map generation, extending from CmapPVMakerHiLo.
+  - CmapPVMakerStar: Handles star-shaped map generation.
+  - TODOs: "//KGJV-: changed, use now MapSize parameter" - Indicates a change to use MapSize instead of MaxPlayersOnTeam. "case 1:" and "case 2:" in GenerateNeutralClusterScreenPosition for CmapPVMakerHiHigher - Missing break statements.
+- lines 1427-1790
+  - CmapPVMakerStar: Manages star-shaped map layouts.
+  - LinkClusters: Links clusters together based on team and neutral sectors.
+  - IsValid: Validates mission parameters for specific map types.
+  - GenerateLayout: Generates layout for different map types like Brawl, PinWheel, DiamondRing, etc.
+  - GenerateNeutralClusterScreenPosition: Positions neutral clusters on the screen.
+  - CmapPVMakerBrawl: Manages brawl map layouts.
+  - CmapPVMakerPinWheel: Manages pinwheel map layouts.
+  - CmapPVMakerDiamondRing: Manages diamond ring map layouts.
+- lines 1791-2147
+  - CmapPVMakerSnowFlake: Generates a snowflake-like map layout.
+  - GenerateTeamClusterScreenPosition: Calculates screen positions for team clusters.
+  - GenerateNeutralClusterScreenPosition: Calculates screen positions for neutral clusters.
+  - LinkClusters: Links clusters together based on their type and position.
+  - IsValid: Validates mission parameters for specific map types.
+  - CmapPVMakerLargeSplit, CmapPVMakerInsideOut, CmapPVMakerGrid, CmapPVMakerEastWest: Different map layout classes.
+  - NA: Likely a macro or constant used to represent an invalid index or value.
+  - TODOs: "KGJV-: changed, use now MapSize parameter" (mentioned in comments) Validation checks for mission parameters could be more detailed.
+- lines 2148-2428
+  - CmapPVMakerEastWest: Generates layout for East West map type.
+  - CmapPVMakerSplitBase: Generates layout for Split Base map type.
+  - CmapPVMakerFromIGCFile: Generates mission from IGC file.
+  - GenerateMission: Main function to generate mission from IGC file.
+  - IsValid: Checks if the mission parameters are valid for a specific map type.
+  - SetName: Sets the name of the map type.
+  - GenerateLayout: Generates the layout of clusters for a map.
+  - GenerateTeamClusterScreenPosition: Determines screen position for team clusters.
 
 #### `src/WinTrek/mappvmaker.h`
 
@@ -13717,42 +15920,64 @@ NOTES: None
 
 #### `src/WinTrek/newgamescreen.cpp`
 
-**PURPOSE:** The `newgamescreen.cpp` file manages the user interface for creating new games in Allegiance. It handles various aspects of game creation, including setting mission parameters, managing player information, and updating UI elements based on user interactions.
+PURPOSE: Manages the interface and logic for the new game screen in Allegiance, handling user interactions and mission parameter settings.
 
-**KEY PARTS:**
-- **Class: NewGameScreen**
-  - Manages the user interface for creating a new game.
-  
-- **Function: GetResourceLevel(const MissionParams& missionparams)**
-  - Calculates the resource level based on various parameters in the mission settings.
-  
-- **Function: ApplyMissionParams(const MissionParams& missionparams)**
-  - Applies the mission parameters to the UI elements of the NewGameScreen.
-  
-- **Function: OpenMDLFile()**
-  - Initializes the modeler and sets up the namespace for the screen components.
-  
-- **Function: OnButtonBack(Event* pevent)**
-  - Handles the back button click event, likely navigating back to a previous screen.
-  
-- **Function: OnButtonCreate(Event* pevent)**
-  - Handles the create button click event, initiating the creation of a new game.
-  
-- **Function: OnGameNameClick(Event* pevent)**
-  - Handles clicks on the game name edit pane.
-  
-- **Function: OnGamePasswordClick(Event* pevent)**
-  - Handles clicks on the game password edit pane.
-  
-- **Function: AddEventTarget**
-  - Registers event handlers for UI controls to respond to changes.
-  
-- **Function: FillCombo**
-  - Populates a combo box with items from a namespace.
+KEY PARTS:
+- NewGameScreen: Manages the new game screen interface and handles user interactions.
+- GetResourceLevel: Calculates the resource level based on asteroid counts.
+- RefreshMissionParams: Updates the UI elements with the current mission parameters.
+- ApplyMissionParams: Applies mission parameters to the UI elements.
+- OpenMDLFile: Initializes the modeler namespace for the new game screen data.
+- FillCombo: Populates a combo box with items from a specified content name in the modeler namespace.
+- FindMapType: Finds the index of a map by its file name.
+- CustomMapIDToItemID: Converts a custom map ID to an item ID.
+- ItemIDToCustomMapID: Converts an item ID back to a custom map ID.
+- OnRefreshMapPreview: Handles refreshing the map preview based on selected settings.
+- OnButtonMapNext: Handles moving to the next map type in the dropdown.
+- OnButtonMapPrev: Handles moving to the previous map type in the dropdown.
+- ReadControls: Reads control values and populates a mission parameters structure.
 
-**CONNECTS TO:** Other screens and systems within Allegiance, particularly those related to game creation and player management.
+CONNECTS TO: modeler namespace for game data, team screen, mission parameters.
 
-**NOTES:** The file includes several commented-out lines indicating potential features that were removed or not fully implemented. There are references to specific settings like "Allow Empty Teams" which are commented out but might be reintroduced in future updates. The code includes a lot of repetitive logic for setting up combo boxes and text fields, which could be refactored into helper functions for better maintainability.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-351
+  - NewGameScreen: Manages the new game screen interface and handles user interactions.
+  - GetResourceLevel: Calculates the resource level based on asteroid counts.
+  - GetBaseMissionParams: Retrieves the base mission parameters.
+  - RefreshMissionParams: Updates the UI elements with the current mission parameters.
+  - ApplyMissionParams: Applies mission parameters to the UI elements.
+  - YesNo: Converts a boolean value to "yes" or "no".
+  - GetNthString: Retrieves a string from a list based on an index.
+  - GetLives: Returns the lives setting as a string.
+- lines 352-727
+  - NewGameScreen: Manages the new game screen interface and logic.
+  - OpenMDLFile: Initializes the modeler namespace for the new game screen data.
+  - FillCombo: Populates a combo box with items from a specified content name in the modeler namespace.
+  - FillIntComboWithLimit: Populates an integer combo box with values up to a specified limit.
+  - FindValue: Retrieves a value from a table based on its index.
+  - FindClosestValue: Finds the closest value to a given number in a table.
+  - AddCustomMapTypes: Adds custom map types to the game screen.
+- lines 728-1069
+  - newgamescreen.cpp: Contains functions and logic for managing the new game screen in Allegiance.
+  - FindMapType(const char szMapFile): Finds the index of a map by its file name.
+  - CustomMapIDToItemID(int mapID): Converts a custom map ID to an item ID.
+  - ItemIDToCustomMapID(int itemID): Converts an item ID back to a custom map ID.
+  - OnRefreshMapPreview(int max): Handles refreshing the map preview based on selected settings.
+  - OnButtonMapNext(): Handles moving to the next map type in the dropdown.
+  - OnButtonMapPrev(): Handles moving to the previous map type in the dropdown.
+  - ReadControls(MissionParams& misparams): Reads control values and populates a mission parameters structure.
+- lines 1071-1370
+  - NewGameScreen: Manages the new game screen interface and handles user interactions.
+  - OnAddPlayer: Updates button states when a player joins or leaves the mission.
+  - OnPlayerStatusChange: Updates button states when a player's status changes.
+  - OnFrame: Handles frame updates, specifically updating countdown text.
+  - UpdateCountdownText: Displays the remaining time until the game starts.
+  - OnMissionStarted: Switches back to the team screen when the mission starts.
+  - OnAddMission: Refreshes mission parameters when a new mission is added.
+  - CreateNewGameScreen: Creates an instance of NewGameScreen.
 
 #### `src/WinTrek/passworddialog.cpp`
 
@@ -13774,29 +15999,38 @@ NOTES: None.
 
 #### `src/WinTrek/passworddialog.h`
 
-PURPOSE: Defines a password dialog system used in Allegiance for user authentication.
+PURPOSE: tiny file (15 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PasswordDialogSink: Interface for handling password dialog events (cancel and submit).
-- CreatePasswordPopup: Function to create and display the password popup dialog.
-
-CONNECTS TO: IPopup, MissionInfo
-
-NOTES: None.
+    #ifndef _passworddialog_h_
+    #define _passworddialog_h_
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // Password Dialog
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    class PasswordDialogSink
+    {
+    public:
+        virtual void OnCancelPassword() = 0;
+        virtual void OnPassword(ZString strPassword) = 0;
+    };
+    TRef<IPopup> CreatePasswordPopup(PasswordDialogSink* psink, const ZString& strPassword, MissionInfo* pmission = NULL);
+    #endif _passworddialog_h_
 
 #### `src/WinTrek/pch.cpp`
 
-PURPOSE: This file is a precompiled header for the WinTrek project, which includes necessary headers and definitions to speed up compilation.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary precompiled header file.
-- `_ATL_STATIC_REGISTRY` and related includes: Conditionally includes ATL (Active Template Library) headers for static registry support.
-- `TREK_OCX` and related includes: Conditionally includes ATL controls and windowing headers for OCX (Object Linking and Embedding Control) functionality.
-
-CONNECTS TO: Other source files that include this precompiled header, such as main application files and modules.
-
-NOTES:
-- Some includes are commented out with "Imago removed" or "none", indicating potential previous modifications or unused code.
+    #include "pch.h"
+    #ifdef _ATL_STATIC_REGISTRY
+    #include <statreg.h>
+    //#include <statreg.cpp> Imago removed (again)
+    #endif
+    #ifdef  TREK_OCX
+    //#include <atlimpl.cpp>
+    #include <atlctl.cpp>
+    //#include <atlwin.cpp>
+    #endif
 
 #### `src/WinTrek/pch.h`
 
@@ -13816,21 +16050,63 @@ NOTES: None.
 
 #### `src/WinTrek/radarimage.cpp`
 
-**PURPOSE:** The `radarimage.cpp` file in Allegiance is responsible for managing the rendering of radar blips and text labels. It handles the visualization of various game entities on a radar screen.
+PURPOSE: Implements radar image functionality for a space game, including drawing blips and expanded blips, setting and getting radar level of detail, and rendering various types of objects on the radar.
 
-**KEY PARTS:**
-- **Class: RadarImageImpl**: Manages the rendering of radar blips and text labels.
-- **Function: Evaluate()**: Recalculates the vertices for the radar circle when the view size changes.
-- **Function: DrawBlip()**: Draws a blip on the radar screen based on various parameters such as position, radius, icon, and state.
-- **Function: RenderBlips()**: Iterates through all models in the cluster and renders blips for each model.
-- **Data: c_szRadarLODs[]**: Array of strings representing different radar modes (e.g., All, Default, Target, None).
-- **Data: m_listTextData**: List to store text data for blip labels, including name, range, and position.
+KEY PARTS:
+- RadarImageImpl: Manages the overall radar image rendering.
+- DrawBlip: Draws individual blips based on object type and parameters.
+- DrawExpandedBlip: Renders an expanded view around a specific object.
+- SetRadarLOD: Adjusts the level of detail for the radar display.
+- GetRadarLOD: Retrieves the current level of detail setting.
+- UsefulTreasure: Determines if a treasure item is useful based on game state and resources.
+- RenderBlips: Renders blips for all objects in the cluster on the radar.
+- Context, Rect, Color: Used for rendering images and text on the radar.
 
-**CONNECTS TO:** Depends on DirectX for rendering and likely interacts with the game's model management system (`ImodelIGC`).
+CONNECTS TO:
+- trekClient: Provides access to game data and functionality.
 
-**NOTES:** 
-- The file contains commented-out sections suggesting additional features that were not implemented.
-- There are TODOs related to improving color choices for better accessibility or consistency, uncommenting code for specific team visibility, and potential refactoring of ripcord time handling logic.
+NOTES:
+- Contains multiple implementations of `DrawExpandedBlip` function.
+- Uses various interfaces like IclusterIGC, IshipIGC, ItreasureIGC, ImodelIGC for different object types.
+
+PARTS (in file order):
+
+- lines 1-356
+  - RadarImageImpl: Implements the radar image functionality.
+  - TextData: Represents data for text labels on the radar.
+  - Evaluate: Recalculates the radar circle vertices and indices when the view size changes.
+  - DrawBlip: Draws a blip on the radar based on various parameters.
+  - DrawExpandedBlip: Draws an expanded blip around an object.
+  - SetRadarLOD: Sets the current radar level of detail.
+  - GetRadarLOD: Retrieves the current radar level of detail.
+  - c_szRadarLODs: Array of strings representing different radar modes.
+- lines 357-712
+  - DrawExpandedBlip: Draws an expanded blip on the radar.
+  - UsefulTreasure: Determines if a treasure item is useful based on the ship's current state and resources.
+  - RenderBlips: Renders blips for each model in the cluster on the radar.
+  - trekClient: Global client instance providing access to game data and functionality.
+  - IclusterIGC, IshipIGC, ItreasureIGC, ImodelIGC: Interfaces representing different types of game objects.
+  - Context: Class for rendering context, used to draw images and text.
+  - Rect: Represents a rectangle area on the screen.
+  - Color: Represents a color in RGBA format.
+- lines 714-1033
+  - UsefulTreasure: Determines if a treasure is useful.
+  - c_iUsefulTech: Indicates a treasure is useful for technology.
+  - m_psurfaceTechIcon: Surface icon for useful technology treasures.
+  - bLabel: Boolean indicating whether to label the radar entry.
+  - OT_treasure: Type representing a treasure object.
+  - OT_ship: Type representing a ship object.
+  - OT_station: Type representing a station object.
+  - OT_missile: Type representing a missile object.
+- lines 1034-1482
+  - RadarImageImpl::RenderBlips: Draws blips on the radar image.
+  - RadarImageImpl::RenderRoundBorder: Renders a round border around the radar.
+  - RadarImageImpl::Render: Main rendering function for the radar image.
+  - RadarImageImpl::s_colorNeutral: Neutral color used in the radar display.
+  - RenderBlips: Function to draw blips, likely part of RadarImageImpl.
+  - RenderRoundBorder: Function to render a round border around the radar, also part of RadarImageImpl.
+  - Render: Main rendering function for the radar image, part of RadarImageImpl.
+  - s_colorNeutral: Neutral color used in various parts of the radar display.
 
 #### `src/WinTrek/radarimage.h`
 
@@ -13868,32 +16144,86 @@ NOTES:
 
 #### `src/WinTrek/sectormap.cpp`
 
-**PURPOSE:** The `sectormap.cpp` file in Allegiance is responsible for managing the rendering and interaction of the sector map, including displaying information about sectors, handling user input, and updating visual states based on game events.
+PURPOSE: Manages and displays information about sectors in the game, including rendering the sector map and handling user interactions.
 
-**KEY PARTS:**
-- **Class: SectorInfoPane**: Manages the display of information about a sector.
-- **Function: GetClusterOwners**: Determines ownership of stations in a cluster.
-- **Function: DrawAsteroidIcons**: Draws icons for special asteroids in a cluster.
-- **Class: SectorMapPane**: Manages rendering and interaction with the sector map.
-- **Function: OnMouseClick**: Processes mouse click events on the sector map.
-- **Function: Apply**: Factory method to create an instance of `SectorInfoPane`.
-- **Variable: m_bFlashFrame**: Indicates whether to flash frames during drawing operations.
+KEY PARTS:
+- SectorInfoPane: Manages and displays information about a sector.
+- GetClusterOwners: Determines the primary and secondary owners of a cluster based on station count.
+- Render: Draws the sector map and related information on the screen.
+- SectorMapPane: Manages the display and interaction with the sector map.
+- SelectCluster: Updates the selected cluster and notifies SectorInfoPane.
+- SetVisible: Sets the visibility of the sector map pane.
 
-**CONNECTS TO:** Other game systems for rendering, input handling, and mission logic.
+CONNECTS TO: Allegiance game engine, other UI components, game logic for asset states and mission parameters.
 
-**NOTES:** Contains commented-out code for additional features that were not fully implemented. Uses bitwise operations and assertions for robust state management.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-360
+  - SectorInfoPane: Manages and displays information about a sector.
+  - GetClusterOwners: Determines the primary and secondary owners of a cluster based on station count.
+  - GetClusterPopulation: Counts the number of active ships in a cluster for a given side.
+  - AddIcon: Adds an icon to the sector info pane, handling duplicates and sorting.
+  - CalcBounds: Calculates the bounds of the sector info pane image.
+  - ClearCluster: Clears the selected and mouse-over clusters.
+  - SelectCluster: Sets the currently selected cluster.
+  - SelectMouseOverCluster: Sets the cluster under the mouse cursor.
+- lines 361-707
+  - SectorInfoPaneFactory::Apply: Creates a new instance of SectorInfoPane.
+  - HeliumAsteroidVisibileInCluster: Checks if any He3 asteroids are visible in a cluster.
+  - Render: Draws the sector map and related information on the screen.
+  - SectorMapPane: Manages the display and interaction with the sector map.
+  - SelectCluster: Updates the selected cluster and notifies SectorInfoPane.
+  - SetVisible: Sets the visibility of the sector map pane.
+- lines 708-1052
+  - m_bVisible: A boolean indicating whether the sector map is visible.
+  - GetWindow(): Retrieves the window associated with the sector map.
+  - GetTimer(): Retrieves the timer associated with the window.
+  - AddSink(): Adds an event sink to the timer.
+  - RemoveSink(): Removes an event sink from the timer.
+  - SelectCluster(): Selects a cluster in the sector map.
+  - m_pSectorInfoPane: A pointer to the sector information pane.
+  - SelectMouseOverCluster(): Selects the mouse-over cluster in the sector info pane.
+- lines 1054-1393
+  - AssetMask: Represents a bitmask of asset states.
+  - ClusterWarning: Enumerates different warning levels for clusters.
+  - GetClusterWarning: Determines the warning level based on asset mask and mission parameters.
+  - DrawImage3D: Draws an image in 3D space with specified color and position.
+  - WinPoint: Represents a point in 2D space.
+  - IclusterIGC: Interface for cluster game objects.
+  - GetClusterPoint: Converts cluster screen coordinates to map coordinates.
+  - GetClusterAtPoint: Finds the cluster at a given map point.
+- lines 1394-1637
+  - SectorMapPane: Manages the sector map interface.
+  - GetClusterCursor: Determines the cursor to display based on current game state.
+  - MouseMove: Handles mouse movement events, including dragging and selecting clusters.
+  - Button: Processes mouse button events, handling clicks and drags.
+  - OnClusterChanged: Updates the selected cluster when it changes externally.
+  - SectorMapPaneFactory::Apply: Factory method to create instances of SectorMapPane.
 
 #### `src/WinTrek/sectorvw.h`
 
-PURPOSE: This file defines an interface class `SectorViewImage` for managing images related to sector views in the game.
+PURPOSE: tiny file (18 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- SectorViewImage: A base class that inherits from `WrapImage`. It provides a method to create instances and an abstract method to set window size.
-- Create: A static factory method to create instances of `SectorViewImage`.
-
-CONNECTS TO: `WrapImage`, `Engine`
-
-NOTES: None.
+    #ifndef	SECTORVW_H
+    #define	SECTORVW_H
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // SectorViewImage
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    class SectorViewImage : public WrapImage {
+    protected:
+        SectorViewImage() :
+            WrapImage(Image::GetEmpty())
+        {
+        }
+    public:
+        static TRef<SectorViewImage> Create(Engine* pengine);
+        virtual void SetWindowSize(const Point& point) = 0;
+    };
+    #endif
 
 #### `src/WinTrek/selpane.cpp`
 
@@ -13944,37 +16274,201 @@ NOTES:
 
 #### `src/WinTrek/teampane.cpp`
 
-**PURPOSE:** The `teampane.cpp` file manages the team pane interface in Allegiance, handling events, painting players and teams, and managing UI components like buttons and lists.
+PURPOSE: Manages the team pane interface and handles various events related to player selection, team management, and resource donations.
 
-**KEY PARTS:**
-- **Class: TeamPane**: Manages the team pane interface, including buttons, combo boxes, and player lists.
-- **Function: DrawAutoDonateIcon**: Draws an icon indicating whether a player's ship is set to auto-donate resources.
-- **Class: PlayerPainter**: Custom painter for rendering individual player items in the list. Handles drawing icons, names, money, deaths, and kills.
-- **Class: TeamPainter**: Custom painter for rendering team items. Handles drawing team icons, names, number of players, and ranks.
-- **Class: TeamPanelPainter**: Custom painter for rendering team panel items. Handles displaying team icons and civilization icons.
-- **Function: IsAllyOrHumanOrSpotted**: Determines if a player is an ally, human, or spotted by the current player's ship.
-- **Function: GetSideUIColor**: Returns a color based on the side ID, used for UI elements related to different sides.
+KEY PARTS:
+- TeamPane: Manages the team pane UI.
+- PlayerPainter: Custom painter for rendering players in the list.
+- TeamPainter: Custom painter for rendering teams in the list.
+- OnEvent: Handles events from the player list and team combo.
+- OnSelectPlayer: Updates the UI when a player is selected.
+- CanAcceptJoiners: Checks if more players can join the current team.
+- OnButtonBoot: Handles the booting of a player.
+- OnRightButtonDonate: Handles large donations with a right-click.
+- ExpandedTeamPane: Extended version of TeamPane with additional functionality for displaying player details.
 
-**CONNECTS TO:** Other UI components and game logic files that handle player interactions and team management.
+CONNECTS TO: Allegiance game engine, PlayerList, TeamCombo
 
-**NOTES:** The file contains commented-out sections and conditional compilation directives indicating parts of the code that are not currently in use or have been temporarily disabled. There is a TODO comment about allowing viewing NOAT lobby teams, which implies additional functionality might be needed for this feature. Additionally, there are assertions and checks for specific conditions that might indicate potential issues or areas for improvement in the game logic.
+NOTES:
+- Contains TODOs indicating code was removed or commented out.
+- Includes custom painters and event handlers specific to the team pane interface.
+
+PARTS (in file order):
+
+- lines 1-361
+  - TeamPane: Manages the team pane interface.
+  - DrawAutoDonateIcon: Draws an icon indicating whether a player can donate resources to another ship.
+  - PlayerPainter: Custom painter for rendering players in the list.
+  - TeamPainter: Custom painter for rendering teams in the list.
+  - sortLeader, sortStatus, etc.: Enumerations defining columns for sorting players and teams.
+  - TODOs: "// draw the ship" (commented out) "//psurface->DrawString(SectorName(pplayer->LastSeenSector()));" (commented out) "//TRef<Image> pimageShipIcon;" (commented out) "//if (IsAllyOrHumanOrSpotted(pplayer)){...}" (commented out) "// draw the sector" (commented out)
+  - Unusual code: Conditional compilation directives like //#include "imagetransform.h" with comments indicating they are commented out. Use of ZString for string manipulation, which is a custom string class in Allegiance.
+- lines 362-725
+  - TeamPane: Manages the team pane UI.
+  - TeamPanelPainter: Paints individual team panels.
+  - IsAllyOrHumanOrSpotted: Filters items based on visibility criteria.
+  - GetSideUIColor: Returns a color for a given side ID.
+  - OnEvent: Handles events from the player list and team combo.
+  - OnSelectPlayer: Updates the UI when a player is selected.
+  - OnSelTeam: Handles selection of a team in the team combo.
+- lines 728-1096
+  - NumPlayersOnSide: Counts human players on a given side.
+  - MaxTeamSize: Determines the maximum team size based on mission parameters and current player imbalances.
+  - CanAcceptJoiners: Checks if more players can join the current team.
+  - OnSelectPlayer: Handles selection of a player in the team pane, enabling/disabling buttons based on player status and team leader privileges.
+  - OnPlayerRightClicked: Adds a right-click menu for selected players.
+  - OnSelTeam: Updates the team selection when a new team is chosen.
+  - OnAddPlayer: Refreshes the player list when a new player joins.
+  - OnDelPlayer: Refreshes the player list when a player leaves.
+- lines 1097-1455
+  - OnButtonBoot: Handles the booting of a player.
+  - OnPlayerStatusChange: Updates the team pane when a player's status changes.
+  - OnButtonDonate: Handles donating money to another player.
+  - OnRightButtonDonate: Handles large donations with a right-click.
+  - OnButtonStopDonate: Toggles stopping a player from donating.
+  - OnButtonAutoDonate: Initiates automatic donations to a selected player.
+  - OnButtonTakeMeTo: Moves the view to a selected player's ship.
+  - OnButtonAccept: Accepts a position request for a player in the team lobby.
+- lines 1456-1844
+  - TeamPane: Manages the team pane interface.
+  - SideCompare, LeaderCompare, etc.: Static functions for comparing player or side information.
+  - PlayerInfo, IshipIGC, IclusterIGC, IhullTypeIGC: Classes representing game entities and their properties.
+  - CreateTeamPane: Factory function to create a new instance of TeamPane.
+  - ExpandedTeamPane: Extended version of TeamPane with additional functionality.
+  - ExpandedPlayerPainter: Custom painter for expanded team pane players.
+  - TODOs: "cut by aem" indicates code was removed or commented out. Additional TODOs may be present in the omitted sections.
+- lines 1845-2049
+  - ExpandedTeamPane: A class that extends TeamPane and adds additional functionality for displaying player details.
+  - OnButtonSize: A member function of ExpandedTeamPane that handles button size events.
+  - CreateExpandedTeamPane: A function to create an instance of ExpandedTeamPane.
+  - m_pbuttonCollapse: A member variable representing a collapse button in the team pane.
+  - m_plistPanePlayers: A member variable representing a list pane for displaying player details.
+  - m_peventTeams: A member variable representing the event source for team selection events.
+  - m_psinkTeams: A member variable representing the event sink for handling team selection events.
+  - TODO: "BT - 7/15 - When the team screen is shown, miners have -1 for the wingID, which causes alleg to crash."
 
 #### `src/WinTrek/teamscreen.cpp`
 
-**PURPOSE:** The `teamscreen.cpp` file in Allegiance is responsible for managing the team selection screen interface, handling user interactions related to team management, displaying information, and managing UI events.
+PURPOSE: Manages the team selection screen and handles interactions related to player teams, civilizations, and mission briefings.
 
-**KEY PARTS:**
-- **Class: TeamScreen**: Manages the team selection screen interface.
-- **Function: OnButtonOK()**: Handles the OK button click event to send a message changing the player's civilization.
-- **Function: OnButtonCancel()**: Closes the popup and restores the cursor when the Cancel button is clicked.
-- **Function: IsHuman(ItemID pitem)**: Determines if a given item (player) is human.
-- **Constructor: TeamScreen(Modeler* pmodeler)**: Initializes the team screen, setting up UI elements, event handlers, and data bindings.
-- **Destructor: ~TeamScreen()**: Cleans up resources when the team screen is destroyed.
-- **Function: SendChat(const ZString& strChat)**: Sends a chat message to the appropriate recipient based on the input string.
+KEY PARTS:
+- TeamScreen: Main class for the team selection screen.
+- TeamPainter: Paints individual teams on the screen.
+- CivilizationArray: Stores civilization IDs.
+- GetMissionMapType: Returns the type of map for the current mission.
+- GetCivMissionBriefing: Constructs briefing text based on mission parameters and player information.
+- OnButtonOk: Processes "OK" button click in team settings dialog, updating side's name and civilization.
+- TeamScreen constructor: Initializes team screen components and settings.
+- SendChat: Handles chat messages, routing them to appropriate recipients.
+- UpdateTeamButtons: Updates the state of team buttons based on mission status and player roles.
+- GetSideRankSum: Counts the sum of ranks for a specified side.
+- OnTeamRightClicked: Creates an alliance context menu if conditions are met.
+- OnButtonDiscord: Opens a Discord link based on the current side.
+- OnPlayerStatusChange: Updates button states when a player's status changes.
 
-**CONNECTS TO:** Other game systems for handling player interactions, mission management, and UI events. Specifically, it interacts with `Modeler`, `MissionInfo`, and other components of the Allegiance game engine.
+CONNECTS TO: trekClient, PlayerPainter, TeamIconImage, MissionBriefPopup, TeamSettingsDialogPopup
 
-**NOTES:** The file contains several TODO comments indicating areas that need further development or review. There are also commented-out sections for defaulting the selection to the lobby side when no valid team is selected and specific logic related to alliances and mission settings, which seems specific to certain game goals (conquest).
+NOTES: None
+
+PARTS (in file order):
+
+- lines 1-360
+  - TeamScreen: Main class for the team selection screen.
+  - TeamPainter: Class responsible for painting individual teams on the screen.
+  - CivilizationArray: Array to store civilization IDs.
+  - numCivilizations: Variable to keep track of the number of civilizations.
+  - lastRandCivUpdate: Time when the random civilization update was last performed.
+  - sortPlayers: Enum defining sorting options for players.
+  - m_fColorIntensity and m_fColorBrightness: Variables controlling color intensity and brightness.
+  - CivilizationArray: Array storing civilization IDs.
+- lines 361-712
+  - TrekResources::SmallFont(): Returns a small font resource.
+  - Color::White(): Represents white color.
+  - WinPoint(m_viColumns[0]+4, m_nHeight  1/2 -2): Specifies a point for drawing text.
+  - trekClient.GetCore()->GetSide(pitem->GetSideID())->GetCivilization()->GetName(): Retrieves the name of the civilization associated with a side.
+  - psurface->DrawString(...): Draws a string on a surface at specified coordinates and color.
+  - PlayerPainter::Paint(...): Paints player information on a surface.
+  - TeamIconImage::SetSide(SideID sideId): Sets the background image for a team icon based on the side ID.
+  - MissionBriefPopup::GetString(const ZString& strName, TRef<INameSpace> pns): Retrieves a string value from a namespace.
+- lines 713-1068
+  - GetMissionMapType: Returns a string representing the type of map for the current mission.
+  - GetCivMissionBriefing: Constructs a briefing text based on the mission parameters and player information.
+  - GetMissionBriefingTitle: Returns the title for the mission briefing.
+  - GetMissionBriefingString: Retrieves a specific string from the mission briefing data.
+  - GetMissionTip: Generates a random tip to display at the end of the mission briefing.
+  - MissionBriefPopup: Manages the popup window that displays the mission briefing and tips.
+  - TeamSettingsDialogPopup: Handles the dialog for setting team names, civilizations, and squads during gameplay.
+  - OnButtonOk: Processes the "OK" button click in the team settings dialog, updating the side's name and civilization.
+- lines 1069-1426
+  - TeamScreen::OnButtonCancel: Closes the popup and restores cursor.
+  - IsHuman: Determines if a player is human based on mission data.
+  - TeamScreen constructor: Initializes team screen components and settings.
+  - AddEventTarget: Registers event handlers for various UI elements.
+  - OnWingCombo: Handles wing selection changes.
+  - OnPlayerClicked, OnPlayerRightClicked, OnPlayerDoubleRightClicked: Handle player interactions.
+  - UpdateButtonStates: Updates button visibility based on game state.
+  - m_pbuttonbarChat: Chat tab control.
+- lines 1427-1771
+  - TeamScreen: Manages the team selection screen interface.
+  - GetCurrentSide(): Returns the current side ID.
+  - SendChat(const ZString& strChat): Handles chat messages, routing them to appropriate recipients based on content and user input.
+  - SetHiddenTeamButtons(bool bHidden): Hides or shows team buttons based on whether changes are allowed.
+  - UpdateTeamButtons(): Updates the state of team buttons based on mission status and player roles.
+  - UpdateButtonStates(): Adjusts the enabled and visible states of various UI elements based on game conditions and player permissions.
+  - UpdateTitleText(): Sets the title text for the screen, displaying the mission name.
+  - UpdatePromptText(): Updates the prompt text to indicate the current team status or join requests.
+- lines 1773-2119
+  - GetSideRankSum: Counts the sum of ranks for a specified side.
+  - GetRankThreshold: Retrieves the threshold to be used for rank balancing.
+  - GetCountdownTime: Calculates the remaining time until the mission starts or ends.
+  - SetCountdownTimer: Formats and sets the countdown timer text.
+  - UpdateCountdownText: Updates the countdown timer display based on the current game stage.
+  - SideCompare, LeaderCompare, PlayerNameCompare, PlayerRankCompare: Comparison functions for sorting players and sides.
+  - PlayerStatusCompare: Custom comparison class to sort players by their status (requesting/member, ready/unready).
+  - PlayerWingCompare: Custom comparison class to sort players by their wing affiliation.
+- lines 2121-2477
+  - ItemIDCompareFunction: A function type used for comparing ItemIDs.
+  - ReverseCompare: A class that reverses the comparison result of another function.
+  - SortingList: A function to sort a list using a given comparison function and reverse flag.
+  - GetPane: Returns the current pane associated with the team screen.
+  - OnEvent: Handles UI events, including player and team selections.
+  - OnDismissRandomizeMessageBox: Handles dismissal of a randomization warning message box.
+  - OnTeamClicked and OnTeamDoubleClicked: Handle left and double-click events on teams.
+  - OnTeamRightClicked: Handles right-click events on teams, creating an alliance context menu if conditions are met.
+- lines 2479-2831
+  - UpdateCivBitmap: Updates the civilization bitmap based on the current side.
+  - OnTeamCivChange: Handles changes to the team's civilization.
+  - OnSelTeam: Handles selection of a team in the list.
+  - OnEvent(TEvent<ZString>::Source pevent, ZString str): Handles text events for chat messages.
+  - OnTimer: Updates UI elements and handles randomization of civilizations.
+  - OnCivChange(int index): Handles changes to civilization selection.
+  - OnWingCombo(int index): Handles wing assignment changes.
+  - OnButtonBack(): Handles the back button click.
+- lines 2832-3188
+  - OnCancelRequest: Handles canceling a request to join a team.
+  - OnButtonDiscord: Opens a Discord link based on the current side.
+  - OnButtonJoin: Attempts to join the current or another team.
+  - OnButtonAccept: Accepts a player's request to join the team.
+  - OnButtonReject: Rejects a player's request to join the team.
+  - OnCivChosen: Changes the civilization for the team if the leader is present.
+  - ChatTargetToButton: Maps chat targets to button indices.
+  - OnButtonBarChat: Handles chat target selection via buttons.
+- lines 3189-3534
+  - TeamScreen::OnButtonAwayFromKeyboard: Handles the "Away From Keyboard" button click.
+  - TeamScreen::OnButtonTeamSettings: Manages team settings and ensures game control isn't started during these settings.
+  - TeamScreen::OnButtonMakeLeader: Sets another player as the team leader.
+  - TeamScreen::OnButtonToggleTeam: Toggles the active state of a team.
+  - TeamScreen::OnAddMission: Updates the mission details when a new mission is added.
+  - TeamScreen::OnAddPlayer: Handles adding players to the mission, including updating chat targets and player statuses.
+  - TeamScreen::OnDelPlayer: Manages player removals, displaying appropriate messages based on the reason for removal.
+  - TeamScreen::OnPlayerStatusChange: Updates button states when a player's status changes.
+- lines 3535-3705
+  - TeamScreen::OnDelRequest: Handles deletion requests for players and displays appropriate messages.
+  - TeamScreen::UpdateStatusText: Updates the status text on the team screen.
+  - TeamScreen::CreateMessageBox: Creates a message box with the given text.
+  - TeamScreen::s_nLastSelectedChatTab: Stores the last selected chat tab index.
+  - TeamScreen::s_bFlash: Indicates whether the screen should be flashing.
+  - CreateTeamScreen: Factory function to create an instance of TeamScreen.
 
 #### `src/WinTrek/teleportpane.cpp`
 
@@ -14032,27 +16526,21 @@ NOTES:
 
 #### `src/WinTrek/trekctrls.cpp`
 
-**Purpose:** The file `src/WinTrek/trekctrls.cpp` contains implementation details for various UI components and controls used in the Allegiance game, including image panes, tabbed interfaces, list panes, and animated transformations.
+PURPOSE: Manages various UI components and functionalities for a list pane with scroll functionality.
 
-**Key Parts:**
-- **SubImagePaneImpl**: Manages an image pane that can be updated and painted.
-- **SetImage**: Updates the image displayed by the `SubImagePane` and triggers a layout update if necessary.
-- **TabPaneImpl**: Implements a tabbed interface with buttons for selecting tabs and managing different panes.
-- **OnSelectTab**: Handles the selection of a tab, updating the visible pane and triggering an event source to notify listeners.
-- **ListPaneOldImpl**: Implements a list pane that can display items with scrollbars and handle events like clicks and mouse overs.
-- **InsertItem**: Inserts an item into the list at a specified position, updating the layout and size as necessary.
-- **RemoveItemByIdx**: Removes an item from the list by index, adjusting the selection if necessary and updating the layout.
-- **ListPaneOld**: Manages a list of items that can be scrolled through. It handles selection, scrolling, and painting of items.
-- **AnimatedTranslateTransform2Impl**: Implements an animated translation transformation for graphical elements.
-- **AnimationController**: Manages animations for game objects.
+KEY PARTS:
+- SubImagePaneImpl: Manages a pane that displays an image.
+- TabPaneImpl: Implements a tabbed interface with selectable tabs and associated panes.
+- ListPaneOldImpl: A class representing a list pane with scroll functionality.
+- InsertItem: Inserts a list item at a specified index.
+- AppendItem: Appends a list item to the end of the list and returns its index.
+- RemoveItem: Removes a list item by pointer.
+- UpdateItem: Updates a list item by pointer.
 
-**Connects To:** Other UI components and systems within the Allegiance game engine.
+CONNECTS TO: trekctrls.h
 
-**Notes:**
-- Contains TODO comments indicating areas that need further work or review.
-- Includes unusual code where `m_pScrollBar` is set to `m_pScrollPane`, which might be a mistake or intentional for a specific design choice.
-- Conditional compilation directives control rendering logic based on build configurations.
-- The `AnimatedTranslateTransform2Impl::Evaluate()` method contains a switch statement that could be simplified.
+NOTES:
+- Uses ZAssert for debugging checks.
 
 #### `src/WinTrek/trekctrls.h`
 
@@ -14071,41 +16559,287 @@ NOTES: None.
 
 #### `src/WinTrek/trekigc.cpp`
 
-**PURPOSE:** Manages game objects and client-side logic in Allegiance, including handling mission events, player status, and sound effects.
+PURPOSE: Manages game elements and interactions within a cluster site, including sound effects, explosions, and model management.
 
-**KEY PARTS:**
-- **Class: WinTrekClient**: Main client class for managing game state, connections, and user interactions.
-- **Function: Initialize**: Sets up resources like surfaces, images, and sound effects.
-- **Function: Terminate**: Cleans up resources when the client is terminated.
-- **Function: OnAppMessage**: Handles incoming messages from the server, updating mission definitions.
-- **Function: OverrideThrottle**: Sets desired throttle value for the ship.
-- **Function: DevelopmentCompleted**: Applies development technologies to a side.
-- **Function: StationTypeCompleted**: Handles completion of station types locally if not connected.
-- **Function: BuildStation**: Creates a new station on an asteroid.
-- **Function: LayExpendable**: Deploys expendables like mines or probes from a ship.
-- **Function: SetViewCluster**: Updates the view cluster and handles cleanup of old cluster data.
-- **Function: RequestViewCluster**: Requests a change in the view cluster if connected.
+KEY PARTS:
+- ClusterSiteImpl: Manages game elements and interactions within a cluster site.
+- AddExplosion: Adds an explosion effect at a specified position with various parameters.
+- AddThingSite: Adds a ThingSite to the scene.
+- DeleteThingSite: Removes a ThingSite from the scene.
+- ModelPointSoundSource: Represents a sound source attached to a model.
+- SoundSite: Interface for models which emit sounds.
+- ShipSoundSite: Manages sound effects for a ship.
+- UpdateSounds: Updates and plays sounds based on the ship's state.
+- LoadEffect: Loads a build effect with the specified color.
+- LoadDecal: Loads a decal with the given texture name and width.
+- WinTrekClient::WinTrekClient(): Constructor for WinTrekClient class.
+- Initialize: Initializes client state and resources.
+- ConnectToServer: Connects to the server and handles connection errors.
 
-**CONNECTS TO:** Other game systems for handling mission events, player status, and sound effects. Depends on network communication for server interactions.
+CONNECTS TO:
+- BaseClient
+- ISoundPositionSource
 
-**NOTES:** Contains TODO comments indicating areas that need further development or review. Uses `assert` statements for expected conditions during development.
+NOTES:
+- Contains TODO comments for future development, such as handling turret orientation in CreateSoundSources.
+
+PARTS (in file order):
+
+- lines 1-349
+  - ClusterSiteImpl: Manages game elements and interactions within a cluster site.
+  - AddExplosion: Adds an explosion effect at a specified position with various parameters.
+  - AddThingSite: Adds a ThingSite to the scene.
+  - DeleteThingSite: Removes a ThingSite from the scene.
+  - AddPoster: Adds a poster image to the scene.
+  - SetEnvironmentGeo: Sets the environment geometry for the cluster site.
+  - GetEnvironmentGeo: Retrieves the current environment geometry.
+  - AddScanner: Adds a scanner to the appropriate list based on side affiliation.
+- lines 350-713
+  - ModelPointSoundSource: Represents a sound source attached to a model.
+  - SoundSite: Interface for models which emit sounds.
+  - RegisteredModelPointSoundSource: A registered version of ModelPointSoundSource.
+  - AmbientSoundSite: A sound site for a model with one continuous ambient sound.
+  - UpdateSounds: Updates the current sounds for this object according to its state.
+  - AddHitSound: Adds a hit sound (only keeps the most recent few sounds).
+  - StopSounds: Stops all sounds on this object - usually used when changing clusters.
+  - GetSoundSource: Gets a sounds source that can be used for this object.
+- lines 714-1064
+  - ShipSoundSite: Manages sound effects for a ship.
+  - ForwardThrustFraction: Calculates the fraction of forward thrust based on controls.
+  - SidewaysThrustFraction: Calculates the fraction of sideways thrust based on controls.
+  - TurnRate: Determines the current turn rate of the ship.
+  - AfterburnerPower: Retrieves the power level of the afterburner.
+  - TryingToFireWeaponWithoutAmmo: Checks if the player is trying to fire a weapon without enough ammo.
+  - TryingToFireAfterburnersWithoutFuel: Checks if the player is trying to use afterburners without fuel.
+  - HasMissileLock: Determines if the ship has a missile lock.
+- lines 1066-1414
+  - ShipSoundSite: Manages sound effects for a ship.
+  - UpdateSounds: Updates and plays sounds based on the ship's state.
+  - CreateSoundSources: Initializes sound sources for various parts of the ship.
+  - GetGunnerInteriorSoundID: Determines the interior gunner sound ID.
+  - GetAfterburnerSoundID: Retrieves the afterburner sound ID.
+  - UpdateEngineSoundLevels: Adjusts engine sound levels and pitches.
+  - StopSounds: Stops all sounds when changing clusters.
+  - TODO: Does not handle turret orientation in CreateSoundSources.
+- lines 1416-1760
+  - ThingSiteImpl: Manages a site for a thing in the game.
+  - Initializes the ThingSiteImpl with a model and sets up sound sites based on the object type.
+  - Cleans up by deleting the sound site if it exists.
+  - Purge: Clears references to things, decals, and build effects.
+  - Terminate: Similar to Purge but handles additional cleanup for different cases.
+  - GetChildModelOffset: Retrieves the offset of a child model frame.
+  - GetChildOffset: Retrieves the offset of a child frame.
+  - SetAfterburnerSmokeSize, SetAfterburnerFireDuration, SetAfterburnerSmokeDuration: Sets properties related to afterburner effects.
+- lines 1762-2111
+  - LoadEffect: Loads a build effect with the specified color.
+  - LoadDecal: Loads a decal with the given texture name and width.
+  - LoadModel: Loads a 3D model with optional texture.
+  - SetTrailColor: Sets the trail color for the model or decal.
+  - LoadAleph: Loads an Aleph entity with the specified texture.
+  - LoadMine: Loads a mine field with the given texture, strength, and radius.
+  - SetMineStrength: Updates the strength of the mine field.
+  - UpdateScreenPosition: Updates the screen position and related properties.
+- lines 2112-2449
+  - WinTrekClient::WinTrekClient(): Constructor for WinTrekClient class.
+  - SideVisibility: Class that manages visibility of sides in the game.
+  - UpdateSounds(DWORD dwElapsedTime): Updates sounds based on elapsed time.
+  - StopSounds(): Stops all sounds associated with the object.
+  - RegisterHit(float fAmount, const Vector& vectOffset, bool bAbsorbedByShield = false): Registers a hit and plays appropriate sound.
+  - GetClusterSite(): Returns the cluster site of the model.
+  - TRef<ISoundPositionSource> GetSoundSource(const Vector& vectOffset): Gets the sound source with an offset.
+  - TRef<ISoundPositionSource> GetSoundSource(): Gets the default sound source.
+- lines 2450-2808
+  - WinTrekClient: Main class for handling client-specific logic.
+  - Initialize: Initializes client state and resources.
+  - LoadExplosionImage: Loads explosion images into memory.
+  - Terminate: Cleans up client resources.
+  - ResetStaticData: Resets mission data.
+  - GetCargoPart: Retrieves the current cargo part.
+  - NextCargoPart: Advances to the next cargo part.
+  - OnReload: Handles reload events for cargo parts.
+- lines 2809-3152
+  - WinTrekClient::OverrideCamera: Overrides the camera view for a given model.
+  - WinTrekClient::TargetKilled: Handles actions when a target is killed.
+  - WinTrekClient::ShipWarped: Manages actions when a ship warps to a new sector.
+  - WinTrekClient::PostNotificationText: Posts notification text with optional critical status.
+  - WinTrekClient::ActivateTeleportProbe: Activates a teleport probe and posts related messages.
+  - WinTrekClient::DestroyTeleportProbe: Destroys a teleport probe and updates cluster assets.
+  - WinTrekClient::PostPlainText: Posts plain text with optional critical status.
+  - WinTrekClient::PostText: Similar to PostPlainText but uses variable arguments.
+- lines 3154-3531
+  - AutoDownloadProgressDialogPopup: Manages the progress dialog for auto-download operations.
+  - OnBeginAutoUpdate: Initializes and displays the auto-download progress dialog.
+  - ShouldFilterFile: Determines if a file should be filtered out during download based on its name.
+  - OnProgress: Updates the progress of the current file being downloaded.
+  - OnError: Handles errors that occur during the auto-update process.
+  - OnEvent: Closes the message box when the user acknowledges an error or abort.
+  - WinTrekClient::OnLogonAck: Handles acknowledgment of logon to a game server.
+  - WinTrekClient::OnLogonLobbyAck: Handles acknowledgment of logon to a lobby.
+- lines 3532-3892
+  - WinTrekClient::OnLogonClubAck: Handles successful or failed login to Zone Club server.
+  - WinTrekClient::Disconnect: Disconnects from the game server and sets m_bDisconnected to true.
+  - WinTrekClient::OnSessionLost: Handles session loss, showing appropriate messages and disconnecting if necessary.
+  - WinTrekClient::FlushSessionLostMessage: Flushes any stored session lost message to a popup.
+  - WinTrekClient::OnEvent: Exits the application when an event is received.
+  - WinTrekClient::OverrideThrottle: Overrides the throttle setting for the game.
+  - DevelopmentCompleted: Applies development technologies and attributes to a side if not connected to the server.
+  - StationTypeCompleted: Handles the completion of station type creation, including creating drones.
+- lines 3894-4249
+  - DataProbeIGC: A structure used for creating a data probe object.
+  - WinTrekClient::DroneTypeCompleted: Handles the completion of a drone type creation process.
+  - WinTrekClient::ContinueRipcord: Determines if the ripcord action can continue.
+  - WinTrekClient::UseRipcord: Executes the ripcord action, moving a ship to a new location.
+  - WinTrekClient::SetViewCluster: Updates the view cluster for the player.
+  - WinTrekClient::RequestViewCluster: Sends a request to change the view cluster to the server.
+  - WinTrekClient::TerminateModelEvent: Handles events when a model is terminated.
+  - WinTrekClient::HandlePickDefaultOrder: Handles picking default orders for ships.
+- lines 4250-4595
+  - WinTrekClient: Main client class handling various game events.
+  - DamageShipEvent: Handles damage to ships, including adjusting groove levels and playing effects.
+  - KillStationEvent: Manages station destruction, including explosions and sound effects.
+  - HitWarpEvent: Processes warp events for ships, updating orientation and velocity.
+  - HitTreasureEvent: Handles treasure interactions for ships.
+  - PaydayEvent: Placeholder function for payday events (not implemented).
+  - GetMoneyRequest: Queues money requests from ships.
+  - ReceiveChat: Manages chat messages, filtering and playing sounds based on conditions.
+- lines 4596-4937
+  - WinTrekClient::ReceiveChat: Handles chat messages and processes commands.
+  - ChatLink: Represents a single chat message.
+  - Preload: Loads models and textures for rendering.
+  - CreateThingSite: Creates a site for a model.
+  - CreateClusterSite: Creates a site for a cluster.
+  - TODOs: NYI need to distinguish between all and friendly in CHAT_ALL_SECTOR NYI hack to piggify a pilot Xynth #14 7/2010 change color if from comm
+  - Unusual code: Cheat board handling commented out Conditional compilation for DX9 build
+- lines 4938-5293
+  - ClusterSiteImpl: Manages cluster sites and their associated sounds.
+  - WinTrekClient::PlaySoundEffect(SoundID soundID, ImodelIGC model): Plays a sound effect for a given model.
+  - WinTrekClient::PlayNotificationSound(SoundID soundID, ImodelIGC model): Plays a notification sound if the model is related to the player's ship.
+  - WinTrekClient::PlayFFEffect(ForceFeedbackEffectID effectID, ImodelIGC model, LONG lDirection): Plays force feedback effects for the given model and direction.
+  - WinTrekClient::PlayVisualEffect(VisualEffectID effectID, ImodelIGC model, float fIntensity): Applies visual effects to a model based on the effect ID and intensity.
+  - WinTrekClient::UpdateAmbientSounds(DWORD dwElapsedTime): Updates ambient sounds in the current cluster or station.
+  - WinTrekClient::ResetSound(): Resets all sound effects.
+  - WinTrekClient::ConnectToServer(BaseClient::ConnectInfo & ci, DWORD dwCookie, Time now, const char szPassword, bool bStandalonePrivate): Connects to the server and handles connection errors.
+- lines 5294-5589
+  - WinTrekClient: Main client class handling game logic and interactions.
+  - OnQuitMission: Handles different types of mission quits and displays appropriate messages.
+  - SetGameoverInfo: Updates gameover information with details about the endgame.
+  - AddGameoverPlayers: Adds player statistics to the endgame data.
+  - GetGameoverMessage: Returns the message describing the gameover reason.
+  - GetEndgamePlayerInfo: Retrieves specific player's endgame information.
+  - GetNumEndgamePlayers: Returns the number of players involved in the endgame.
+  - GetSideEndgameInfo: Provides details about a specific side during the endgame.
 
 #### `src/WinTrek/trekinput.cpp`
 
-**PURPOSE:** The `trekinput.cpp` file manages input handling for the Allegiance game, including keyboard, joystick, and mouse inputs. It handles loading and saving of input mappings, tracking key states, and translating input events into game commands.
+PURPOSE: Handles input processing and configuration for Allegiance's game interface, including keyboard and joystick mappings.
 
-**KEY PARTS:**
-- **Class: TrekInputImpl**: Manages input handling with methods to initialize commands, load maps, check key states, and handle joystick effects.
-- **Function: InitializeCommandsMDL()**: Initializes command mappings and key modifiers.
-- **Function: LoadMap(const ZString& str)**: Loads input mappings from a configuration file and handles joystick initialization.
-- **Variable: m_ppboolTrekKeyButtonDown**: Tracks whether specific TrekKeys are currently pressed.
-- **Class: TrekInput**: Manages overall input handling, including loading maps, clearing button states, and translating key messages.
-- **Function: CreateTrekInput**: Factory function to create an instance of `TrekInputImpl`.
-- **Array: g_ppccAxisDescription**: Descriptions for joystick axes used in the user interface.
+KEY PARTS:
+- TrekInputImpl: Main class implementing input handling.
+- InitializeCommandsMDL(): Initializes command mappings using a modeler namespace.
+- Flush(): Resets keyboard state by calling GetKeyState() on all keys.
+- normalize(int val, int minval, int maxval): Normalizes an integer value to a specified range.
+- CreateInputMapPopup(...): Function to create a popup for input mapping configuration.
+- pnsCommands: Adds command targets and modifiers to a namespace.
+- GetKeyDown(int vk): Checks if a key is currently down.
+- LoadMap(const ZString& str): Loads an input map from a modeler namespace, initializing key mappings and joystick settings.
+- TrekInput: Main class handling input processing.
+- IsTrekKeyDown: Checks if a TrekKey is currently down.
+- SetMouseTrekKey: Sets the state of a mouse-based TrekKey.
+- TranslateKeyMessage: Translates Windows key messages to TrekKeys.
+- HandleKeyMessage: Handles incoming key messages and updates internal states.
+- PlayFFEffect: Plays force feedback effects on the joystick.
+- GetAxis: Retrieves the value of a joystick axis.
+- IsAxisValid: Checks if a joystick axis is valid.
 
-**CONNECTS TO:** Other input-related classes such as `JoystickImage`, `InputEngine`, and `KeyState`.
+CONNECTS TO: Allegiance's game engine, input handling system, and modeler namespace for command mappings.
 
-**NOTES:** The file contains commented-out debug commands and TODOs indicating areas for improvement or further development. There are instances where the code reloads an input map to fix issues with key states, which might be a temporary workaround.
+NOTES:
+- Use of GetKeyState() in Flush() method for keyboard state reset.
+- Commented-out lines related to specific views or targets.
+
+PARTS (in file order):
+
+- lines 1-325
+  - TrekInputImpl: Main class implementing the input handling for the game.
+  - InitializeCommandsMDL(): Initializes command mappings using a modeler namespace.
+  - Flush(): Resets keyboard state by calling GetKeyState() on all keys.
+  - normalize(int val, int minval, int maxval): Normalizes an integer value to a specified range.
+  - CreateInputMapPopup(...): Function to create a popup for input mapping configuration.
+  - countAxis, keyMax, ModifierNone, etc.: Constants defining various input-related parameters and states.
+  - TODOs: "Do things this way because SetKeyboardState() doesn't appear to work on Win'95..." "// Turkey added 8/10 #56"
+  - Unusual code: The use of GetKeyState() in the Flush() method, which is not typically used for resetting keyboard state. The commented-out line for "CommandViewTurret" and similar commands related to specific views or targets.
+- lines 326-679
+  - pnsCommands: Adds command targets and modifiers to a namespace.
+  - GetKeyDown(int vk): Checks if a key is currently down.
+  - GetFPSString(): Generates a string representing current modifier states.
+  - LoadMap(const ZString& str): Loads an input map from a modeler namespace, initializing key mappings and joystick settings.
+  - m_pboolNone to m_pboolJustControlShiftAlt: Boolean variables representing different combinations of key modifiers.
+  - keyMax, TK_Max: Constants defining the maximum number of keys and commands.
+  - m_KeyMap to m_ControlShiftAltKeyMap: Arrays mapping virtual key codes to command targets based on modifier states.
+  - m_wheelupTK to m_xbutton5TK: Variables for special mouse buttons mapped to command targets.
+- lines 681-1047
+  - TrekInput: Main class handling input processing.
+  - IsTrekKeyDown: Checks if a TrekKey is currently down.
+  - SetMouseTrekKey: Sets the state of a mouse-based TrekKey.
+  - TranslateKeyMessage: Translates Windows key messages to TrekKeys.
+  - HandleKeyMessage: Handles incoming key messages and updates internal states.
+  - PlayFFEffect: Plays force feedback effects on the joystick.
+  - GetAxis: Retrieves the value of a joystick axis.
+  - IsAxisValid: Checks if a joystick axis is valid.
+- lines 1049-1373
+  - TrekKey OnXButton2(): Returns a key mapping for the second Xbox button.
+  - TrekKey OnXButton3(): Returns a key mapping for the third Xbox button.
+  - TrekKey OnXButton4(): Returns a key mapping for the fourth Xbox button.
+  - TrekKey OnXButton5(): Returns a key mapping for the fifth Xbox button.
+  - CreateInputMapPopup(Modeler pmodeler, IEngineFont pfont, Number ptime): Creates and returns an input map popup using provided parameters.
+  - CreateTrekInput(HINSTANCE hInst, HWND hwnd, InputEngine pinputEngine, JoystickImage pjoystickImage): Factory function to create a new instance of TrekInputImpl.
+  - g_ppccAxisDescription[]: Array containing descriptions for different axes (Yaw, Pitch, Roll, Throttle, Hat, Hat as Buttons).
+  - KeyInfo g_pkeyInfo[]: Array mapping key codes to their corresponding names.
+- lines 1374-1714
+  - InputMapPopup: Manages a popup for input mapping.
+  - KeyMapping: Represents a keyboard key and its modifiers.
+  - ButtonMapping: Represents a joystick button index.
+  - CommandMap: Maps commands to either keyboard keys or joystick buttons.
+  - AddKeyMapping: Adds a keyboard key mapping to the command map.
+  - AddButtonMapping: Adds a joystick button mapping to the command map.
+  - HasKeyMapping: Checks if a specific keyboard key mapping exists in the command map.
+  - RemoveKeyMapping: Removes a specific keyboard key mapping from the command map.
+- lines 1715-2086
+  - InputMapPopup: Manages input mapping popup functionality.
+  - KeyMapping: Represents a keyboard key mapping with virtual key code and modifiers.
+  - ButtonMapping: Represents a button mapping with joystick index and button index.
+  - EvaluateImage: Custom image class that intercepts mouse input during editing.
+  - HasButtonMapping: Checks if a button mapping exists for given joystick and button indices.
+  - RemoveButtonMapping: Removes a button mapping based on joystick and button indices.
+  - GetString: Generates a string representation of all key and button mappings.
+  - FillModifierMap: Fills an array indicating which keys have modifiers associated with them.
+- lines 2087-2480
+  - InputMapPopup: Manages input mapping settings.
+  - LoadMap: Loads an input map from a file.
+  - SaveMap: Saves the current input map to a file.
+  - OnButtonOK: Handles the OK button click event.
+  - OnButtonCancel: Handles the Cancel button click event.
+  - OnButtonRestore: Restores default input mappings.
+  - OnDoubleClick: Handles double-click events on the list pane.
+  - GetSelectionIndex: Retrieves the index of the currently selected item in the list pane.
+- lines 2481-2847
+  - GetCommandMapIndex: Returns the command map index based on the current selection.
+  - GetAxisIndex: Calculates the axis index by subtracting a constant from the current selection index.
+  - DeleteMapping: Deletes the mapping for either an axis or a command based on the current selection.
+  - IsEditing: Checks if the current state is in editing mode.
+  - EditSelection: Initiates editing mode, recording initial joystick values or setting up key/button input prompts.
+  - StopEditing: Ends editing mode and resets related variables.
+  - RemoveKeyMappings: Removes all key mappings for a given virtual key code and modifiers.
+  - AddKeyMapping: Adds a key mapping if it's not already in use, prompting to overwrite if necessary.
+- lines 2849-3055
+  - ItemPainter: Manages painting of items on a surface.
+  - GetXSize: Returns the X size of an item.
+  - GetYSize: Returns the Y size of an item.
+  - Paint: Draws an item on a surface with optional selection and focus indicators.
+  - IPopup: Interface for popup components.
+  - GetPane: Retrieves the pane associated with this popup.
+  - GetImage: Generates an image representation of the popup.
+  - IKeyboardInput: Handles keyboard input events.
 
 #### `src/WinTrek/trekinput.h`
 
@@ -14182,17 +16916,20 @@ NOTES: None
 
 #### `src/WinTrek/treksound.h`
 
-PURPOSE: This file defines a function to create a namespace for sound effects in the Allegiance game.
+PURPOSE: tiny file (12 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CreateSoundNameSpace: Function that creates and returns an INameSpace object containing sound effect resources.
-- TRef<INameSpace>: A reference type used to manage the lifetime of the INameSpace object.
-- Modeler*: Pointer to a modeler object, likely used for loading or managing game assets.
-- INameSpace*: Pointer to a parent namespace, indicating hierarchical organization.
-
-CONNECTS TO: Allegiance's sound management system and asset loading subsystems.
-
-NOTES: None.
+    #ifndef _treksound_H_
+    #define _treksound_H_
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // effect sounds
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    TRef<INameSpace> CreateSoundNameSpace(
+        Modeler*    pmodeler,
+        INameSpace* pnsParent
+    );
+    #endif
 
 #### `src/WinTrek/videoscreen.cpp`
 
@@ -14218,16 +16955,27 @@ NOTES:
 
 #### `src/WinTrek/wintrekp.h`
 
-PURPOSE: This header file contains private declarations for the ThingSitePrivate class, which extends the ThingSite class and provides additional functionality specific to the game's rendering and audio systems.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ThingSitePrivate: Inherits from ThingSite and overrides methods for updating screen position and retrieving sound sources.
-- UpdateScreenPosition: Updates the screen position of a thing site with given parameters.
-- GetSoundSource: Pure virtual function that must be implemented by derived classes to provide a sound source interface.
-
-CONNECTS TO: ThingSite, ISoundPositionSource
-
-NOTES: None.
+    #ifndef _WinTrekP_H__
+    #define _WinTrekP_H__
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // Wintrek Private Headers
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    class ThingSitePrivate : public ThingSite {
+    public:
+        virtual void UpdateScreenPosition(
+            const Point& pointScreenPosition,
+            float fScreenRadius,
+            float distanceToEdge,
+            unsigned char ucRadarState
+        ) {
+        }
+        virtual TRef<ISoundPositionSource> GetSoundSource(void) = 0;
+    };
+    #endif
 
 #### `src/WinTrek/zoneeventsscreen.cpp`
 
@@ -14250,55 +16998,281 @@ None.
 
 ### src/Wopr/AllegianceInterop
 
-### Folder Overview
+This folder contains interop code for Allegiance, facilitating communication between managed and native C++ components.
 
-The `src/Wopr/AllegianceInterop` folder contains essential components for managing communication between managed (.NET) code and unmanaged C++ code in the Allegiance game. It facilitates client-server interactions, manages native objects from managed code, and provides wrappers for various game systems.
+- AllMessages.h: Defines message types used in client-server communication.
+- igcWrapper.cpp: Implements wrappers for game entities like ships and stations.
+- igcWrapper.h: Declares classes and functions to interact with game objects.
+- NativeClientThingSite.h: Manages visibility and side-specific information for game objects.
+- ClientConnection.cpp: Handles connections to the game lobby and server.
 
-#### Key Files:
-
-- **AllMessages.h**: Defines message classes used for client-server communication.
-- **AllegianceInterop.cpp**: Implements interop functionality to bridge managed and unmanaged code.
-- **ClientConnection.cpp**: Manages client connections to the game's lobby and server.
-- **NativeClient.cpp**: Handles message processing and event hooks in the native client.
-- **igcWrapper.cpp**: Provides wrappers for various game objects and systems, allowing interaction between managed and unmanaged code.
-
-These files collectively ensure seamless communication and data exchange between the Allegiance game's managed and native components.
+Largest files: AllMessages.h (10213 lines), igcWrapper.cpp (5027 lines), igcWrapper.h (2267 lines), NativeClientThingSite.h (349 lines), ClientConnection.cpp (291 lines).
 
 #### `src/Wopr/AllegianceInterop/AllMessages.h`
 
-**File:** src/Wopr/AllegianceInterop/AllMessages.h
+PURPOSE: The file `AllMessages.h` contains definitions for various message types used in communication between clients and servers in the Allegiance game. It includes both client-to-server (C) and server-to-client (S) messages, as well as structures and classes to manage these messages.
 
-**PURPOSE:** This header file contains definitions for various message classes used in the Allegiance game for client-server communication. These messages facilitate logon, logoff, buy loadouts, object spotting, and other game-related interactions.
+KEY PARTS:
+- FMD_C_LOGONREQ: Represents a client logon request.
+- FMD_S_LOGONACK: Represents a server acknowledgment of a client logon.
+- ManagedObject: Base class for all message objects handling byte array conversion.
+- FMD_S_STATIC_MAP_INFO: Contains static map information.
+- FMD_CS_PROJECTILE_INSTANCE: Represents a projectile with creation details and position.
+- FMD_S_MISSIONDEF: Detailed mission definition.
+- FMD_CS_SIDE_INACTIVE: Indicates side activity status.
+- FMD_CS_FIRE_MISSILE: Message for firing a missile.
+- ServerSingleShipUpdate: Structure for single ship update details.
+- FMD_S_SHIP_STATUS: Ship status message.
+- FMD_C_START_GAME: Class for starting a game.
+- FMD_S_ENTER_LIFEPOD: Class for entering a life pod.
+- SimpleClient: Manages client connections and operations.
+- FedMessaging: Handles messaging between clients, servers, and components.
 
-**KEY PARTS:**
-- **Class: FMD_C_LOGONREQ** - Represents a client logon request.
-- **Class: FMD_S_LOGONACK** - Represents a server logon acknowledgment.
-- **Class: FMD_CS_LOGOFF** - Represents a client logoff request.
-- **Class: FMD_C_BUY_LOADOUT** - Represents a client buy loadout request.
-- **Class: FMD_S_BUY_LOADOUT_ACK** - Represents a server buy loadout acknowledgment.
-- **Class: FMD_S_OBJECT_SPOTTED** - Represents a server object spotted message.
-- **Class: FMD_S_SET_CLUSTER** - Represents a server set cluster message.
-- **Class: FMD_S_DEV_COMPLETED** - Represents a server development completed message.
-- **Class: FMD_S_SET_BRIEFING_TEXT** - Represents a server set briefing text message.
+CONNECTS TO: None
 
-**CONNECTS TO:** Other game systems and files, particularly those handling network communication and player data management.
+NOTES: None
 
-**NOTES:** The file includes TODO comments indicating areas that need further work or synchronization.
+PARTS (in file order):
+
+- lines 2-391
+  - FMD_C_LOGONREQ: Represents a client logon request message.
+  - FMD_S_LOGONACK: Represents a server logon acknowledgment message.
+  - FMD_CS_LOGOFF: Represents a client logoff message.
+  - FMD_C_BUY_LOADOUT: Represents a client buy loadout request message.
+  - FMD_S_BUY_LOADOUT_ACK: Represents a server buy loadout acknowledgment message.
+  - ManagedObject: Base class for all message objects, handling byte array conversion.
+  - BEGIN_PFM_CREATE_ALLOC and END_PFM_CREATE: Macros used to create and allocate message instances.
+  - FM_VAR_PARM: Macro to handle parameter passing in message creation.
+- lines 392-769
+  - FMD_S_OBJECT_SPOTTED: Represents an object spotted message.
+  - FMD_S_SET_CLUSTER: Represents a set cluster message.
+  - FMD_S_DEV_COMPLETED: Represents a development completed message.
+  - FMD_S_SET_BRIEFING_TEXT: Represents a set briefing text message.
+  - FMD_S_PLAYERINFO: Represents a player information message.
+  - ObjectType, ObjectID, SectorID, ServerSingleShipUpdate, Cookie, DevelopmentID, PersistPlayerScoreObject, String, Money, SideID, ShipID, RankID, DroneTypeID, PilotType, AbilityBitMask, ObjectID: Data types used in the messages.
+  - TODOs: Handle rgPersistPlayerScores objects. Convert CharacterName to a managed string correctly. Implement ToManagedByteArray method.
+- lines 770-1158
+  - FMD_S_STATIC_MAP_INFO: Represents static map information.
+  - FMD_CS_PROJECTILE_INSTANCE: Represents a projectile instance with creation time, data, and position.
+  - FMD_S_RANK_INFO: Represents rank information with ranks and count.
+  - FMD_S_SET_START_TIME: Represents setting the start time.
+  - FMD_CS_SET_TEAM_INFO: Represents setting team information including squad ID, side ID, and side name.
+  - FMD_S_PLAYER_RESCUED: Represents a player being rescued by another player.
+  - The commented-out property for WingID indicates potential future functionality that was not implemented.
+  - There are no explicit TODO comments in the provided code snippet.
+- lines 1159-1545
+  - FMD_S_BALLOT: Represents a ballot message sent by the server.
+  - FMD_S_CANCEL_BALLOT: Represents a cancel ballot message sent by the server.
+  - FMD_C_VOTE: Represents a vote message sent by the client.
+  - FMD_S_SHIP_DELETE: Represents a ship delete message sent by the server.
+  - FMD_C_RANDOMIZE_TEAMS: Represents a randomize teams command sent by the client.
+  - ChatDataWrapper: Wraps a ChatData instance and provides properties for accessing its fields.
+  - FMD_CS_CHATMESSAGE: Represents a chat message sent by the client or server.
+  - TODOs: None identified in this snippet.
+- lines 1546-1940
+  - FMD_C_SHIP_UPDATE: Represents a ship update message.
+  - FMD_S_EXPORT: Represents an export message for objects.
+  - FMD_S_POSTER: Represents a poster message with geographic data.
+  - FMD_S_TREASURE: Represents a treasure message.
+  - FMD_S_DESTROY_TREASURE: Represents a destroy treasure message.
+  - FMD_CS_NEW_SHIP_INSTANCE: Represents a new ship instance creation message.
+  - FMD_CS_DROP_PART: Represents a drop part message for ships.
+  - TODOs: "FM_VAR_PARM(StringToCharArray(exportData), CB_ZTS)" - Consider replacing with more efficient method. "strcpy(pfm->textureName, StringToCharArray(textureName));" - Ensure buffer overflow is handled safely.
+- lines 1942-2315
+  - FMD_CS_SWAP_PART: Represents a message for swapping equipment on a ship.
+  - FMD_CS_PING: Represents a ping message between client and server.
+  - FMD_S_URLROOT: Represents a URL root message.
+  - FMD_S_MISSION_STAGE: Represents the current stage of a mission.
+  - FMD_S_MISSIONDEF: Represents a detailed definition of a mission, including various parameters and descriptions.
+  - BEGIN_PFM_CREATE_ALLOC: Macro for creating and allocating a new message instance.
+  - END_PFM_CREATE: Macro for finalizing the creation of a message instance.
+  - StringToCharArray: Converts a managed string to a character array.
+- lines 2316-2705
+  - FMD_C_POSITIONREQ: Represents a client request for position information.
+  - FMD_S_POSITIONREQ: Represents a server response to a client's position request.
+  - FMD_C_POSITIONACK: Represents a client acknowledgment of a position change or deletion request.
+  - FMD_CS_DELPOSITIONREQ: Represents a client-server request to delete a position request.
+  - FMD_CS_LOCK_LOBBY: Represents a client-server request to lock the lobby.
+  - FMD_CS_LOCK_SIDES: Represents a client-server request to lock the sides.
+  - FMD_CS_PLAYER_READY: Represents a client-server notification of player readiness.
+  - TODOs or unusual code: The commented-out properties for rgStationID, rgShipIDLeaders, rgcPlayers, rgfAutoAccept, rgfReady, rgfForceReady, rgfActive, and rgfAllies suggest these were originally intended but are not currently used.
+- lines 2706-3102
+  - FMD_S_TEAM_READY: Represents a message indicating that a team is ready.
+  - FMD_CS_FORCE_TEAM_READY: Represents a client-server message to force a team to be ready.
+  - FMD_C_DOCKED: Represents a message for when a ship docks at a station.
+  - FMD_CS_CHANGE_TEAM_CIV: Represents a client-server message to change the civilization of a side.
+  - FMD_CS_AUTO_ACCEPT: Represents a client-server message to set auto-accept status for a side.
+  - FMD_S_STATIONS_UPDATE: Represents a server message with updated station states.
+  - FMD_S_STATION_CAPTURE: Represents a server message indicating that a station has been captured.
+  - FMD_S_STATION_DESTROYED: Represents a server message indicating that a station has been destroyed.
+- lines 3103-3501
+  - FMD_S_MONEY_CHANGE: Represents a message about money change between ships.
+  - FMD_S_DOCKED: Represents a message indicating that a ship has docked at a station.
+  - FMD_S_GAME_OVER: Represents a game over message with details about the winner and other sides.
+  - FMD_S_GAME_OVER_PLAYERS: Represents a message containing player information after a game ends.
+  - FMD_C_BUCKET_DONATE: Represents a client command to donate money to a bucket.
+  - FMD_S_BUCKET_STATUS: Represents a server message with the status of a bucket, including total time and money donated.
+  - FMD_C_PLAYER_DONATE: Represents a client command to donate money from a player's ship.
+  - FMD_CS_SIDE_INACTIVE: Represents a client-side message indicating that a side is inactive.
+- lines 3502-3876
+  - FMD_CS_SIDE_INACTIVE: Represents a message indicating side activity status.
+  - FMD_CS_FIRE_MISSILE: Represents a message for firing a missile.
+  - FMD_S_SIDE_TECH_CHANGE: Represents a message for changing side technology developments.
+  - FMD_S_SIDE_ATTRIBUTE_CHANGE: Represents a message for changing side attributes.
+  - FMD_S_EJECT: Represents a message for ejecting a ship.
+  - FMD_S_SINGLE_SHIP_UPDATE: Represents a message for updating a single ship's status.
+  - TODOs: None identified in this snippet.
+  - Unusual code: The use of ManagedObject and related classes, which suggest integration with managed code environments. The presence of BEGIN_PFM_CREATE_ALLOC and END_PFM_CREATE macros, indicating a specific message format creation process.
+- lines 3877-4273
+  - FMD_S_SINGLE_SHIP_UPDATE: A class representing a single ship update message.
+  - ObjectType: An enumeration type for object types.
+  - ObjectID: A type representing an object identifier.
+  - ServerSingleShipUpdate: A structure containing details about a single ship update.
+  - bool bIsRipcording: A boolean indicating if ripcording is active.
+  - FMD_C_SUICIDE: A class representing a suicide message.
+  - EquipmentType: An enumeration type for equipment types.
+  - FMD_S_MISSILE_DESTROYED: A class representing a missile destroyed message.
+- lines 4275-4655
+  - FMD_S_SHIP_STATUS: Represents a ship status message.
+  - FMD_S_PROBES_UPDATE: Represents an update on probe states.
+  - FMD_CS_ORDER_CHANGE: Represents a change in order for a command.
+  - FMD_S_LEAVE_SHIP: Represents a ship leaving another ship.
+  - FMD_S_JOINED_MISSION: Represents a ship joining a mission.
+  - BEGIN_PFM_CREATE_ALLOC: Macro to start creating and allocating a message.
+  - END_PFM_CREATE: Macro to end the creation of a message.
+  - FM_VAR_REF: Macro to get a reference to a variable in a message.
+- lines 4656-5052
+  - Cookie: A class that has a method get() which returns a member variable m_Instance->cookie.
+  - FMD_S_LOADOUT_CHANGE: A serializable class representing a loadout change message with properties for loadout, passengers, and ship ID.
+  - FMD_C_ACTIVE_TURRET_UPDATE: A serializable class representing an active turret update message with properties for time update and turret update data.
+  - FMD_C_INACTIVE_TURRET_UPDATE: A serializable class representing an inactive turret update message.
+  - FMD_S_TELEPORT_ACK: A serializable class representing a teleport acknowledgment message with properties for station ID and new hull status.
+  - FMD_C_BOARD_SHIP: A serializable class representing a board ship command with a property for the parent ship ID.
+  - FMD_C_VIEW_CLUSTER: A serializable class representing a view cluster command with properties for cluster ID, target object type, and target object ID.
+  - FMD_S_KILL_SHIP: A serializable class representing a kill ship message with properties for ship ID, credit details, killer side ID, and credit flags.
+- lines 5053-5447
+  - FMD_CS_SET_WINGID: Sends a command to set a ship's wing ID.
+  - FMD_S_ICQ_CHAT_ACK: Represents an ICQ chat acknowledgment message.
+  - FMD_CS_CHATBUOY: Sends a chat buoy message with a message and data.
+  - FMD_S_CREATE_CHAFF: Sends a message to create chaff at specified coordinates.
+  - FMD_S_MISSILE_SPOOFED: Indicates that a missile has been spoofed.
+  - FMD_S_END_SPOOFING: Signals the end of spoofing.
+  - FMD_C_AUTODONATE: Command to donate money to another ship.
+  - MapType: Enumerates different map types for missions.
+- lines 5448-5846
+  - FMD_S_PAYDAY: Represents a message for paying money.
+  - FMD_S_SET_MONEY: Represents a message for setting money on a ship.
+  - FMD_S_AUTODONATE: Represents a message for autodonating money between ships.
+  - FMD_C_MUTE: Represents a client-side message to mute a player.
+  - FMD_CS_SET_TEAM_LEADER: Represents a server-to-client message to set a team leader.
+  - FMD_CS_SET_TEAM_INVESTOR: Represents a server-to-client message to set a team investor.
+  - FMD_CS_SET_MISSION_OWNER: Represents a server-to-client message to set the mission owner.
+  - FMD_CS_QUIT_MISSION: Represents a client-to-server message to quit a mission.
+- lines 5847-6242
+  - FMD_S_JOIN_SIDE: Represents a message sent by the server when a player joins a side.
+  - FMD_CS_QUIT_SIDE: Represents a client-side message to quit a side with a reason and ship ID.
+  - FMD_S_ENTER_GAME: Represents a message from the server indicating that a game has been entered.
+  - FMD_CS_RELOAD: Represents a client-side message to reload items for a specific ship.
+  - FMD_S_GAIN_FLAG: Represents a message sent by the server when a player gains a flag.
+  - FMD_C_START_GAME: Represents a client-side message to start a game.
+  - TODO: Handle all arrays in this message
+  - Unusual code: The commented-out section for FMD_S_THREAT and FMD_S_GAME_STATE, which were likely intended but not fully implemented.
+- lines 6243-6648
+  - FMD_C_START_GAME: Class for starting a game.
+  - FMD_S_ACQUIRE_TREASURE: Class for acquiring treasure.
+  - FMD_C_TREASURE_ACK: Class for acknowledging treasure acquisition.
+  - FMD_S_ADD_PART: Class for adding parts to a ship.
+  - FMD_S_ENTER_LIFEPOD: Class for entering a life pod.
+  - FMD_S_LIGHT_SHIPS_UPDATE: Class for updating light ships.
+  - FMD_S_HEAVY_SHIPS_UPDATE: Class for updating heavy ships.
+  - FMD_S_VIEW_CLUSTER: Class for viewing a cluster.
+- lines 6649-7053
+  - FMD_S_BOARD_NACK: Represents a board not acknowledged message.
+  - FMD_S_ASTEROIDS_UPDATE: Contains updated information about asteroids.
+  - FMD_S_ASTEROID_DRAINED: Indicates an asteroid has been drained.
+  - FMD_S_BUILDINGEFFECT_DESTROYED: Signals the destruction of a building effect.
+  - FMD_CS_REQUEST_MONEY: A client request for money.
+  - FMD_S_SHIP_RESET: Server reset message for a ship.
+  - FMD_C_RIPCORD_REQUEST: Client request to activate ripcord.
+  - FMD_S_RIPCORD_ACTIVATE: Server activation of ripcord.
+- lines 7054-7455
+  - SimpleClient: Manages client connections.
+  - FedMessaging: Handles messaging between clients and servers.
+  - BEGIN_PFM_CREATE_ALLOC: Initializes message creation with allocation.
+  - END_PFM_CREATE: Ends message creation process.
+  - ShipID: Represents a unique identifier for a ship.
+  - Time: Represents time-related data.
+  - WarpID: Represents a unique identifier for a warp point.
+  - ExpendableTypeID: Represents a type of expendable item.
+- lines 7456-7858
+  - FMD_C_REQPINGDATA: Represents a request for ping data.
+  - FMD_C_CHANGE_ALLIANCE: Represents a change in alliance between sides.
+  - FMD_S_CHANGE_ALLIANCES: Represents changes to alliances sent by the server.
+  - FMD_S_ASTEROID_MINED: Represents an asteroid being mined.
+  - FMD_CS_HIGHLIGHT_CLUSTER: Represents highlighting a cluster on the map.
+  - FMD_C_LOGON_LOBBY_OLD: Represents logging into the lobby with old protocol.
+  - FMD_C_LOGOFF_LOBBY: Represents logging off from the lobby.
+  - FMD_L_AUTO_UPDATE_INFO: Represents auto-update information sent by the server.
+- lines 7859-8283
+  - FMD_C_CREATE_MISSION_REQ: Represents a request to create a mission.
+  - FMD_L_CREATE_MISSION_ACK: Represents an acknowledgment of creating a mission.
+  - FMD_L_CREATE_MISSION_NACK: Represents a negative acknowledgment of creating a mission.
+  - FMD_C_JOIN_GAME_REQ: Represents a request to join a game.
+  - FMD_L_JOIN_GAME_NACK: Represents a negative acknowledgment of joining a game.
+  - FMD_L_JOIN_MISSION: Represents a notification that a player has joined a mission.
+  - FMD_L_LOGON_ACK: Represents an acknowledgment of a successful logon.
+  - FMD_L_LOGON_NACK: Represents a negative acknowledgment of a logon attempt.
+- lines 8284-8668
+  - SimpleClient: A class used for client operations.
+  - FedMessaging: Manages messaging between different components of the game.
+  - FMD_L_FOUND_PLAYER: Represents a message indicating that a player has been found.
+  - FMD_C_LOGON_LOBBY: Represents a logon request to the lobby.
+  - ServerCoreInfo_Managed and StaticCoreInfo_Managed: Structs representing server and static core information in a managed format.
+  - FMD_L_SERVERS_LIST: Represents a list of servers, including both static and server core details.
+  - FMD_LS_LOBBYMISSIONINFO: Represents mission information for the lobby.
+  - The use of FM_VAR_REF and FM_VAR_PARM macros for handling message variables.
+- lines 8669-9027
+  - SimpleClient: Likely a client class for handling network communications.
+  - FedMessaging: A messaging system used for inter-client communication.
+  - BEGIN_PFM_CREATE_ALLOC: Macro or function to start creating an allocation for message passing.
+  - END_PFM_CREATE: Macro or function to end the creation of an allocation.
+  - szGameName: Represents the name of the game.
+  - rgSquadIDs: Represents the squad IDs associated with the game.
+  - dwPort: Represents the port number for network communication.
+  - dwCookie: A unique identifier for the mission or session.
+- lines 9028-9430
+  - FMD_LS_MISSION_GONE: Represents a mission gone message with properties for dwCookie.
+  - FMD_LS_SQUAD_MEMBERSHIPS: Manages squad memberships with properties for squadMemberships and cSquadMemberships.
+  - FMD_S_LOGON_LOBBY: Handles logon lobby messages with various string and integer properties.
+  - FMD_S_LOGOFF_LOBBY: Represents a logoff lobby message without any properties.
+  - FMD_L_CREATE_MISSION_REQ: Manages mission creation requests with properties for GameName, IGCStaticFile, and dwCookie.
+  - TODO: Sort this one out if needed. - Indicates a comment suggesting further work on the commented-out section of code related to FMD_S_NEW_MISSION.
+- lines 9431-9857
+  - FMD_L_NEW_MISSION_ACK: Represents a message acknowledging a new mission.
+  - FMD_S_HEARTBEAT: Represents a heartbeat message sent by the server to keep connections alive.
+  - FMD_L_QUIT: Represents a quit message from a client.
+  - FMD_L_TOKEN: Represents a token message sent by a client.
+  - FMD_S_PLAYER_JOINED: Represents a player joining a mission.
+  - FMD_S_PLAYER_QUIT: Represents a player quitting a mission.
+  - FMD_L_REMOVE_PLAYER: Represents a request to remove a player from a mission.
+  - FMD_S_PAUSE: Represents a pause command sent by the server.
+- lines 9858-10213
+  - FMD_LS_PLAYER_RANK: Represents a player rank message with properties for rank.
+  - FMD_L_UPDATE_DRM_HASHES: Manages DRM hashes updates with a property for the download URL.
+  - FMD_S_LOG_CHAT_MESSAGE: Logs chat messages with properties for mission name, source and target names, message, IPs, and Steam IDs.
+  - WarpInfo: Holds information about a warp between clusters with properties for from and to clusters.
+  - ClusterInfo: Represents cluster information including its ID, home sector status, and warps.
+  - FMD_S_CLUSTERINFO: Manages cluster information with a list of ClusterInfo objects.
+  - TODOs: The code has several instances where arrays are accessed without checking bounds (e.g., sizeof(m_Instance->clusterIDs) / sizeof(SectorID)). There is no error handling for potential issues when accessing or modifying the m_clusterInfos list.
+  - Unusual Code: The use of gcnew String(FM_VAR_REF(m_Instance, ...)) to convert native C++ strings to managed strings in properties.
 
 #### `src/Wopr/AllegianceInterop/AllegianceInterop.cpp`
 
-PURPOSE: This file contains the implementation of interop functionality between Allegiance and another system, likely for communication or data exchange purposes.
+PURPOSE: tiny file (3 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Class: ManagedObject - Manages objects that interact with external systems.
-- Function: InitializeInterop - Initializes the interop system.
-- Function: ShutdownInterop - Shuts down the interop system.
-- Function: SendDataToAllegiance - Sends data to Allegiance from another system.
-- Function: ReceiveDataFromAllegiance - Receives data from Allegiance.
-
-CONNECTS TO: ManagedObject.h, AllegianceInterop.h
-
-NOTES: None.
+    #include "stdafx.h"
+    #include "AllegianceInterop.h"
+    #include "ManagedObject.h"
 
 #### `src/Wopr/AllegianceInterop/AllegianceInterop.h`
 
@@ -14314,17 +17288,16 @@ NOTES: None.
 
 #### `src/Wopr/AllegianceInterop/AssemblyInfo.cpp`
 
-PURPOSE: This file contains metadata attributes for the AllegianceInterop assembly, providing information about its title and product.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- AssemblyTitleAttribute: Specifies the title of the assembly as "AllegianceInterop".
-- AssemblyConfigurationAttribute: Left empty.
-- AssemblyProductAttribute: Specifies the product name as "AllegianceInterop".
-- AssemblyCopyrightAttribute: Not specified (empty).
-
-CONNECTS TO: None. This file is a metadata file and does not directly connect to other systems or files.
-
-NOTES: None.
+    #include "stdafx.h"
+    using namespace System;
+    using namespace System::Runtime::CompilerServices;
+    using namespace System::Security::Permissions;
+    [assembly:AssemblyTitleAttribute(L"AllegianceInterop")];
+    [assembly:AssemblyConfigurationAttribute(L"")];
+    [assembly:AssemblyProductAttribute(L"AllegianceInterop")];
+    [assembly:AssemblyTrademarkAttribute(L"")];
 
 #### `src/Wopr/AllegianceInterop/ClientConnection.cpp`
 
@@ -14379,33 +17352,26 @@ NOTES: None.
 
 #### `src/Wopr/AllegianceInterop/ISupportManagedByteArrays.h`
 
-PURPOSE: Defines an interface in C++/CLI for objects that can convert themselves into a managed byte array.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ISupportManagedByteArrays: Interface with a single method ToManagedByteArray() that returns a managed byte array.
-- ToManagedByteArray(): Converts the implementing object to a managed byte array.
-
-CONNECTS TO: Other classes or systems that need to handle data in managed byte arrays.
-
-NOTES: None.
+    #pragma once
+    using namespace System;
+    namespace AllegianceInterop {
+    	public interface class ISupportManagedByteArrays
+    	{
+    	public:
+    		array<unsigned char> ^ ToManagedByteArray();
+    	};
+    }
 
 #### `src/Wopr/AllegianceInterop/ManagedObject.cpp`
 
-**PURPOSE:** The file `ManagedObject.cpp` is part of the Allegiance game's interop layer, responsible for managing and interfacing with managed objects in a way that allows them to interact with native C++ components.
+PURPOSE: tiny file (4 lines), shown in full rather than summarized.
 
-**KEY PARTS:**
-- **Class: ManagedObject** - Manages the lifecycle and interactions of managed objects within the game.
-- **Function: Initialize** - Initializes the managed object system.
-- **Function: Shutdown** - Cleans up resources used by the managed object system.
-- **Function: CreateInstance** - Creates a new instance of a managed object.
-- **Function: DestroyInstance** - Destroys an existing managed object instance.
-- **Function: CallMethod** - Invokes a method on a managed object instance.
-- **Function: GetProperty** - Retrieves the value of a property from a managed object instance.
-- **Function: SetProperty** - Sets the value of a property on a managed object instance.
-
-**CONNECTS TO:** `ManagedObject.h`, other interop components, and game engine systems.
-
-**NOTES:** None.
+    #include "stdafx.h"
+    #include "ManagedObject.h"
+    namespace AllegianceInterop {
+    }
 
 #### `src/Wopr/AllegianceInterop/ManagedObject.h`
 
@@ -14512,150 +17478,350 @@ NOTES:
 
 #### `src/Wopr/AllegianceInterop/Resource.h`
 
-PURPOSE: This file is a Microsoft Visual C++ generated include file used by the application resource script (.rc) to define dependencies and other metadata.
+PURPOSE: tiny file (3 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `N O _ D E P E N D E N C I E S`: A macro indicating that this file does not depend on any external libraries or modules.
-- `Microsoft Visual C++ generated include file`: Specifies that this file was automatically created by the Microsoft Visual C++ compiler.
-- `Used by app.rc`: Indicates that this file is included in the application resource script.
-
-CONNECTS TO: None. It serves as a metadata file for the resource script.
-
-NOTES: None.
+      / / { { N O _ D E P E N D E N C I E S } } 
+     / /   M i c r o s o f t   V i s u a l   C + +   g e n e r a t e d   i n c l u d e   f i l e . 
+     / /   U s e d   b y   a p p . r c 
 
 #### `src/Wopr/AllegianceInterop/SimpleClient.cpp`
 
-PURPOSE: This file contains a simple client implementation for the Allegiance game, likely used for integrating with messaging or communication systems.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- SimpleClient: A class representing a basic client that can handle application messages.
-- OnAppMessage: A function within SimpleClient that processes incoming application messages but currently does nothing (returns E_NOTIMPL).
-
-CONNECTS TO: FedMessaging and CFMConnection, which are likely part of the messaging system used in Allegiance.
-
-NOTES: The OnAppMessage function is implemented to return E_NOTIMPL, indicating it has not been fully implemented.
+    #include "stdafx.h"
+    #include "SimpleClient.h"
+    SimpleClient::SimpleClient()
+    {
+    }
+    HRESULT SimpleClient::OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnFrom, FEDMESSAGE * pfm)
+    {
+    	return E_NOTIMPL;
+    }
 
 #### `src/Wopr/AllegianceInterop/SimpleClient.h`
 
-PURPOSE: This file defines a simple client class for messaging in the Allegiance game using the FedMessaging system.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- SimpleClient: A class that implements the IFedMessagingSite interface to handle application messages.
-- OnAppMessage: A virtual function that overrides the base class method to process incoming application messages.
-
-CONNECTS TO: messagecore.h, FedMessaging, CFMConnection, FEDMESSAGE
-
-NOTES: None.
+    #pragma once
+    #include "messagecore.h"
+    class SimpleClient : public IFedMessagingSite
+    {
+    public:
+    	SimpleClient();
+    	// Inherited via IFedMessagingSite
+    	virtual HRESULT OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnFrom, FEDMESSAGE * pfm) override;
+    };
 
 #### `src/Wopr/AllegianceInterop/clintlibWrapper.cpp`
 
-PURPOSE: This file provides a wrapper class for the `MissionInfo` class from Allegiance's C++ codebase, allowing it to be used in managed code via C++/CLI.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- MissionInfoWrapper: A C++/CLI wrapper class that encapsulates an instance of the native `::MissionInfo` class.
-  - Constructor: Initializes the wrapper with a pointer to a native `MissionInfo` instance.
-
-CONNECTS TO: clintlibWrapper.h, Allegiance's C++ codebase (specifically the `MissionInfo` class).
-
-NOTES: None.
+    #include "stdafx.h"
+    #include "clintlibWrapper.h"
+    using namespace System;
+    namespace AllegianceInterop
+    {
+    	MissionInfoWrapper::MissionInfoWrapper(::MissionInfo * instance)
+    	{
+    		m_instance = instance;
+    	}
+    }
 
 #### `src/Wopr/AllegianceInterop/clintlibWrapper.h`
 
-PURPOSE: This file provides a C++/CLI wrapper for the `::MissionInfo` class from Allegiance's internal library (`clintlib.h`). It allows managed code to interact with mission information in a type-safe manner.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- MissionInfoWrapper: A managed class that wraps an instance of `::MissionInfo`.
-  - Name(): Returns the name of the mission as a string.
-  - Description(): Returns the description of the mission as a string.
-  - GetCookie(): Retrieves a cookie associated with the mission.
-
-CONNECTS TO: clintlib.h
-
-NOTES: none
+    #pragma once
+    #include "clintlib.h"
+    using namespace System;
+    namespace AllegianceInterop
+    {
+    	public ref class MissionInfoWrapper
+    	{
+    	public:
+    		::MissionInfo * m_instance;
+    	public:
+    		MissionInfoWrapper(::MissionInfo * instance);
+    		String ^        Name() { return gcnew String(m_instance->Name()); }
+    		String ^        Description() { return gcnew String(m_instance->Description()); }
+    		int				GetCookie() { return m_instance->GetCookie(); }
+    	};
+    }
 
 #### `src/Wopr/AllegianceInterop/igcWrapper.cpp`
 
-**PURPOSE:** The `igcWrapper.cpp` file in Allegiance is responsible for wrapping unmanaged C++ classes into managed .NET objects. This allows the game's core functionality to be accessed and manipulated from within a .NET environment.
-
-**KEY PARTS:**
-- **Name:** `GeoWrapper`
-  - Description: Wraps geographical data or environment-related information.
-  
-- **Name:** `ImapMakerIGCWrapper`
-  - Description: Manages game map creation or management.
-  
-- **Name:** `MissionParamsWrapper`
-  - Description: Contains parameters related to the current mission, such as game mode and rules.
-  
-- **Name:** `ShipLoadoutWrapper`
-  - Description: Represents a ship's loadout or equipment configuration.
-  
-- **Name:** `CompactOrientationWrapper`, `CompactTimeWrapper`, `CompactPositionWrapper`, `CompactStateWrapper`, `CompactVelocityWrapper`, `CompactTurnRatesWrapper`, `CompactControlDataWrapper`, `CompactShipFractionsWrapper`
-  - Description: Wraps compact representations of various data types for efficient storage and transmission.
-  
-- **Name:** `ServerLightShip`
-  - Description: Manages light ship-related operations.
-
-**CONNECTS TO:** 
-- Other game systems and classes, particularly those related to game objects, missions, and player interactions.
-
-**NOTES:** 
-- Contains TODOs and unusual code snippets, such as commented-out alternative implementations and methods for converting tech tree bitmasks.
-
-#### `src/Wopr/AllegianceInterop/igcWrapper.h`
-
-**PURPOSE:** The `igcWrapper.h` file provides managed C++ interfaces for various game objects and parameters from Allegiance's C++ codebase. It facilitates interaction with player information, vector operations, mission parameters, ship loadouts, and other game state elements.
-
-**KEY PARTS:**
-- **PlayerInfoWrapper**: Manages player-specific data like last seen parent, sector, ship type, state, station, and money.
-- **VectorWrapper**: Handles vector operations including addition, subtraction, normalization, etc., providing access to X, Y, Z components.
-- **GeoWrapper**: Wraps the `::Geo` class for geographic-related functionality (not detailed in this snippet).
-- **ImapMakerIGCWrapper**: Provides a managed interface for mission parameters and game maps.
-- **MissionParamsWrapper**: Offers methods to reset mission parameters and check various game modes like conquest, territory, death match, etc.
-- **ShipLoadoutWrapper**: Manages ship loadout data such as part data.
-- **CompactOrientationWrapper**, **CompactTimeWrapper**, **CompactPositionWrapper**, **CompactStateWrapper**, **CompactVelocityWrapper**, **CompactTurnRatesWrapper**, and **CompactControlDataWrapper**: Provide efficient serialization or transmission of game state information.
-- **ServerLightShipUpdateWrapper**, **ServerHeavyShipUpdateWrapper**, **ServerSingleShipUpdateWrapper**: Manage server-side ship updates.
-- **ClientShipUpdateWrapper** and **ClientActiveTurretUpdateWrapper**: Manage client-side ship and turret updates.
-
-**CONNECTS TO:** Allegiance's C++ game engine, particularly the `PlayerInfo`, `::Vector`, `::Geo`, `ImapMakerIGC`, `MissionParams`, `ShipLoadout`, and other related classes.
-
-**NOTES:** None.
-
-#### `src/Wopr/AllegianceInterop/stdafx.cpp`
-
-PURPOSE: This file is a precompiled header file used to speed up compilation times by including common headers that are frequently used across multiple source files in the Allegiance project.
+PURPOSE: The file `igcWrapper.cpp` contains a series of wrapper classes and functions to facilitate interoperability between managed and unmanaged code in Allegiance, specifically for game entities like ships, stations, asteroids, and more.
 
 KEY PARTS:
-- Name: stdafx.h - Contains commonly included headers for faster compilation.
-- Name: stdafx.cpp - Implementation of the precompiled header file, which is typically empty but can include additional code if needed.
+- Wraps various game entities such as `::Geo`, `::ImapMakerIGC`, `::MissionParams`, etc.
+- Provides static interfaces for managing constants and objects (`IstaticIGCWrapper`).
+- Manages mission-related operations (`ImissionIGCWrapper`), including adding, deleting, and retrieving clusters, ships, stations, asteroids, warps, buoys, and treasures.
+- Offers methods to update and export game data (`IbaseIGCWrapper::Update`, `IbaseIGCWrapper::Export`).
+- Manages ship-specific operations (`IshipIGCWrapper`), including processing updates, setting private data, and handling collisions.
+- Wraps station-related functionalities (`IstationIGCWrapper`), such as adding and deleting ships, repairing them, and retrieving their capabilities.
+- Provides wrappers for various types of objects like hulls, parts, launchers, magazines, dispensers, and more.
 
-CONNECTS TO: Other source files that include "stdafx.h".
+CONNECTS TO: Allegiance game engine (unmanaged code).
 
 NOTES: None.
 
-#### `src/Wopr/AllegianceInterop/stdafx.h`
+PARTS (in file order):
 
-PURPOSE: This file is a precompiled header for the Allegiance Interop project, including necessary headers and defining module information.
+- lines 1-305
+  - GeoWrapper: Wraps a ::Geo instance.
+  - ImapMakerIGCWrapper: Wraps an ::ImapMakerIGC instance.
+  - MissionParamsWrapper: Wraps a ::MissionParams instance.
+  - ShipLoadoutWrapper: Wraps a ::ShipLoadout instance.
+  - CompactOrientationWrapper: Wraps a ::CompactOrientation instance.
+  - CompactTimeWrapper: Wraps a ::CompactTime instance.
+  - CompactPositionWrapper: Wraps a ::CompactPosition instance.
+  - CompactStateWrapper: Wraps a ::CompactState instance.
+- lines 306-618
+  - IstaticIGCWrapper: Provides a static interface to interact with game constants and objects.
+  - FloatConstantID, DamageTypeID, DefenseTypeID, DroneTypeID, DevelopmentID, StationTypeID, CivID, HullID, ExpendableTypeID, PartID, ProjectileTypeID, TreasureSetID: IDs for various game entities.
+  - GetFloatConstant, SetFloatConstant: Methods to get and set float constants.
+  - GetDamageConstant, SetDamageConstant: Methods to get and set damage constants based on damage and defense types.
+  - GetConstants, SetConstants: Methods to get and set all constants as a block of data.
+  - AddDroneType, DeleteDroneType, GetDroneType, GetDroneTypes: Manage and retrieve drone types.
+  - AddDevelopment, DeleteDevelopment, GetDevelopment, GetDevelopments: Manage and retrieve development items.
+  - AddStationType, DeleteStationType, GetStationType, GetStationTypes: Manage and retrieve station types.
+- lines 619-933
+  - ImissionIGCWrapper: Manages mission-related operations and data.
+  - AddCluster, DeleteCluster, GetCluster, GetClusters: Manage clusters of objects in the game world.
+  - AddShip, DeleteShip, GetShip, GetShips: Manage ships in the game.
+  - AddStation, DeleteStation, GetStation, GetStations: Manage stations in the game.
+  - AddAsteroid, DeleteAsteroid, GetAsteroid, GetAsteroids: Manage asteroids in the game.
+  - AddWarp, DeleteWarp, GetWarp, GetWarps: Manage warps or teleportation points.
+  - AddBuoy, DeleteBuoy, GetBuoy, GetBuoys: Manage buoys or markers.
+  - AddTreasure, DeleteTreasure, GetTreasure, GetTreasures: Manage treasures in the game.
+- lines 934-1241
+  - IbaseIGCWrapper::Update: Updates the instance with the given time.
+  - IbaseIGCWrapper::Export: Exports data to the specified location.
+  - IbaseIGCWrapper::GetUniqueID: Retrieves a unique identifier for the instance.
+  - IbaseIGCWrapper::GetObjectType: Returns the type of object.
+  - IbaseIGCWrapper::GetObjectID: Gets the object's ID.
+  - IbaseIGCWrapper::GetMission: Retrieves the mission associated with the instance.
+  - ItypeIGCWrapper::ItypeIGCWrapper: Constructor for ItypeIGCWrapper.
+  - ItypeIGCWrapper::GetData: Returns the data of the instance.
+- lines 1242-1550
+  - ImodelIGCWrapper: Provides a managed interface for ImodelIGC objects.
+  - IdamageIGCWrapper: Inherits from ImodelIGCWrapper and provides additional methods for damage-related operations.
+  - IscannerIGCWrapper: Inherits from IdamageIGCWrapper and adds scanner-related functionality.
+  - IshipIGCWrapper: Inherits from IscannerIGCWrapper and extends it with ship-specific properties and methods.
+  - GetFraction: Returns the fraction value of an object.
+  - SetFraction: Sets the fraction value of an object.
+  - InScannerRange: Checks if another model is within scanner range.
+  - CanSee: Determines if another model can be seen by this model.
+- lines 1551-1859
+  - IshipIGCWrapper: A C++/CLI wrapper class for an unmanaged C++ interface (::IshipIGC), providing a managed interface to ship-related operations.
+  - ExportShipUpdate(ClientShipUpdateWrapper^ pshipupdate): Exports a ship update from a managed ClientShipUpdateWrapper object to the underlying unmanaged ::IshipIGC.
+  - ExportShipUpdate(ClientActiveTurretUpdateWrapper^ patu): Similar to above, but for active turret updates.
+  - ProcessFractions(const CompactShipFractions& fractions): Processes ship fractions using an unmanaged interface method.
+  - ProcessShipUpdate(const ServerLightShipUpdate& shipupdate), ProcessShipUpdate(const ClientShipUpdate& shipupdate), ProcessShipUpdate(const ClientActiveTurretUpdate& shipupdate): Various methods to process different types of ship updates.
+  - SetPrivateData(DWORD dwPrivate), GetPrivateData(): Methods for setting and getting private data associated with the ship.
+  - ReInitialize(DataShipIGC  dataShip, Time now): Reinitializes the ship with new data.
+  - HitTreasure(TreasureCode treasureCode, ObjectID objectID, short amount): Handles a ship hitting a treasure.
+- lines 1860-2176
+  - IshipIGCWrapper: Wraps a ship's interface for interop.
+  - AchievementMask: Represents achievement bits.
+  - DamageTrackWrapper: Manages damage tracking for models.
+  - CommandID: Identifies commands.
+  - Time: Represents game time.
+  - VectorWrapper: Wrapper for vector data.
+  - IbaseIGCWrapper: Base class for base-related interfaces.
+  - PlayerInfoWrapper: Holds player information.
+- lines 2177-2483
+  - IprobeIGCWrapper::GetAccuracy: Returns the accuracy of an object.
+  - IprobeIGCWrapper::GetCanRipcord: Checks if an object can ripcord at a given speed.
+  - IprobeIGCWrapper::GetRipcordDelay: Returns the delay before an object can ripcord.
+  - IstationIGCWrapper::AddShip: Adds a ship to the station.
+  - IstationIGCWrapper::DeleteShip: Deletes a ship from the station.
+  - IstationIGCWrapper::GetShip: Retrieves a ship by its ID.
+  - IstationIGCWrapper::GetShips: Returns a list of all ships at the station.
+  - IstationIGCWrapper::RepairAndRefuel: Repairs and refuels a given ship.
+- lines 2484-2789
+  - IstationTypeIGCWrapper: Wraps an instance of ::IstationTypeIGC, providing managed access to station type properties and methods.
+  - GetScannerRange(): Returns the scanner range of the station.
+  - GetIncome(): Returns the income generated by the station.
+  - GetCapabilities(): Returns the capabilities bitmask of the station.
+  - HasCapability(StationAbilityBitMask habm): Checks if the station has a specific capability.
+  - GetTextureName(): Returns the texture name of the station.
+  - GetBuilderName(): Returns the builder name of the station.
+  - GetSuccessorStationType(IsideIGCWrapper^ pside): Retrieves the successor station type for a given side.
+- lines 2790-3091
+  - IexpendableTypeIGCWrapper: Base class for expendable types.
+  - ImissileTypeIGCWrapper: Wrapper for missile type objects.
+  - ImineTypeIGCWrapper: Wrapper for mine type objects.
+  - IchaffTypeIGCWrapper: Wrapper for chaff type objects.
+  - IprobeTypeIGCWrapper: Wrapper for probe type objects.
+  - IhullTypeIGCWrapper: Wrapper for hull type objects.
+  - GetRadius: Returns the radius of an object.
+  - GetCapabilities: Returns the capabilities of an object.
+- lines 3092-3397
+  - IhullTypeIGCWrapper::GetLandPlanes(int slotID): Returns the number of land planes for a given slot ID.
+  - IpartTypeIGCWrapper::GetEquipmentType(): Retrieves the equipment type associated with this part type.
+  - IlauncherTypeIGCWrapper::GetExpendableType(): Returns the expendable type associated with this launcher type.
+  - IpartIGCWrapper::SetShip(IshipIGCWrapper^ newVal, Mount mount): Assigns a ship to this part and sets its mount point.
+  - IweaponIGCWrapper::GetProjectileType(): Retrieves the projectile type used by this weapon.
+  - IshieldIGCWrapper::GetFraction(): Returns the current fraction of shield strength.
+  - IcloakIGCWrapper::GetMaxCloaking(): Returns the maximum cloaking level for this cloak.
+  - IafterburnerIGCWrapper::IncrementalUpdate(Time lastUpdate, Time now, bool bUseFuel): Updates the afterburner's state based on time and fuel usage.
+- lines 3398-3709
+  - IlauncherIGCWrapper: A wrapper class for managing launcher objects.
+  - ImagazineIGCWrapper: A wrapper class for managing magazine objects.
+  - IdispenserIGCWrapper: A wrapper class for managing dispenser objects.
+  - IclusterIGCWrapper: A wrapper class for managing cluster objects, which can contain various types of game entities like models, warps, mines, missiles, probes, stations, ships, asteroids, and treasures.
+  - GetModel: Retrieves a model by name from the cluster.
+  - GetModels: Returns all models in the cluster.
+  - GetPickableModels: Returns pickable models in the cluster.
+  - AddWarp: Adds a warp to the cluster.
+- lines 3710-4014
+  - IclusterIGCWrapper::GetAmbientLevel: Returns the ambient level.
+  - IclusterIGCWrapper::GetPosterName: Returns the poster's name as a string.
+  - IclusterIGCWrapper::SetPrivateData: Sets private data with a DWORD value.
+  - IclusterIGCWrapper::FlushCollisionQueue: Flushes the collision queue.
+  - IasteroidIGCWrapper::IasteroidIGCWrapper: Constructor for wrapping an asteroid instance.
+  - IasteroidIGCWrapper::GetOre: Returns the amount of ore on the asteroid.
+  - IasteroidIGCWrapper::SetOre: Sets the amount of ore on the asteroid.
+  - IasteroidIGCWrapper::MineOre: Mines ore from the asteroid for a given time duration.
+- lines 4015-4319
+  - IsideIGCWrapper::GetShip(ShipID id): Retrieves a ship wrapper by ID.
+  - IsideIGCWrapper::GetShips(): Returns a list of all ships as wrappers.
+  - IsideIGCWrapper::AddBucket(IbucketIGCWrapper^ s): Adds a bucket to the instance.
+  - IsideIGCWrapper::DeleteBucket(IbucketIGCWrapper^ s): Deletes a bucket from the instance.
+  - IsideIGCWrapper::GetBucket(BucketID bucketID): Retrieves a bucket wrapper by ID.
+  - IsideIGCWrapper::GetBuckets(): Returns a list of all buckets as wrappers.
+  - IcivilizationIGCWrapper::IcivilizationIGCWrapper(::IcivilizationIGC  instance): Constructor for civilization wrapper.
+  - ItreasureSetIGCWrapper::ItreasureSetIGCWrapper(::ItreasureSetIGC  instance): Constructor for treasure set wrapper.
+- lines 4320-4622
+  - ShipStatusWrapper: Manages ship status properties.
+  - ClusterSiteWrapper: Wraps cluster site functionality.
+  - SideVisibilityWrapper: Handles side visibility settings.
+  - GameSiteWrapper: Represents game site operations.
+  - IIgcSiteWrapper: Interface for IGC site operations.
+  - DamageTrackWrapper: Manages damage tracking.
+  - DamageBucketWrapper: Represents a single damage bucket.
+  - DamageTrackSetWrapper: Manages a set of damage tracks.
+- lines 4623-4923
+  - DamageTrackWrapper::DamageTrackWrapper: Constructor for wrapping a DamageTrack instance.
+  - DamageTrackSetWrapper::AddTrack: Adds a track to the set.
+  - DamageTrackSetWrapper::DeleteTrack: Deletes a track from the set.
+  - WaypointWrapper::WaypointWrapper: Constructor for wrapping a Waypoint instance.
+  - GotoPlanWrapper::GotoPlanWrapper: Constructor for wrapping a GotoPlan instance.
+  - PersistPlayerScoreObjectWrapper::Reset: Resets the player score object.
+  - PersistPlayerScoreObjectWrapper::GetRank: Gets the rank of the player score object.
+  - PersistPlayerScoreObjectWrapper::GetScore: Gets the score of the player score object.
+- lines 4924-5027
+  - GameOverScoreObjectWrapper::Set: Sets a value on the wrapped instance.
+  - GameOverScoreObjectWrapper::GetRank: Retrieves the rank of the score object.
+  - GameOverScoreObjectWrapper::GetRecentTimePlayed: Returns the recent time played by the player.
+  - GameOverScoreObjectWrapper::GetRecentBaseKills: Gets the number of base kills in the most recent game.
+  - GameOverScoreObjectWrapper::GetRecentBaseCaptures: Retrieves the number of base captures in the last game.
+  - GameOverScoreObjectWrapper::GetRecentKills: Returns the number of kills made by the player recently.
+  - GameOverScoreObjectWrapper::GetRecentDeaths: Gets the number of deaths experienced by the player recently.
+  - GameOverScoreObjectWrapper::GetRecentEjections: Retrieves the number of ejections from the game recently.
+
+#### `src/Wopr/AllegianceInterop/igcWrapper.h`
+
+PURPOSE: The file `igcWrapper.h` contains a series of wrapper classes and functions to facilitate interaction with various game objects and data structures in Allegiance, primarily for managing player information, mission parameters, game entities, and score tracking.
 
 KEY PARTS:
-- #pragma once: Ensures the header is included only once.
-- #include <time.h>: Includes the time-related functions and macros.
-- #define _MODULE_ "AllegianceInterop": Defines a macro to identify the module name.
+- PlayerInfoWrapper: Manages player-related data.
+- VectorWrapper: Provides methods for vector operations.
+- MissionParamsWrapper: Handles mission parameters.
+- ShipLoadoutWrapper: Represents a ship's loadout.
+- IprobeTypeIGCWrapper: Wraps probe type information.
+- IhullTypeIGCWrapper: Wraps hull type details.
+- IpartTypeIGCWrapper: Manages part types for ships.
+- IweaponIGCWrapper: Extends part type to include weapon-specific properties.
+- ShipStatusWrapper: Tracks the state of a ship.
+- SideVisibilityWrapper: Manages visibility status for game sides.
 
-CONNECTS TO: None, it's a standalone precompiled header file.
+CONNECTS TO: Allegiance core game engine and other related modules.
 
-NOTES: none.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 2-362
+  - PlayerInfoWrapper: Wraps a PlayerInfo object with methods for accessing its properties.
+  - VectorWrapper: Wraps a ::Vector object with methods for vector operations and conversions.
+  - GeoWrapper: Wraps a ::Geo object.
+  - ImapMakerIGCWrapper: Wraps an ImapMakerIGC object with methods to get and set map maker ID and name.
+- lines 363-736
+  - MissionParamsWrapper: Manages mission parameters.
+  - ShipLoadoutWrapper: Represents a ship's loadout.
+  - CompactOrientationWrapper: Handles compact orientation data.
+  - CompactTimeWrapper: Manages compact time information.
+  - CompactPositionWrapper: Deals with compact position data.
+  - CompactStateWrapper: Encapsulates compact state information.
+  - CompactVelocityWrapper: Manages compact velocity data.
+  - CompactTurnRatesWrapper: Handles compact turn rates.
+- lines 737-1075
+  - CstaticIGC GetStaticCore(): Retrieves a static core instance.
+  - void SetStaticCore(CstaticIGC pStatic): Sets the static core instance.
+  - short GetReplayCount(): Returns the replay count.
+  - String ^ GetContextName(): Gets the context name as a string.
+  - void UpdateAllies(const char Allies[c_cSidesMax]): Updates ally information.
+  - IbaseIGCWrapper: A base class for various game objects, wrapping an underlying C++ interface.
+  - ImodelIGCWrapper: Wraps a model in the game, providing methods to interact with it.
+  - IdamageIGCWrapper: Extends ImodelIGCWrapper to include damage-related functionality.
+- lines 1076-1444
+  - BuoyType: Represents a type of buoy.
+  - IchaffIGCWrapper: Wrapper class for IIchaffIGC interface.
+  - IprojectileIGCWrapper: Wrapper class for IprojectileIGC interface.
+  - ImissileIGCWrapper: Wrapper class for ImissileIGC interface.
+  - ImineIGCWrapper: Wrapper class for ImineIGC interface.
+  - IbuildingEffectIGCWrapper: Wrapper class for IbuildingEffectIGC interface.
+  - IprobeIGCWrapper: Wrapper class for IprobeIGC interface.
+  - IstationIGCWrapper: Wrapper class for IstationIGC interface.
+- lines 1445-1803
+  - IprobeTypeIGCWrapper: Wraps an IprobeTypeIGC instance, providing access to scanner range, dt burst, dispersion, accuracy, ammo, projectile type, ripcord delay, and ambient sound.
+  - IhullTypeIGCWrapper: Wraps an IhullTypeIGC instance, offering properties like length, max speed, turn rate, thrust, side multiplier, back multiplier, scanner range, max energy, recharge rate, hit points, defense type, part mask, capacity, weapon mounts, texture name, mass, signature, capabilities, scale, max ammo, max fuel, ECM, ripcord speed, ripcord cost, successor hull type, interior/exterior sounds, and preferred part types.
+  - IpartTypeIGCWrapper: Wraps an IpartTypeIGC instance, providing details such as equipment type, part mask, mass, signature, successor part type, inventory line MDL name, and amount on a ship.
+  - IlauncherTypeIGCWrapper: Extends IpartTypeIGCWrapper, adding functionality related to launchers, including expendable type.
+  - IpartIGCWrapper: Base class for parts, providing common properties like equipment type, part type, ship, mount ID, active status, mass, price, mounted fraction, amount, and methods to arm and set mount.
+  - IweaponIGCWrapper: Extends IpartIGCWrapper, adding specific details for weapons such as projectile type, ammo per shot, lifespan, dt burst, gunner, firing status, and sounds.
+  - IshieldIGCWrapper: Extends IpartIGCWrapper, providing shield-specific properties like regeneration, max strength, defense type, fraction, and methods to set fraction.
+  - IcloakIGCWrapper: Extends IpartIGCWrapper, offering cloak-related properties such as energy consumption, max cloaking, on/off rates, engagement/disengagement sounds.
+- lines 1804-2170
+  - IwarpIGCWrapper: Provides a managed wrapper for the native IwarpIGC class.
+  - ItreasureIGCWrapper: Manages the ItreasureIGC class, providing functionality to interact with treasure objects.
+  - IsideIGCWrapper: Represents a side in the game and provides methods to manage its properties and entities.
+  - IcivilizationIGCWrapper: Wraps the IcivilizationIGC class, offering access to civilization-specific data.
+  - ShipStatusWrapper: Manages the state of a ship within the game.
+  - ClusterSiteWrapper: Handles cluster sites and their associated environments.
+  - SideVisibilityWrapper: Tracks visibility status for sides in the game.
+  - IIgcSiteWrapper: Provides methods for handling various site-related events and interactions.
+- lines 2171-2267
+  - SetCommanderScore(float fCommanderScore): Sets the commander score.
+  - GetScore(): Retrieves the current score.
+  - Reset(bool bFull): Resets the score data, optionally fully.
+  - SetRankRatio(float rankRatio): Sets the rank ratio.
+  - Connected(): Checks if the player is connected.
+  - Commanding(): Determines if the player is commanding.
+  - Connect(Time t): Initiates a connection at a specific time.
+  - Disconnect(Time t): Terminates a connection at a specific time.
+
+#### `src/Wopr/AllegianceInterop/stdafx.cpp`
+
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
+
+      # i n c l u d e   " s t d a f x . h " 
+
+#### `src/Wopr/AllegianceInterop/stdafx.h`
+
+PURPOSE: tiny file (3 lines), shown in full rather than summarized.
+
+      # p r a g m a   o n c e 
+     # i n c l u d e   < t i m e . h > 
+     # d e f i n e   _ _ M O D U L E _ _   " A l l e g i a n c e I n t e r o p " 
 
 ### src/Wopr/AllegianceInteropClassGenerator
 
-This folder contains tools for generating interop classes between C++ and .NET in Allegiance, facilitating communication and data exchange between different parts of the game or with external systems.
+This folder contains tools and classes used by Allegiance to generate C# wrapper classes for interfacing with native C++ code. The primary purpose is to facilitate communication between managed (C#) and unmanaged (C++) components within the game.
 
-- `Program.cs`: Main entry point and orchestrates the generation process.
-- `GenerateMessageWrappers.cs`: Processes message definitions from header files and generates corresponding C# classes.
-- `GenerateIgcWrappers.cs`: Processes IGC headers and generates C# wrappers for the defined classes.
-- `FixupNullChecks.cs`: Adds null checks to certain method calls in the generated code.
-- `RegexHelpers.cs`: Contains helper methods for regular expression operations used in parsing header files.
-- `CodeGenerator.cs`: Manages the overall generation of C# code from parsed data.
+- Program.cs: Processes header files to automatically generate C# wrapper classes, enabling seamless interaction between C# and C++ code.
 
 #### `src/Wopr/AllegianceInteropClassGenerator/Program.cs`
 
@@ -14677,10 +17843,9 @@ NOTES: The code includes regex patterns for parsing C++ headers and generating C
 
 ### src/Wopr/AllegianceInteropClassGenerator/Properties
 
-The `src/Wopr/AllegianceInteropClassGenerator/Properties` folder contains properties for the AllegianceInteropClassGenerator project, which is responsible for generating interop classes for interfacing with the Allegiance game engine from other languages or tools.
+This folder contains properties and configuration files for the AllegianceInteropClassGenerator project, which is likely responsible for generating interop classes for interfacing with external systems or libraries in Allegiance.
 
-- AssemblyInfo.cs: Specifies metadata about the assembly such as its title, version, and GUID.
-- Resources.resx: Contains resources used by the project, such as strings and images.
+- AssemblyInfo.cs: Contains assembly metadata such as the title, description, version, and copyright information. This file is essential for defining how the assembly is identified and used by other parts of the application or external tools.
 
 #### `src/Wopr/AllegianceInteropClassGenerator/Properties/AssemblyInfo.cs`
 
@@ -14706,11 +17871,11 @@ NOTES: none
 
 ### src/Wopr/Strategies
 
-The `src/Wopr/Strategies` folder in Allegiance contains classes that define various strategies for bot behavior within the game. These strategies are designed to automate tasks such as research, expansion, scouting, and connection management.
+This folder contains strategies and related logic for managing game operations in Allegiance.
 
-- **CommanderResearchAndExpand.cs**: Manages a strategy focused on researching and expanding by investing in specific technologies.
-- **ConnectToGame.cs**: Handles the connection and setup of a bot to join an existing game or create a new one.
-- **ScoutExploreMap.cs**: Implements a scouting strategy for exploring unexplored clusters, handling ship status updates, and navigating through clusters.
+- CommanderResearchAndExpand.cs: Manages a strategy focused on researching and expanding by investing in specific technologies.
+- ConnectToGame.cs: Handles the process of connecting to a game server, joining a mission, and managing team readiness.
+- ScoutExploreMap.cs: Implements a scouting strategy for exploring clusters, focusing on finding and managing Aelphs.
 
 #### `src/Wopr/Strategies/CommanderResearchAndExpand.cs`
 
@@ -14752,36 +17917,31 @@ NOTES:
 
 #### `src/Wopr/Strategies/ScoutExploreMap.cs`
 
-**PURPOSE:** The `ScoutExploreMap.cs` file contains strategies for exploring the game map using scout ships. It manages ship status updates, selects exploration targets, and handles sweeping through clusters to gather resources.
+PURPOSE: The file contains the implementation of a scouting strategy for exploring clusters in Allegiance, focusing on finding and managing Aelphs (likely important resources or entities).
 
-**KEY PARTS:**
-- **Class: ScoutExploreMap**: Extends `Wopr.StrategyBase` and implements a strategy for scouting and exploring clusters.
-- **Function: AttachMessages**: Registers message handlers for ship status updates and cluster changes.
-- **Function: MessageReceiver_FMD_S_SHIP_STATUS**: Handles messages related to ship status updates, determining actions like sweeping or selecting new targets.
-- **Function: UpdateUnexploredWarpsList**: Updates the list of unexplored clusters by checking for clusters with no asteroids.
-- **Function: FlyToStationPointAndWaitForAelphs**: Moves the ship to a station point and waits for resources/events using asynchronous tasks.
-- **Function: SweepCluster**: Sweeps through a cluster by creating waypoints and moving between them asynchronously.
-- **Function: SelectNextAelphTarget**: Selects the next target warp based on proximity and unexplored status, handling cases where no immediate targets are available.
-- **Function: FindNearestUnexploredCluster**: Finds the nearest unexplored cluster using Dijkstra's pathfinding algorithm.
-- **Function: Start**: Initializes the strategy and prepares the scout ship for exploration.
-- **Function: ReturnToBase**: Makes the current scout ship return to its base by finding and setting a command to go to the nearest friendly station.
-- **Function: IsCurrentShipAScout**: Determines if the current ship is of type Scout by checking its base hull type name.
-- **Function: ChangeShip(ShipType, LoadoutBase)**: Changes the current ship to a new scout ship with specified loadout, buying and mounting required parts.
-- **Function: GetHullTypeString(ShipType)**: Converts a `ShipType` enum value to its corresponding string representation.
+KEY PARTS:
+- ScoutExploreMap: Main class for the scouting strategy.
+- AttachMessages: Handles attaching messages to the strategy.
+- UpdateUnexploredWarpsList: Updates a list of unexplored clusters.
+- FlyToStationPointAndWaitForAelphs: Navigates to a point and waits for Aelphs.
+- SweepCluster: Sweeps through a cluster to find Aelphs.
+- SelectNextAelphTarget: Determines the next target warp for exploration.
+- FindNearestUnexploredCluster: Finds the nearest unexplored cluster using Dijkstra's algorithm.
+- Start: Initializes the scout strategy.
+- ScoutSector: Manages scouting activities within sectors.
+- ReturnToBase: Returns the scout to its base.
 
-**CONNECTS TO:** Other strategy files within the game's strategy system.
+CONNECTS TO: Other parts of the game, likely including ship management and resource handling systems.
 
-**NOTES:** The code uses repetitive logic for clearing and repurchasing parts, which could be simplified. There is extensive logging in the `ChangeShip` function that might be useful during development but could be removed for production performance reasons.
+NOTES:
+- TODOs: Remove commented-out code Refactor repetitive logic
 
 ### src/Wopr/Strategies/Loadouts
 
-The `src/Wopr/Strategies/Loadouts` folder in Allegiance contains classes related to defining and managing ship loadouts, which are specific configurations of weapons, missiles, dispensers, and cargo items for different types of ships.
+This folder contains classes related to loadouts in the Allegiance game, which specify various item types that can be equipped by different units.
 
-- **LoadoutBase.cs**: Defines an abstract base class `LoadoutBase` that represents a ship's loadout. It includes properties for various item types such as weapons, missiles, dispensers, and cargo, along with a method to convert `ItemType` enum values to their string representations.
-  
-- **ScoutProbeLoadout.cs**: Implements a specific loadout configuration for scout probes. This class inherits from `LoadoutBase` and sets up the weapon, missile, dispenser, and cargo items tailored for scout probe units.
-
-These files are crucial for defining how different types of ships in the game should be equipped with various items to perform their specific roles effectively.
+- LoadoutBase.cs: Defines a base class for loadouts, specifying common properties and methods for all loadouts.
+- ScoutProbeLoadout.cs: Defines a specific loadout configuration for scout probes, detailing the items and settings unique to this unit type.
 
 #### `src/Wopr/Strategies/Loadouts/LoadoutBase.cs`
 
@@ -14812,11 +17972,9 @@ NOTES: None.
 
 ### src/Wopr/Strategies/Properties
 
-The `src/Wopr/Strategies/Properties` folder in Allegiance contains metadata attributes for the Strategies assembly, which is part of the game's toolset or strategy components. The folder includes a single file:
+This folder contains metadata and configuration settings for the Strategies assembly in Allegiance, a Microsoft multiplayer space game.
 
-- **AssemblyInfo.cs**: This file specifies assembly-level attributes such as title, description, copyright, and company information.
-
-The primary purpose of this folder is to provide essential metadata about the Strategies assembly, aiding in its identification and management within the game development environment.
+- AssemblyInfo.cs: Provides assembly-level attributes such as the assembly version, description, company name, and copyright information.
 
 #### `src/Wopr/Strategies/Properties/AssemblyInfo.cs`
 
@@ -14842,15 +18000,16 @@ NOTES: none
 
 ### src/Wopr/Wopr
 
-The `src/Wopr/Wopr` folder contains essential components for managing strategies, handling game configurations, and processing messages in the Allegiance game. It includes classes for loading strategy plugins, managing team directors, and receiving messages from the game server.
+The `src/Wopr/Wopr` folder contains essential components for managing game sessions and client interactions in Allegiance. It includes classes for loading strategy plugins, handling configuration settings, finding paths, receiving messages, and directing teams of players.
 
-- **AssemblyLoader.cs**: Loads and manages strategy plugins from external assemblies.
-- **Configuration.cs**: Retrieves configuration settings from the application's configuration file.
-- **DijkstraPathFinder.cs**: Implements Dijkstra's algorithm to find the shortest path between clusters in a game map.
-- **LaunchWithoutYellowCom.bat**: A batch file for copying debug binaries and executing wopr.exe with specific flags.
-- **MessageReceiver.cs**: Handles incoming messages from the game server and processes them based on their type.
-- **Program.cs**: Contains the main entry point and logic for managing teams in a game using the Allegiance core.
-- **README.md**: Provides troubleshooting instructions and guidance for running the WOPR application.
+- AssemblyLoader.cs: Loads and manages strategy plugins from external assemblies.
+- Configuration.cs: Retrieves configuration settings from the application's configuration file.
+- DijkstraPathFinder.cs: Implements Dijkstra's algorithm to find the shortest path between clusters in a space game mission.
+- MessageReceiver.cs: Handles incoming messages from client connections, processing various message types and invoking corresponding delegate methods.
+- Program.cs: The entry point for the Wopr application, managing game sessions by creating and controlling teams of players through the Allegiance core.
+- TeamDirector.cs: Manages clients, assigning strategies, handling client lifecycle events like connecting to the lobby and changing strategies.
+
+Largest files: MessageReceiver.cs (1648 lines), TeamDirector.cs (519 lines), Program.cs (302 lines), DijkstraPathFinder.cs (155 lines), AssemblyLoader.cs (61 lines).
 
 #### `src/Wopr/Wopr/AssemblyLoader.cs`
 
@@ -14900,47 +18059,72 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/LaunchWithoutYellowCom.bat`
 
-PURPOSE: This batch file is used to copy debug binaries from the FZDebug directory to a temporary Debug directory and then run the wopr.exe executable with the -y flag.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- xcopy /s /y /q bin\FZDebug\* temp\Debug\: Copies all files from the bin\FZDebug directory to the temp\Debug directory, suppressing prompts and overwriting existing files silently.
-- temp\Debug\wopr.exe -y: Runs the wopr.exe executable located in the temp\Debug directory with the -y flag.
-
-CONNECTS TO: bin\FZDebug directory, temp\Debug directory
-
-NOTES: None.
+    xcopy /s /y /q  bin\FZDebug\* temp\Debug\
+    temp\Debug\wopr.exe -y
 
 #### `src/Wopr/Wopr/MessageReceiver.cs`
 
-**PURPOSE:** The `MessageReceiver.cs` file in Allegiance handles the reception and processing of messages from clients and the game server. It manages event handling for various message types and dispatches them to appropriate delegates.
+PURPOSE: The `MessageReceiver.cs` file handles incoming messages from client connections in the Allegiance game. It processes various message types and invokes corresponding delegate methods to handle each type.
 
-**KEY PARTS:**
-- **Class: MessageReceiver**
-  - Inherits from `MarshalByRefObject`.
-  - Initializes with a player name.
-  
-- **Method: OnAppMessage(AllegianceInterop.ClientConnection client, byte[] messageData)**
-  - Processes incoming messages, filters spam, and dispatches to event handlers.
+KEY PARTS:
+- MessageReceiver: Class handling incoming messages.
+- OnAppMessage: Method processing message data using BinaryReader.
+- FMD_ prefixed methods: Delegates for specific message types like position acknowledgments, player readiness, etc.
+- File.AppendAllText: Writes log messages to a file.
+- TODOs: Potential future work or areas for optimization.
 
-- **Event Handlers (e.g., FMD_C_LOGONREQ)**
-  - Handles specific message types by creating data models and invoking delegates.
-  
-- **Function: ProcessMessage(MessageType messageType, byte[] messageData, Client client)**
-  - Invokes the corresponding delegate based on the message type.
+CONNECTS TO: Other game systems and files that process client messages.
 
-- **Delegates:**
-  - `FMD_CS_FIRE_MISSILE`, `FMD_S_SIDE_TECH_CHANGE`, etc., handle specific types of messages.
-  
-- **Method: ReceiveMessage()**
-  - Main function to receive and process messages, invoking appropriate event handlers.
+NOTES: Contains commented-out lines indicating skipped or incomplete message type handling.
 
-**CONNECTS TO:** 
-- AllegianceInterop namespace for message data models and client connections.
-- Other parts of the game that subscribe to events for handling specific messages.
+PARTS (in file order):
 
-**NOTES:** 
-- Uses `MarshalByRefObject`, which is unusual for a game client.
-- Contains commented-out sections for disabled or incomplete message types.
+- lines 2-351
+  - MessageReceiver: A class that handles incoming messages from a client connection.
+  - OnAppMessage: A method that processes incoming message data.
+  - MemoryStream and BinaryReader: Used to read binary data from the message.
+  - MessageType enumeration: Contains constants for different message types.
+  - FMD_ prefixed methods: These are delegates that handle specific message types. They are invoked based on the message type received.
+  - File.AppendAllText: Writes log messages to a file, appending new messages each time.
+  - TODOs: The commented-out lines indicate potential future work or areas for optimization. There is no explicit TODO tag, but the commented-out code suggests that some message types are currently skipped or not fully implemented.
+- lines 352-694
+  - FMD_C_POSITIONACK: Handles client position acknowledgment messages.
+  - FMD_CS_DELPOSITIONREQ: Handles deletion of a player's position request.
+  - FMD_CS_LOCK_LOBBY: Locks the lobby for further changes.
+  - FMD_CS_LOCK_SIDES: Locks the sides in the game.
+  - FMD_CS_PLAYER_READY: Indicates that a player is ready to start the game.
+  - FMD_S_TEAM_READY: Signals that a team is ready.
+  - FMD_CS_FORCE_TEAM_READY: Forces a team to be ready.
+  - FMD_C_DOCKED: Handles client docking messages.
+- lines 695-1037
+  - FMD_S_TELEPORT_ACK: Handles teleport acknowledgment messages.
+  - FMD_C_BOARD_SHIP: Handles client board ship requests.
+  - FMD_C_VIEW_CLUSTER: Handles client view cluster requests.
+  - FMD_S_KILL_SHIP: Handles server kill ship notifications.
+  - FMD_CS_SET_WINGID: Handles set wing ID commands from clients.
+  - FMD_S_ICQ_CHAT_ACK: Handles ICQ chat acknowledgment messages.
+  - FMD_CS_CHATBUOY: Handles client chat buoy messages.
+  - FMD_S_CREATE_CHAFF: Handles server create chaff notifications.
+- lines 1039-1382
+  - MessageReceiver: Handles receiving and processing messages from clients.
+  - FMD_S_WARP_BOMB: Represents a warp bomb message sent by the server to a client.
+  - FMD_S_PROMOTE: Represents a promotion message sent by the server to a client.
+  - FMD_C_PROMOTE: Represents a promotion request message sent by a client to the server.
+  - FMD_S_CREATE_BUCKETS: Represents a create buckets message sent by the server to a client.
+  - FMD_S_RELAUNCH_SHIP: Represents a relaunch ship message sent by the server to a client.
+  - FMD_S_PINGDATA: Represents a ping data message sent by the server to a client.
+  - FMD_C_REQPINGDATA: Represents a request ping data message sent by a client to the server.
+- lines 1383-1648
+  - FMD_S_DESTROY_TREASURE_Event: Event handler for when a treasure is destroyed.
+  - FMD_CS_NEW_SHIP_INSTANCE_Event: Event handler for when a new ship instance is created.
+  - FMD_CS_DROP_PART_Event: Event handler for when a part is dropped from a ship.
+  - FMD_CS_SWAP_PART_Event: Event handler for when parts are swapped on a ship.
+  - FMD_CS_PING_Event: Event handler for ping requests from clients.
+  - FMD_S_URLROOT_Event: Event handler for sending the URL root to clients.
+  - FMD_S_MISSION_STAGE_Event: Event handler for updating mission stages.
+  - FMD_C_POSITIONREQ_Event: Event handler for position request messages from clients.
 
 #### `src/Wopr/Wopr/Program.cs`
 
@@ -14959,23 +18143,16 @@ NOTES:
 
 #### `src/Wopr/Wopr/README.md`
 
-PURPOSE: This README file provides troubleshooting steps and guidance for running the WOPR application, which is part of the Allegiance game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- AllegianceInterop.dll: The primary DLL that needs to be loaded for WOPR to function.
-- MSVCRT runtime: Required for AllegianceInterop.dll to load correctly. Install from provided links.
-- Dependency Walker: Tool to diagnose missing dependencies if AllegianceInterop.dll fails to load.
-- BotAuthenticationGuid: Registry setting required on both the machine running WOPR and the game server.
-- Debug builds: For debug versions, place MSVCRTD* DLLs in the same directory as WOPR.
-
-CONNECTS TO:
-- Allegiance game server for bot authentication.
-
-NOTES:
-- Ensure the correct version of the MSVCRT runtime is installed (x86 or x64).
-- Use Dependency Walker to identify and resolve missing dependencies.
-- Verify BotAuthenticationGuid setting in the registry.
-- Place appropriate MSVCRTD* DLLs for debug builds.
+    If AllegianceInterop.dll fails to load, then chances are the MSVCRT runtime is not up to date. Install the latest run time from:
+    	https://aka.ms/vs/17/release/vc_redist.x86.exe
+    	https://aka.ms/vs/17/release/vc_redist.x64.exe
+    (WOPR is usually x86, but you can install both.)
+    If AllegianceInterop.dll still fails to load, use dependency walker to see what it's missing, then put those .DLLs into the same directory as WOPR.
+    If WOPR hangs when starting, check that BotAuthenticationGuid is set on both the machine running WOPR and on the game server in
+    SOFTWARE\WOW3264Node\Microsoft\Microsoft Games\Allegiance\1.4\Server\BotAuthenticationGuid
+    If you are trying to run WOPR on a debug build, put the MSVCRTD* dlls into the same directory as WOPR.
 
 #### `src/Wopr/Wopr/TeamDirector.cs`
 
@@ -14996,28 +18173,15 @@ NOTES:
 
 ### src/Wopr/Wopr/Constants
 
-This folder contains constants used throughout the Allegiance game, providing essential values and enumerations for various systems and components.
+This folder contains various constants and enumerations used throughout the Allegiance game engine to define different types of data and actions. It provides a centralized location for managing game-specific values and identifiers.
 
-- BitReader.cs: Manages reading bit-based data from binary streams.
-- BuoyType.cs: Defines types of buoys used in the game.
-- Civilization.cs: Enumerates different civilizations with their unique IDs.
-- CommandID.cs: Lists command IDs for unit actions.
-- CommandType.cs: Enumerates states of commands within the game.
-- EquipmentType.cs: Categorizes different types of equipment available.
-- InvestResult.cs: Outlines possible outcomes of investment operations.
-- ItemType.cs: Defines categories of items in the game.
-- MessageType.cs: Enumerates message types for client-server communication.
-- MissionStage.cs: Represents stages of a mission in the game.
-- ObjectType.cs: Categorizes various object types used in the game.
-- PilotType.cs: Enumerates different pilot types in the game.
-- ServerType.cs: Defines types of servers (Lobby and Server).
-- ShipState.cs: Lists possible states for ships.
-- ShipType.cs: Enumerates different ship types available.
-- StationAbilityBitMask.cs: Bitmask for station abilities.
-- StationType.cs: Enumerates different types of stations.
-- StrategyID.cs: Defines AI strategy IDs.
-- TargetType.cs: Categorizes target types in the game.
-- TechpathType.cs: Lists technology path types.
+- BitReader.cs: Reads bit-based data from a binary stream, ensuring alignment with C++ struct alignment.
+- MessageType.cs: Defines an enumeration of message types used in communication between clients and servers.
+- ObjectType.cs: Defines an enumeration of object types used to categorize different entities within the game world.
+- TargetType.cs: Defines an enumeration of target types for identifying different entities and conditions that can be targeted.
+- ItemType.cs: Defines an enumeration of item types used in the game.
+
+Largest files: MessageType.cs (190 lines), BitReader.cs (142 lines), ObjectType.cs (70 lines), TargetType.cs (54 lines), ItemType.cs (32 lines).
 
 #### `src/Wopr/Wopr/Constants/BitReader.cs`
 
@@ -15039,30 +18203,43 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Constants/BuoyType.cs`
 
-PURPOSE: This file defines an enumeration representing different types of buoys used in the game.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- BuoyType: An enumeration with two values, c_buoyWaypoint and c_buoyCluster, representing different types of buoys.
-
-CONNECTS TO: None
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum BuoyType
+        {
+            c_buoyWaypoint = 0,
+            c_buoyCluster = 1
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/Civilization.cs`
 
-PURPOSE: This file defines an enumeration of civilizations in the Allegiance game, which is used to identify different factions within the game.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Civilization: An enumeration representing different civilizations with their corresponding IDs.
-  - Belters: ID 101
-  - Gigacorp: ID 18
-  - IronCoalition: ID 25
-
-CONNECTS TO: src/Wopr/Wopr/Constants/Core.cs (likely contains the definition of CivID)
-
-NOTES:
-- The Bios civilization is commented out and not included in the enumeration.
-- There is a TODO comment suggesting that more civilizations should be added if AI support for them is implemented.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        // Matched up to CivID in the cores.
+        // TODO: Add the rest should we get AIs done for these base ones.
+        public enum  Civilization : short
+        {
+            Belters = 101,
+            //Bios = 35,
+            Gigacorp = 18,
+            IronCoalition = 25
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/CommandID.cs`
 
@@ -15077,14 +18254,24 @@ NOTES: none
 
 #### `src/Wopr/Wopr/Constants/CommandType.cs`
 
-PURPOSE: This file defines an enumeration of command types used within the Allegiance game's Wopr system.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CommandType: Enumerates different states of commands in the game, including queued, accepted, current, and planned commands.
-
-CONNECTS TO: src/Wopr/Wopr/CommandHandler.cs
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum CommandType
+        {
+            c_cmdQueued = 0,
+            c_cmdAccepted = 1,
+            c_cmdCurrent = 2,
+            c_cmdPlan = 3,
+            c_cmdMax = 4
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/EquipmentType.cs`
 
@@ -15109,14 +18296,24 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Constants/InvestResult.cs`
 
-PURPOSE: This file defines an enumeration representing the possible results of an investment operation within the Allegiance game.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- InvestResult: An enumeration with values indicating the outcome of an investment attempt, such as success, insufficient funds, already in progress, invalid technology name, or not available yet.
-
-CONNECTS TO: None
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum InvestResult
+        {
+            Succeeded,
+            InsufficientFunds,
+            AlreadyInProgress,
+            InvalidTechName,
+            NotAvailableYet
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/ItemType.cs`
 
@@ -15149,14 +18346,25 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Constants/MissionStage.cs`
 
-PURPOSE: This file defines an enumeration representing different stages of a mission in the Allegiance game.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- MissionStage: Enumerates the various stages of a mission including NOTSTARTED, STARTING, STARTED, OVER, and TERMINATE.
-
-CONNECTS TO: igc.h
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        // From igc.h
+        public enum MissionStage
+        {
+            STAGE_NOTSTARTED,
+            STAGE_STARTING,
+            STAGE_STARTED,
+            STAGE_OVER,
+            STAGE_TERMINATE
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/ObjectType.cs`
 
@@ -15175,47 +18383,87 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Constants/PilotType.cs`
 
-PURPOSE: This file defines an enumeration of pilot types used in the Allegiance game.
+PURPOSE: tiny file (18 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PilotType: An enumeration representing different types of pilots in the game, including miners, wingmen, layers, builders, carriers, players, and cheat players.
-
-CONNECTS TO: Wopr namespace, likely used throughout the game to identify and manage different types of pilots.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum PilotType
+        {
+            c_ptMiner = 0,
+            c_ptWingman = 2,
+            c_ptLayer = 5,
+            c_ptBuilder = 6,
+            c_ptCarrier = 9,
+            c_ptPlayer = 10,
+            c_ptCheatPlayer = 11
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/ServerType.cs`
 
-PURPOSE: This file defines an enumeration representing different types of servers in the Allegiance game.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ServerType: An enumeration with two values, Lobby and Server, used to distinguish between lobby and game server types.
-
-CONNECTS TO: None. It is a standalone constants file.
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum ServerType
+        {
+            Lobby,
+            Server
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/ShipState.cs`
 
-PURPOSE: This file defines an enumeration of possible states for a ship in the Allegiance game.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ShipState: An enumeration representing different states a ship can be in, such as dead, docked, flying, observer, and turret.
-
-CONNECTS TO: None
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum ShipState
+        {
+            c_ssDead = 1,                //A nice enumeration of all the things it could have been doing
+            c_ssDocked = 2,              //when it was last seen (if only briefly)
+            c_ssFlying = 3,
+            c_ssObserver = 4,
+            c_ssTurret = 5
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/ShipType.cs`
 
-PURPOSE: This file defines an enumeration of different types of ships in the Allegiance game.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ShipType: An enumeration that lists various ship types such as Scout, Fighter, Interceptor, StealthFighter, Bomber, and Gunship.
-
-CONNECTS TO: None. This file is self-contained and does not depend on other systems or files.
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum ShipType
+        {
+            Scout,
+            Fighter,
+            Interceptor,
+            StealthFighter,
+            Bomber,
+            Gunship
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/StationAbilityBitMask.cs`
 
@@ -15244,25 +18492,46 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Constants/StationType.cs`
 
-PURPOSE: This file defines an enumeration of different types of stations that can be built in the game Allegiance.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- StationType: An enumeration containing various station types such as Outpost, Teleport, Refinery, etc.
-
-CONNECTS TO: src/Wopr/Wopr/Entities/Station.cs
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum StationType
+        {
+            Outpost,
+            Teleport,
+            Refinery,
+            Garrison,
+            Tactical,
+            Supremacy,
+            Expansion,
+            ShipYard
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/StrategyID.cs`
 
-PURPOSE: This file defines an enumeration of strategy IDs used within the Allegiance game's Wopr module to identify different types of strategic operations.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- StrategyID: An enumeration with three values representing different strategies: ConnectToGame, CommanderResearchAndExpand, and ScoutExploreMap.
-
-CONNECTS TO: None
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        public enum StrategyID
+        {
+            ConnectToGame,
+            CommanderResearchAndExpand,
+            ScoutExploreMap
+        }
+    }
 
 #### `src/Wopr/Wopr/Constants/TargetType.cs`
 
@@ -15278,25 +18547,34 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Constants/TechpathType.cs`
 
-PURPOSE: This file defines an enumeration representing different types of technology paths available in the game Allegiance.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TechpathType: An enumeration with three values - Supremacy, Expansion, and Tactical, each representing a distinct technology path in the game.
-
-CONNECTS TO: Wopr namespace, likely used in other parts of the game to determine which technology path is currently active or being researched.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Constants
+    {
+        enum TechpathType
+        {
+            Supremacy,
+            Expansion,
+            Tactical
+        }
+    }
 
 ### src/Wopr/Wopr/Entities
 
-The `src/Wopr/Wopr/Entities` folder in Allegiance contains classes that represent various entities and data structures used within the game. These classes handle core information, game state management, serialization, and server-related data.
+This folder contains classes and structures related to game entities and information management in Allegiance.
 
-- **CoreInfo.cs**: Manages information about game cores, including their names, official status, and bit values.
-- **GameInfo.cs**: Tracks exploration progress, manages clusters and warps, and provides methods to update and query game state.
-- **ISupportReadingFromStreams.cs**: Defines an interface for entities that can read their state from a binary stream and determine the size of their data in bytes.
-- **InflightConstructor.cs**: Manages the construction of ships within a cluster during gameplay.
-- **MessageElement.cs**: Provides utility methods for reading specific types of data, particularly strings, from a binary stream.
-- **PersistPlayerScoreObject.cs**: Defines a structure to persist player scores in the game.
+- GameInfo.cs: Manages state information between bots within a team, including exploration sweeps and unexplored areas.
+- ServerCoreInfo.cs: Represents information about server cores, including their name, remote address, and current games.
+- PersistPlayerScoreObject.cs: Defines a structure to persist player scores in the game.
+- CoreInfo.cs: Holds details about a core within the game, such as its name and whether it is an official core.
+- MessageElement.cs: Contains utility methods for reading message elements from binary streams.
+
+Largest files: GameInfo.cs (101 lines), ServerCoreInfo.cs (36 lines), PersistPlayerScoreObject.cs (30 lines), CoreInfo.cs (29 lines), MessageElement.cs (27 lines).
 
 #### `src/Wopr/Wopr/Entities/CoreInfo.cs`
 
@@ -15335,27 +18613,43 @@ NOTES:
 
 #### `src/Wopr/Wopr/Entities/ISupportReadingFromStreams.cs`
 
-PURPOSE: Defines an interface for entities that can read their state from a binary stream and determine the size of their data in bytes.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ISupportReadingFromStreams: Interface with two methods - Read(BinaryReader br) and GetByteSizeOfEntity().
-
-CONNECTS TO: Used by classes implementing this interface to deserialize their state from streams, likely used in network communication or loading game states.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Entities
+    {
+        public interface ISupportReadingFromStreams
+        {
+            void Read(BinaryReader br);
+            int GetByteSizeOfEntity();
+        }
+    }
 
 #### `src/Wopr/Wopr/Entities/InflightConstructor.cs`
 
-PURPOSE: The `InflightConstructor` class in the Allegiance game is designed to manage the construction of ships within a cluster during gameplay.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- **Cluster**: Represents the cluster where the ship construction takes place.
-- **Ship**: Represents the ship being constructed.
-- **StationType**: Enumerates the type of station involved in the construction process.
-
-CONNECTS TO: AllegianceInterop, Wopr.Constants
-
-NOTES: None.
+    using AllegianceInterop;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Wopr.Constants;
+    namespace Wopr.Entities
+    {
+        public class InflightConstructor
+        {
+            public IclusterIGCWrapper Cluster;
+            public IshipIGCWrapper Ship;
+            public StationType StationType;
+        }
+    }
 
 #### `src/Wopr/Wopr/Entities/MessageElement.cs`
 
@@ -15417,36 +18711,54 @@ NOTES: None.
 
 #### `src/Wopr/Wopr/Entities/StaticCoreInfo.cs`
 
-PURPOSE: This file defines a class `StaticCoreInfo` that represents static core information in the game Allegiance. It includes functionality to read this information from a binary stream.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: `cbIGCFile`: Stores the name of an IGC (International Gliding Club) file.
-- Function: `Read(BinaryReader br)`: Reads the `StaticCoreInfo` object from a binary reader, specifically handling the `cbIGCFile` string with a fixed length of 13 characters.
-
-CONNECTS TO: `MessageElement`, which is likely an abstract base class or interface for message elements in the game's communication system.
-
-NOTES: None.
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.IO;
+    namespace Wopr.Entities
+    {
+        public class StaticCoreInfo : MessageElement
+        {
+            public string cbIGCFile; // c_cbFileName = 13
+            internal static StaticCoreInfo Read(BinaryReader br)
+            {
+                StaticCoreInfo returnValue = new StaticCoreInfo();
+                returnValue.cbIGCFile = ReadString(br, 13);
+                return returnValue;
+            }
+        };
+    }
 
 #### `src/Wopr/Wopr/Entities/TeamDirectorPlayerInfo.cs`
 
-PURPOSE: This file defines a class `TeamDirectorPlayerInfo` that holds information about players in a team director context within the Allegiance game.
+PURPOSE: tiny file (15 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PlayerName: Stores the name of the player.
-- SideIndex: Indicates the side index of the player.
-- IsCommander: A boolean indicating if the player is a commander.
-- IsGameController: A boolean indicating if the player has game controller privileges.
-
-CONNECTS TO: None explicitly mentioned, but likely used in team director systems or player management modules.
-
-NOTES: none
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    namespace Wopr.Entities
+    {
+        public class TeamDirectorPlayerInfo
+        {
+            public string PlayerName;
+            public short SideIndex;
+            public bool IsCommander;
+            public bool IsGameController;
+        }
+    }
 
 ### src/Wopr/Wopr/Loadouts
 
-The `src/Wopr/Wopr/Loadouts` folder in Allegiance contains classes related to ship loadouts, which define the equipment and weapons available to ships.
+The `Loadouts` folder in Allegiance contains classes related to managing different configurations of equipment and items that can be equipped on ships.
 
-- `LoadoutBase.cs`: Defines an abstract base class for all ship loadouts, specifying properties for various items that can be equipped on a ship.
-- `ScoutProbeLoadout.cs`: Implements a specific loadout configuration for scout probes, setting up weapon, missile, dispenser, and cargo items.
+- LoadoutBase.cs: Defines a base class for loadouts, providing properties and methods to manage various types of items that can be equipped on a ship.
+- ScoutProbeLoadout.cs: Specifies a particular loadout configuration designed for scout probes in the game.
 
 #### `src/Wopr/Wopr/Loadouts/LoadoutBase.cs`
 
@@ -15476,11 +18788,9 @@ NOTES: None.
 
 ### src/Wopr/Wopr/Properties
 
-The `src/Wopr/Wopr/Properties` folder contains metadata properties for the Wopr application, which is a component of Allegiance. This includes assembly attributes such as title, version, and GUID.
+This folder contains metadata and configuration settings for the Wopr assembly in Allegiance, a 2000 Microsoft multiplayer space game.
 
-- AssemblyInfo.cs: Defines metadata about the Wopr application, including its title, version, and GUID.
-- Resources.resx: Contains localized resources for the application.
-- Settings.settings: Manages user settings for the application.
+- AssemblyInfo.cs: Contains general information about the assembly such as its title, description, version, and copyright details. It also specifies attributes like ComVisible, Guid, and CLSCompliant to control how the assembly is exposed to other languages and frameworks.
 
 #### `src/Wopr/Wopr/Properties/AssemblyInfo.cs`
 
@@ -15506,50 +18816,69 @@ NOTES: none
 
 ### src/Wopr/Wopr/Strategies
 
-The `src/Wopr/Wopr/Strategies` folder in Allegiance contains classes responsible for implementing various strategies that commanders can use within the game. These strategies manage research, expansion, exploration, and other critical aspects of gameplay.
+The `src/Wopr/Wopr/Strategies` folder in Allegiance contains essential strategy implementations for managing game operations such as research and expansion, scouting, and connection management.
 
-- **CommanderResearchAndExpand.cs**: Manages research and expansion strategies by allocating resources to technologies and building stations.
-- **ConnectToGame.cs**: Handles the connection process to a game server and manages various events related to mission setup and player interactions.
-- **ScoutExploreMap.cs**: Implements a strategy for exploring the game map using scout ships, handling chat messages, ship status updates, and docking events.
-- **StrategyBase.cs**: Defines a base class for implementing different strategies in Allegiance, providing methods to start and finish strategies and handle communication with the game client.
+- CommanderResearchAndExpand.cs: Manages investments, technology queues, and station placement to facilitate the bot's growth and exploration.
+- ScoutExploreMap.cs: Handles scouting and exploration strategies, including movement through clusters, finding warps, and returning to base.
+- ConnectToGame.cs: Manages the game client connection and initialization, handling events related to player interactions and server communication.
+- StrategyBase.cs: Provides a foundational class for implementing various strategies, offering methods for communication with the game client and managing strategy lifecycle.
 
 #### `src/Wopr/Wopr/Strategies/CommanderResearchAndExpand.cs`
 
-**PURPOSE:** The `CommanderResearchAndExpand` class in Allegiance is responsible for managing research and expansion strategies for commanders. It handles the allocation of resources to research technologies and expand the fleet by placing constructors on clusters.
+PURPOSE:
+The CommanderResearchAndExpand.cs file implements a strategy for researching and expanding in Allegiance's Wopr game. It manages investments, technology queues, and station placement.
 
-**KEY PARTS:**
-- **Class: CommanderResearchAndExpand**
-  - Extends `StrategyBase` and implements a strategy for commanders.
-  
-- **Constants:**
-  - `AmountOfMoneyToKeepOnHand`: Amount of money the commander should keep on hand.
-  - `SecondTechbaseMarker`: Marker for the second techbase in the tech paths.
+KEY PARTS:
+- CommanderResearchAndExpand: Main class implementing research and expansion strategy.
+- QueueTechForAvailableMoney: Queues technologies based on available funds.
+- PlaceStation: Places stations at clusters.
+- InvestInTech: Attempts to invest in technologies.
+- ProcessInvestmentQueue: Manages the investment queue, handling money and tech availability.
 
-- **Fields:**
-  - `_investmentList`: List to store investments.
-  - `_constructorsInFlightToClusterObjectIDByShipObjectID`: Dictionary mapping ship IDs to their current construction targets.
-  - `_clustersWaitingForConstructors`: List of clusters waiting for constructors.
-  - `_primaryTechpath` and `_secondaryTechpath`: Nullable variables to hold primary and secondary tech paths.
-  - `_primaryTechPaths` and `_secondaryTechPaths`: Dictionaries mapping tech path types to lists of technology names.
+CONNECTS TO:
+- Allegiance game engine systems for managing resources, technology, and station placement.
 
-- **Constructor:**
-  - Initializes the strategy with predefined tech paths for Supremacy, Tactical, and Expansion.
+NOTES:
+None.
 
-- **Methods:**
-  - `AttachMessages`: Attaches message handlers to receive updates from the game.
-  - `MessageReceiver_FMD_CS_REQUEST_MONEY`: Handles money requests from ships.
-  - `MessageReceiver_FMD_CS_PING`: Manages constructor placement and queueing of technologies based on available money.
-  - `PlaceStation`: Determines the type of station and places the constructor accordingly.
+PARTS (in file order):
 
-- **Unusual Code:**
-  - The use of `Task.Run` to handle asynchronous operations for constructor placement.
-  - The logic for finding intermediate clusters using Dijkstra's algorithm if the target cluster is not yet discovered.
-
-**CONNECTS TO:** Other systems or files it depends on or serves, one line.
-- Depends on game state updates and messages from other parts of the game engine.
-
-**NOTES:**
-- None.
+- lines 1-377
+  - CommanderResearchAndExpand: Main class that implements a strategy for researching and expanding.
+  - AmountOfMoneyToKeepOnHand: Constant defining how much money to keep on hand.
+  - SecondTechbaseMarker: Marker string for second techbase.
+  - _investmentList: List of investments.
+  - _constuctorsInFlightToClusterObjectIDByShipObjectID: Dictionary mapping ship IDs to cluster object IDs for in-flight constructors.
+  - _clustersWaitingForConstructors: List of clusters waiting for constructors.
+  - _primaryTechpath and _secondaryTechpath: Nullable variables for primary and secondary tech paths.
+  - _primaryTechPaths and _secondaryTechPaths: Dictionaries mapping tech path types to lists of technology names.
+- lines 378-782
+  - QueueTechForAvailableMoney: Queues technology for available money.
+  - UndockMinersAndStartMining: Undocks miners and starts mining.
+  - MessageReceiver_FMD_S_MONEY_CHANGE: Handles money change messages.
+  - MessageReceiver_FMD_CS_CHATMESSAGE: Handles chat message messages.
+  - MessageReceiver_FMD_S_STATIONS_UPDATE: Handles stations update messages.
+  - MessageReceiver_FMD_S_BUCKET_STATUS: Handles bucket status messages.
+  - MessageReceiver_FMD_S_SHIP_STATUS: Handles ship status messages.
+  - PlaceStation: Places a station at a specified cluster.
+- lines 783-1164
+  - Log: Writes log messages to a file or console.
+  - DijkstraPathFinder: Class used for finding the shortest path between clusters using Dijkstra's algorithm.
+  - GetCore(): Returns the core game object containing various game data.
+  - GetClusters(): Retrieves all clusters in the galaxy.
+  - GetStations(): Returns a list of stations within a cluster.
+  - GetSide(): Retrieves the side (player) information.
+  - GetMissionParams(): Provides mission parameters such as maximum drones.
+  - QueueTech: Queues a technology for investment and construction.
+- lines 1165-1624
+  - QueueTech: Queues a technology for investment.
+  - GetNextTechbaseName: Determines the next tech base to build based on available resources and current stations.
+  - IsTechAvailableForInvestment: Checks if a technology is available for investment.
+  - InvestInTech: Attempts to invest in a technology, handling insufficient funds and already in progress states.
+  - ProcessInvestmentQueue: Processes the queue of technologies to invest in, managing money and tech availability.
+  - QueueTechForTechpath: Queues technologies based on a predefined tech path.
+  - GetTeleportCount: Counts the number of teleport stations.
+  - GetOutpostCount: Counts the number of outpost stations.
 
 #### `src/Wopr/Wopr/Strategies/ConnectToGame.cs`
 
@@ -15629,30 +18958,28 @@ NOTES:
 
 ### src/Zone
 
-The `src/Zone` folder in Allegiance contains core classes and interfaces related to managing zones, members, squads, and medals within the game environment.
+The `src/Zone` folder in Allegiance contains essential components for managing game zones and their members. It includes interfaces and utilities for handling ranks, positions, statuses, and detailed statuses of zone members.
 
-- **Medal.h**: Defines an interface for medals that can be awarded in the game, including properties like name, description, ranking, and image file.
-- **Member.h**: Provides an interface and utility functions for managing member information such as ranks, positions, statuses, and detailed statuses.
-- **Squad.h**: Contains interfaces and constants related to squads, including rank validation and conversion to strings.
-- **Zone.h**: Declares classes and constants related to the game's zone system, including maximum sizes for various database entries.
+- Medal.h: Defines structures and functions related to medals, which are awarded to players based on achievements.
+- Member.h: Provides a comprehensive interface for managing zone members, including rank management, position tracking, status updates, and detailed status information.
+- Squad.h: Contains interfaces and constants for squad operations within zones, facilitating group actions and communications.
+- Zone.h: Offers basic definitions and utilities related to game zones, setting the foundation for zone-specific functionalities.
 
 #### `src/Zone/Medal.h`
 
-PURPOSE: Defines an interface for medals that can be awarded in the game. Medals have a name, description, ranking, and image.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- IMedalBase: Interface class with pure virtual functions to set and get medal properties.
-  - SetName: Sets the medal's name.
-  - SetDescription: Sets the medal's description.
-  - SetRanking: Sets the medal's ranking for sorting purposes.
-  - SetImageFileName: Sets the file name of the medal's image.
-  - GetName: Returns the medal's name.
-  - GetDescription: Returns the medal's description.
-  - GetRanking: Returns the medal's ranking.
-
-CONNECTS TO: IZoneMedal, which likely inherits from IMedalBase to provide specific implementations for medals within a zone.
-
-NOTES: None.
+    class IMedalBase  // inherited by IZoneMedal
+    {
+    public:
+        virtual void            SetName(const char * szName)                  = 0;
+        virtual void            SetDescription(const char * m_szDescription)  = 0;
+        virtual void            SetRanking(int nRanking)                      = 0; // used for sorting
+        virtual void            SetImageFileName(const char * szFileName)     = 0;
+        virtual char *          GetName()           = 0;
+        virtual char *          GetDescription()    = 0;
+        virtual int             GetRanking()        = 0;
+    };
 
 #### `src/Zone/Member.h`
 
@@ -15690,26 +19017,36 @@ NOTES: None
 
 #### `src/Zone/Zone.h`
 
-PURPOSE: This header file defines constants and includes necessary headers for managing zones in the Allegiance game.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `c_cbURLDB`, `c_cbSquadDescriptionDB`, `c_cbLogDB`, `c_cbZoneNameDB`: Constants defining maximum sizes for various database entries.
-- `Member.h`, `Squad.h`, `Medal.h`: Included headers that likely contain classes related to game members, squads, and medals.
-
-CONNECTS TO: Member.cpp, Squad.cpp, Medal.cpp (for implementation of the included headers).
-
-NOTES: None.
+    #ifndef ZONE_INC
+    #define ZONE_INC
+    const int c_cbURLDB = 255;
+    const int c_cbSquadDescriptionDB = 510;
+    const int c_cbLogDB = 500;
+    const int c_cbZoneNameDB = 30; // size of zone names
+    #include "Member.h"
+    #include "Squad.h"
+    #include "Medal.h"
+    #endif
 
 ### src/_Utility
 
-**Folder Summary:** The `src/_Utility` directory contains utility functions, classes, and implementations that support various aspects of the Allegiance game, including file operations, configuration management, collision detection, message handling, and database interactions.
+The `src/_Utility` folder in Allegiance contains essential utility functions and classes used across various parts of the game. It provides core functionalities such as file operations, collision detection, network messaging, and spatial partitioning.
 
-**Important Files:**
-- **CRC.cpp & CRC.h**: Implement CRC32 checksum calculations for memory and files.
-- **CollisionQueue.cpp & CollisionQueue.h**: Manage a queue to handle and process collision events efficiently.
-- **ConfigurationStore.cpp & ConfigurationStore.h**: Provide mechanisms for reading from and writing configuration data using JSON and Windows registry.
-- **HitTest.cpp & HitTest.h**: Handle hit testing and collision detection between various shapes.
-- **Messages.cpp & Messages.h**: Manage message handling and network communication using DirectPlay.
+- CRC.cpp: Implements CRC32 checksum calculations for memory and files.
+- CollisionEntry.cpp: Provides sorting algorithms for `CollisionEntry` objects based on their collision times.
+- ConfigurationStore.cpp: Manages configuration settings using JSON and Windows Registry backends.
+- Endpoint.cpp: Offers sorting algorithms for `Endpoint` objects, including quicksort and bubble sort.
+- FileLoader.cpp: Handles loading and managing game resources like artwork files.
+- HitTest.cpp: Contains functions and classes for collision detection and hit testing in the game.
+- KDnode.cpp: Implements a KD-tree node for efficient spatial partitioning.
+- KDroot.cpp: Manages a collection of `HitTest` objects using a KD-tree structure.
+- Messages.cpp: Manages network messaging and player connections using DirectPlay.
+- Utility.cpp: Provides utility functions and classes for various game-related operations.
+- Utility.h: Contains utility classes and functions for collision detection, frame data handling, and other operations.
+
+Largest files: Messages.cpp (2172 lines), HitTest.cpp (1948 lines), Utility.h (1513 lines), listwrappers.h (704 lines), Utility.cpp (646 lines).
 
 #### `src/_Utility/CRC.cpp`
 
@@ -15731,18 +19068,28 @@ NOTES:
 
 #### `src/_Utility/CRC.h`
 
-PURPOSE:
-This file contains utility functions to generate cyclic redundancy check (CRC) values for memory and files. CRC is a simple hash function used to detect accidental changes to raw data.
+PURPOSE: tiny file (20 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- MemoryCRC: Generates a 32-bit checksum for a block of memory.
-- FileCRC: Generates a 32-bit checksum for a file, either by filename or file handle.
-
-CONNECTS TO:
-- windows.h: For Windows-specific functions and types used in the implementation.
-
-NOTES:
-- None.
+    #pragma once
+    #include <windows.h>
+    /***************************************************************************
+    Function:		MemoryCRC()
+    Parameters:		data: pointer to data
+    				size: size of the data (must be non-zero)
+    Purpose:		generate a 32-bit checksum
+    Returns:		checksum of the data (never returns zero)
+    ****************************************************************************/
+    int MemoryCRC(const void *_data, unsigned size);
+    /***************************************************************************
+    Function:		FileCRC()
+    Parameters:		szFileName:   file to get CRC from
+                    szErrorMsg:   this can be NULL if you don't care about a msg,
+                                  or else it must be able to store 100+MAX_PATH chars
+    Returns:        Checksum of the file, returns 0 on error
+    Example:		CRC = FileCRC("autoexec.bat", 0, 0);
+    ****************************************************************************/
+    int FileCRC(const char *szFilename, char * szErrorMsg);
+    int FileCRC(HANDLE hFile,           char * szErrorMsg);
 
 #### `src/_Utility/CollisionEntry.cpp`
 
@@ -15846,40 +19193,93 @@ NOTES:
 
 #### `src/_Utility/FileLoader.h`
 
-PURPOSE: Defines an interface for loading files securely and provides a function to create a secure file loader.
+PURPOSE: tiny file (12 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- IFileLoader: Interface with methods to check if a file exists, get the file path, and load a file.
-- CreateSecureFileLoader: Function to create a secure file loader using specified paths and a secure path.
-
-CONNECTS TO: tref.h, base.h, vector, memory
-
-NOTES: None.
+    #pragma once
+    #include "tref.h"
+    #include "base.h"
+    #include "vector"
+    #include "memory"
+    class IFileLoader {
+    public:
+        virtual bool HasFile(const ZString& path) = 0;
+        virtual ZString GetFilePath(const ZString& path) = 0;
+        virtual TRef<ZFile> GetFile(const ZString& path) = 0;
+    };
+    std::shared_ptr<IFileLoader> CreateSecureFileLoader(const std::vector<ZString>& vPaths, const ZString& pathSecure);
 
 #### `src/_Utility/HitTest.cpp`
 
-**PURPOSE:** The `HitTest.cpp` file contains implementations for hit testing algorithms used in the Allegiance game engine to determine collisions and proximity between objects in space.
+PURPOSE: The file HitTest.cpp contains functions and classes for collision detection and hit testing in Allegiance, including bounding box calculations, shape representations, and algorithms to determine collisions between objects.
 
-**KEY PARTS:**
-- **Name:** HitTest.cpp (part 1)
-  - Contains definitions for various classes (`HitTest`, `BoundingPoint`, `BoundingSphere`, `ConvexVertex`, `BoundingCone`, `SingleHull`, `MultiHull`, `BoundingHull`) and functions used in hit testing.
-  
-- **Name:** HitTest.cpp (part 2)
-  - Defines the `Load` function to load multi-hulls from files, the `Create` function to create hit test objects based on shapes, and utility functions like `GetMinExtreme`, `GetMaxExtreme`, and `HullCollide`.
-  
-- **Name:** HitTest.cpp (part 3)
-  - Implements collision detection algorithms such as `IntervalCollide`, `closest_vertex`, `closest_edge`, and `closest_face` to determine the closest points between convex hulls.
-  
-- **Name:** HitTest.cpp (part 4)
-  - Contains implementations for hit testing algorithms, specifically focusing on determining the closest point to a given point within a convex hull using the Johnson algorithm. Also includes functions like `DoGilbert`.
+KEY PARTS:
+- HitTest::SetBB: Sets the bounding box for an object based on its position and velocity.
+- HitTest::UpdateBB: Updates the bounding box of an object to reflect its current state.
+- HitTest::Collide: Determines if two objects collide within a given time interval.
+- BoundingPoint, BoundingSphere, BoundingCone: Classes representing different types of hit test shapes.
+- ConvexVertex: Represents a vertex in a convex hull and its adjacency information.
+- SingleHull: Represents a single convex hull with vertices and adjacency information.
+- MultiHull: Represents a multi-hull object with multiple convex hulls.
+- BoundingHull: Extends HitTest to handle bounding hulls for collision detection.
+- CachedMultiHull: Stores cached multi-hull data.
+- IntervalCollide: Recursively checks for collisions between two convex hulls over an interval.
+- Johnson4: Main function for hit testing a point against a tetrahedron.
 
-**CONNECTS TO:**
-- Other files related to game objects and collision detection.
+CONNECTS TO: Other files related to game objects and physics calculations.
 
-**NOTES:**
-- The file contains several TODO comments indicating areas that need further work or review.
-- There are some unusual constructs, such as the use of `__asm` instructions for floating-point operations on x86 CPUs.
-- The code uses a hack to verify FPU round-off errors and ensure they do not cause infinite loops in retail builds.
+NOTES:
+- The use of #undef new before the definition of SingleHull::operator new.
+- Complex logic in BoundingCone::GetExtreme to determine extreme points on a cone.
+
+PARTS (in file order):
+
+- lines 1-339
+  - HitTest::SetBB: Sets the bounding box for an object based on its position and velocity.
+  - HitTest::UpdateBB: Updates the bounding box of an object to reflect its current state.
+  - HitTest::Collide: Determines if two objects collide within a given time interval.
+  - BoundingPoint, BoundingSphere, BoundingCone: Classes representing different types of hit test shapes.
+  - ConvexVertex: Represents a vertex in a convex hull and its adjacency information.
+  - SingleHull: Represents a single convex hull with vertices and adjacency information.
+  - TODOs: "Allow collisions that occur slightly beyond m_tStop to guarantee that all collisions get processed at least once" "The objects are moving apart ... when will their bounding spheres no longer overlap."
+  - Unusual code: The use of #undef new before the definition of SingleHull::operator new. The complex logic in BoundingCone::GetExtreme to determine extreme points on a cone.
+- lines 340-694
+  - HitTest::GetCenter: Returns the center of the hit test shape.
+  - MultiHull: Represents a multi-hull object with multiple convex hulls.
+  - BoundingHull: Extends HitTest to handle bounding hulls for collision detection.
+  - CachedMultiHull: Stores cached multi-hull data.
+  - cachedMultiHulls: Global list of cached multi-hulls.
+  - HitTest::Load: Loads a multi-hull from a file, caching it if not already loaded.
+- lines 695-1051
+  - HitTest::Create: Creates a new HitTest object based on a file or default shape.
+  - MultiHull: Represents a convex hull with multiple hulls.
+  - SingleHull: Represents a single convex hull.
+  - ConvexVertex: Represents a vertex of a convex hull.
+  - FrameLink: Represents a frame in the game world.
+  - FrameDataUTL: Contains data for a frame, including its name and position.
+  - HitTest::GetMinExtreme: Calculates the minimum extreme point for a given shape.
+  - HitTest::GetMaxExtreme: Calculates the maximum extreme point for a given shape.
+- lines 1052-1416
+  - IntervalCollide: Recursively checks for collisions between two convex hulls over an interval.
+  - DoGilbert: Applies Gilbert's algorithm to find collision points between two convex hulls.
+  - Johnson2: Johnson's algorithm for finding the closest point on a line segment (2D).
+  - Johnson3: Johnson's algorithm for finding the closest point on a triangle (3D).
+  - closest_vertex, closest_edge, closest_face: Helper functions to determine the closest feature of a simplex.
+  - c_maxAttempts: Maximum number of attempts to find a separating plane between two convex hulls.
+  - maxDeltaT: Threshold for determining if an interval is small enough to consider as a collision.
+- lines 1417-1781
+  - Johnson4: Main function for hit testing a point against a tetrahedron.
+  - Vector: Class representing 3D vectors with x, y, z components.
+  - closest_vertex: Function to find the closest vertex to a point.
+  - closest_edge: Function to find the closest edge to a point.
+  - closest_face: Function to find the closest face to a point.
+  - subset1, subset2, subset3, subset4: Arrays defining subsets of vertices for hit testing.
+  - dp: Matrix storing dot products of vertex vectors.
+  - delta: Matrix storing calculated distances and differences for hit testing.
+- lines 1782-1948
+  - HitTest: Class for hit testing.
+  - Johnson: Function that performs a Johnson algorithm to find the minimum distance between two convex polyhedra.
+  - DoGilbert: Function that implements the Gilbert algorithm to determine if two convex polyhedra intersect.
+  - epsilon: A constant representing a small value used for floating-point comparison.
 
 #### `src/_Utility/KDnode.cpp`
 
@@ -15917,20 +19317,78 @@ This file contains the implementation of a KDroot class, which is part of a spat
 
 #### `src/_Utility/Messages.cpp`
 
-**PURPOSE:** The `Messages.cpp` file in Allegiance is responsible for managing network communication between clients and servers using DirectPlay. It handles the creation, sending, receiving, and processing of messages.
+PURPOSE: Manages network messaging and player connections using DirectPlay for a multiplayer game.
 
-**KEY PARTS:**
-- **Class: FedMessaging**: Manages message handling for communication between clients and servers.
-- **Function: DPlayMsgHandler**: Callback function that receives messages from DirectPlay and forwards them to the appropriate `FedMessaging` instance.
-- **Function: PFedMsgCreate**: Generates a FedMessage of specified type, constructs variable-length parameters, and optionally queues it for sending.
-- **Function: QueueExistingMsg**: Queues an existing message for sending in the outgoing packet buffer.
-- **Function: GenericSend**: Sends messages through DirectPlay with appropriate flags based on the guaranteed status of the message.
-- **Data: g_dpMsgids**: Array mapping DirectPlay message IDs to their string representations for debugging and logging purposes.
-- **Macro: GETSORC**: Used for debugging to determine if the code is running in the server or client context.
+KEY PARTS:
+- FedMessaging: Manages messaging between clients and server.
+- DPlayMsgHandler: Handles messages received from DirectPlay.
+- GenericSend: Sends a message to a recipient, handling guaranteed and non-guaranteed messages differently.
+- ConnectToDPAddress: Attempts to connect to a machine using a DirectPlay address.
+- JoinSession: Initiates joining a session as a client.
+- CFMConnection: Manages a connection between two players.
+- FMSessionDesc: Parses the session name to extract game details.
 
-**CONNECTS TO:** DirectPlay, CFMConnection, CFMGroup
+CONNECTS TO: DirectPlay
 
-**NOTES:** The file contains several TODO comments indicating areas that need further implementation or improvement. There are also conditional compilation directives like `#ifndef NO_MSG_CRC` and `#ifdef DUMPMSGS` for debugging and performance optimization. Additionally, there is a memory leak fix in the `allocAndCopyStruct` function, and debugging code to log hacker activity, which should be removed or commented out for production.
+NOTES:
+- None
+
+PARTS (in file order):
+
+- lines 1-362
+  - FedMessaging: Manages messaging between clients and server.
+  - DPlayMsgHandler: Handles messages received from DirectPlay.
+  - EnumHostsCallback: Callback function for enumerating hosts.
+  - SetDefaultRecipient: Sets the default recipient for messages.
+  - GetDefaultRecipient: Retrieves the default recipient.
+  - PFedMsgCreate: Creates a new FedMessage.
+  - VerifyMessages: Ensures that output buffer contains valid FEDMESSAGEs.
+  - DumpMemory: Dumps memory leaks.
+- lines 363-710
+  - CB: Represents a count of bytes.
+  - FEDMESSAGE: A structure representing a message with fields like cbmsg and fmid.
+  - FedMessaging: Manages sending and receiving messages over a network using DirectPlay.
+  - GenericSend: Sends a message to a recipient, handling guaranteed and non-guaranteed messages differently.
+  - SendToDefault: Sends queued messages to the default recipient.
+  - SendMessages: Queues up messages for sending and sends them if possible.
+  - CheckOdometer: Tracks time, number of messages, and bytes sent since the last call.
+  - OnSysMessage: Handles system messages received from DirectPlay.
+- lines 711-1066
+  - FedMessaging::MsgHandler: Handles incoming DirectPlay messages and stores them for later processing.
+  - FedMessaging::ReceiveMessages: Loops through all inbound messages in a queue and dispatches them appropriately.
+  - DPNMSG_CREATE_PLAYER: Represents a message indicating the creation of a player.
+  - DPNMSG_DESTROY_PLAYER: Represents a message indicating the destruction of a player.
+  - DPNMSG_SEND_COMPLETE: Represents a message indicating the completion of a send operation.
+  - DPNMSG_ADD_PLAYER_TO_GROUP: Represents a message indicating that a player has been added to a group.
+  - DPNMSG_REMOVE_PLAYER_FROM_GROUP: Represents a message indicating that a player has been removed from a group.
+  - DPNMSG_TERMINATE_SESSION: Represents a message indicating the termination of a session.
+- lines 1067-1413
+  - FedMessaging: Manages DirectPlay connections and messaging.
+  - ConnectToDPAddress: Attempts to connect to a machine using a DirectPlay address.
+  - Connect: Initiates a connection to a host machine.
+  - KillSvr: Attempts to kill the dplaysvr process.
+  - InitDPlayClient: Initializes a DirectPlay client.
+  - InitDPlayServer: Initializes a DirectPlay server.
+  - HostSession: Starts a session and becomes the host (server).
+  - TODOs: How do we know when to make sure dplaysvr isn't hosed? AddComponent(DPNA_KEY_PORT): Sets the port for the DirectPlay address.
+- lines 1415-1794
+  - FedMessaging: Manages session creation and management.
+  - JoinSession: Initiates joining a session as a client.
+  - JoinSessionInstance: Joins an already enumerated session instance.
+  - Shutdown: Cleans up resources when shutting down the session.
+  - GetConnectionFromDpid: Retrieves a connection by its DPID.
+  - GetGroupFromDpid: Retrieves a group by its DPID.
+  - GetIPAddress: Fetches the IP address of a connection.
+  - GetListeningPort: Determines the port the server is listening on.
+- lines 1795-2172
+  - CFMConnection: Manages a connection between two players.
+  - CFMGroup: Represents a group of connections within a session.
+  - FedMessaging: Main class for managing network messaging and player connections.
+  - FMSessionDesc: Parses the session name to extract game details.
+  - CreateConnection: Creates a new connection object.
+  - SetSessionDetails: Updates the session details with custom information.
+  - GetCountConnections: Returns the number of active connections.
+  - GetLinkDetails: Retrieves link details for a specific connection.
 
 #### `src/_Utility/Utility.cpp`
 
@@ -15954,23 +19412,58 @@ NOTES: None.
 
 #### `src/_Utility/Utility.h`
 
-**PURPOSE:** The file `src/_Utility/Utility.h` contains a collection of utility classes and functions designed to support various operations in the Allegiance game engine, including linked lists, rotation handling, frame data management, collision detection, and general utilities.
+PURPOSE: Contains utility classes and functions for collision detection, frame data handling, and other game-related operations.
 
-**KEY PARTS:**
-- **List_utl**: Template class for singly linked lists with optional thread safety.
-- **Link_utl**: Template class representing elements in a linked list.
-- **Lock_utl**: Utility class for managing locks on lists to ensure safe access.
-- **Rotation**: Class representing rotations in 3D space using an axis-angle representation.
-- **FrameDataUTL**: Represents a frame in a hierarchy with position and forward direction.
-- **Interval**: Represents an interval with lower and upper bounds.
-- **BoundingBox**: Represents a bounding box in 3D space defined by intervals along each axis.
-- **Endpoint**: Represents an endpoint in a sorted list of points or intervals.
-- **Transform44**: Represents a 4x4 transformation matrix including position and orientation.
-- **HitTest**: Represents a hit test for collision detection, including shape information.
+KEY PARTS:
+- UTL: Base class for utility classes.
+- List_utl: A linked list implementation with basic operations like adding and removing elements.
+- Link_utl: Represents an element in a linked list, providing methods to navigate through the list.
+- Lock_utl: Provides thread-safe locking mechanisms for lists.
+- Slist_utl: A single-threaded safe list class that manages objects of type T.
+- Slink_utl: A single-threaded safe link class that holds an object of type T.
+- Rotation: A class representing a rotation in 3D space with axis-angle representation.
+- FrameDataUTL: A structure containing frame data including name, position, and forward direction.
+- MultiHullBase: Represents a multi-hull base with an ellipse equation and original radius.
+- HitTest: A class representing a hit test with various properties and methods.
 
-**CONNECTS TO:** Other utility classes and functions within the game engine, particularly those related to collision detection and spatial partitioning.
+CONNECTS TO: None
 
-**NOTES:** None.
+NOTES:
+- The use of _exposed macro which seems to be a custom preprocessor directive.
+- The sink() function in Slink_utl and Slist_utl, which is called after certain operations but its purpose is not immediately clear from this snippet.
+
+PARTS (in file order):
+
+- lines 1-350
+  - UTL: Base class for utility classes.
+  - List_utl: A linked list implementation with basic operations like adding and removing elements.
+  - Link_utl: Represents an element in a linked list, providing methods to navigate through the list.
+  - Lock_utl: Provides thread-safe locking mechanisms for lists.
+  - Slist_utl: A single-threaded safe list class that manages objects of type T.
+  - Slink_utl: A single-threaded safe link class that holds an object of type T.
+  - c_cbFileNameDB, c_cbDescriptionDB, etc.: Constants defining maximum lengths for various string types used in the game.
+  - TODOs or unusual code: The use of _exposed macro which seems to be a custom preprocessor directive. The sink() function in Slink_utl and Slist_utl, which is called after certain operations but its purpose is not immediately clear from this snippet.
+- lines 351-707
+  - Slink_utl<T, Sink>: A template class for a linked list node with additional functionality.
+  - Mlist_utl<T>: A multi-thread safe templated list class that inherits from List_utl and Lock_utl.
+  - Mlink_utl<T>: A multi-thread safe templated linked list element class that inherits from Link_utl.
+  - Rotation: A class representing a rotation in 3D space with axis-angle representation.
+  - FrameDataUTL: A structure containing frame data including name, position, and forward direction.
+  - FrameList: A typedef for Slist_utl<FrameDataUTL>, representing a list of frame data.
+  - FrameLink: A typedef for Slink_utl<FrameDataUTL>, representing a linked list element of frame data.
+  - Interval: A class representing an interval with low and high endpoints.
+- lines 708-1065
+  - MultiHullBase: Represents a multi-hull base with an ellipse equation and original radius. GetFrameOffset: Retrieves the frame offset for a given frame name. GetFrameForward: Retrieves the forward direction of a frame. GetFrame: Searches for a frame by name. GetOriginalRadius: Returns the original radius. GetEllipseEquation: Returns the ellipse equation.
+  - HitTest: A class representing a hit test with various properties and methods. Load: Loads a hit test from a file. Create: Creates a new hit test instance. AddRef/Release: Reference counting for object management. SetStaticF: Sets whether the hit test is static. SetBB: Updates bounding box based on time and velocity. Move: Moves the hit test by a given time step. AdjustTimes: Adjusts start and stop times. UpdateStaticBB: Updates static bounding box for a given radius. UpdateBB: Updates dynamic bounding box. Collide: Handles collision detection with another hit test. GetShape/GetTrueShape: Retrieves the current and true shapes of the hit test. SetShape: Sets the shape, ensuring it does not exceed the true shape. GetRadius/SetRadius: Gets and sets the radius of the hit test. GetScale: Returns the scale factor (always 1.0 in this implementation). GetDeadF/SetDeadF: Gets and sets whether the hit test is dead. GetDeletedF/SetDeletedF: Gets and sets whether the hit test has been deleted. GetData: Retrieves the associated data object. GetLastTest/SetLastTest: Gets and sets the last tested hit test. GetVelocity/SetVelocity: Gets and sets the velocity, with checks to ensure it is valid. GetID/SetID: Gets and sets the unique identifier of the hit test. GetNoHit/SetUseTrueShapeSelf/SetUseTrueShapeOther/SetNoHit: Manages no-hit conditions and shape usage. SetTimeStart/SetTimeStop: Sets the start and
+- lines 1066-1513
+  - Utility.h: Contains utility functions and classes for collision detection, frame data handling, and other game-related operations.
+  - HitTestShape: Represents a shape used in collision detection.
+  - Orientation: Defines the orientation of an object in space.
+  - Vector: A class representing 3D vector operations.
+  - KDroot: The root node of a kd-tree used for efficient collision detection.
+  - CollisionEntry: Holds information about a collision event.
+  - CollisionQueue: Manages a queue of collision events.
+  - UTL: Utility class with static methods for file handling, string manipulation, and other general purposes.
 
 #### `src/_Utility/allegdb.cpp`
 
@@ -16014,15 +19507,9 @@ NOTES: None.
 
 #### `src/_Utility/pch.cpp`
 
-PURPOSE: This file is a precompiled header for the Allegiance project, which includes common headers used across multiple source files to improve compilation speed.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary include file that contains all the standard and third-party libraries commonly used in the project.
-- `_Utility`: The directory where this file resides, indicating its utility-focused nature.
-
-CONNECTS TO: All other C++ source files that include "pch.h".
-
-NOTES: None.
+    #include "pch.h"
 
 #### `src/_Utility/pch.h`
 
@@ -16042,53 +19529,77 @@ NOTES:
 
 ### src/clintlib
 
-**Folder Overview:** The `src/clintlib` folder in Allegiance contains core client-side libraries responsible for managing updates, handling messages from the server, censoring bad words, and providing thread synchronization.
+The `src/clintlib` folder in Allegiance contains core client-side functionality essential for managing game operations and interactions. It includes modules for handling downloads, processing server messages, filtering bad words, and managing player and mission data.
 
-- **AutoDownload.cpp**: Manages automatic file downloads from a remote server.
-- **AutoDownload.h**: Declares interfaces and utility functions for auto-download management.
-- **appmsg.cpp**: Handles incoming client-server messages to update game state.
-- **badwords.cpp**: Implements bad word filtering and censoring.
-- **badwords.h**: Provides functions for loading and censoring bad words.
-- **clintlib.cpp**: Manages critical sections, event handling, player interactions, and network communication.
-- **clintlib.h**: Defines essential classes and interfaces for client-side operations.
-- **pch.cpp** and **pch.h**: Precompiled header files to speed up compilation.
+- AutoDownload.cpp: Manages automatic file downloads, verifying local files, and handling download errors.
+- AutoDownload.h: Defines interfaces and utility functions for the auto-download system.
+- appmsg.cpp: Processes various messages and updates from the server to manage game state and player interactions.
+- badwords.cpp: Implements filtering of bad words in text strings within the game.
+- clintlib.cpp: Contains core client operations, including event handling and mission management.
+- clintlib.h: Manages client-side operations and interactions, such as player and mission data.
+
+Largest files: clintlib.cpp (4396 lines), appmsg.cpp (3594 lines), clintlib.h (2478 lines), AutoDownload.cpp (1545 lines), AutoDownload.h (744 lines).
 
 #### `src/clintlib/AutoDownload.cpp`
 
-**File: src/clintlib/AutoDownload.cpp**
+PURPOSE: Handles auto-download functionality for Allegiance, including managing file downloads, verifying local files, and handling errors.
 
-**PURPOSE:** Manages the auto-download process for Allegiance files from an FTP server.
+KEY PARTS:
+- CAutoDownloadImpl: Implements IAutoDownload and IHTTPSessionSink interfaces to manage the download process.
+- CFileInfo: Stores file information such as CRC, size, and timestamp.
+- SetFTPSite: Sets the FTP site URL and initial directory for downloading game files.
+- BeginUpdate: Starts the update process by initiating the download of FileList.txt.
+- HandleAutoDownload: Orchestrates the auto-download process, verifying local files and downloading necessary game files.
+- OnFileCompleted: Handles completion of a file download.
+- CLocalFilesVerifier: Manages local file verification and downloading.
 
-**KEY PARTS:**
-- **Class: CAutoDownloadImpl**
-  - Inherits from `IAutoDownload` and `IHTTPSessionSink`.
-  - Handles the main loop for downloading files, verifying local files, and managing the auto-download state.
-  
-- **Function: SetFTPSite**
-  - Configures the FTP site URL, including initial directory, username, and password.
+CONNECTS TO:
+- IAutoDownload
+- IHTTPSessionSink
+- Reloader.exe
 
-- **Function: BeginUpdate**
-  - Initializes the update process by setting up the download environment and initiating the download of `FileList.txt`.
+NOTES:
+- "Need to restart allegiance"
+- "This command-line needs to be in sync with the command-line reader in Reloader.exe"
 
-- **Function: HandleAutoDownload**
-  - Manages the main loop for downloading files, verifying local files, and managing the auto-download state.
+PARTS (in file order):
 
-- **Function: Abort**
-  - Aborts the current download and handles any necessary cleanup.
-
-- **Function: DoError**
-  - Handles error conditions by logging errors, displaying messages to the user, and setting an error flag.
-
-- **Function: AddFileToDownloadList**
-  - Adds files to the download list with their size, CRC, and timestamp.
-
-**CONNECTS TO:** CLocalFilesVerifier, IAutoDownload, IHTTPSessionSink
-
-**NOTES:** 
-- The use of `_debugf` for debugging output.
-- Error handling involving writing error messages to a log file (`UpdateError.txt`).
-- TODOs: "make Username and Password work for FTP" in `SetFTPSite`.
-- Consider optimizing by starting downloads while building file lists.
+- lines 1-372
+  - CAutoDownloadImpl: Implements IAutoDownload and IHTTPSessionSink interfaces for handling auto-download functionality.
+  - CFileInfo: Struct to store file information like CRC, size, and timestamp.
+  - SetFTPSite: Sets the FTP site URL and initial directory.
+  - SetOfficialFileListAttributes: Sets the official CRC and file list size for verification.
+  - SetArtPath: Sets the art path ensuring it's in a friendly format.
+  - BeginUpdate: Starts the update process by setting up the environment and initiating the download of FileList.txt.
+  - HandleAutoDownload: Handles the auto-download process, verifying local files and downloading game files.
+  - Abort: Aborts the download process and handles errors.
+- lines 377-759
+  - DoError: Handles error messages by logging them and notifying the user.
+  - AddFileToDownloadList: Adds files to the download list with details like name, size, CRC, and timestamp.
+  - OnAnalysisProgress: Notifies about progress in file analysis.
+  - HasErrorOccurred: Checks if an error has occurred during the download process.
+  - SetNeedToMoveFiles: Sets whether files need to be moved after download.
+  - ShouldFilterFile: Determines if a file should be filtered out from downloading.
+  - ShouldRetry: Checks if a file should be retried for download based on its content.
+  - OnError: Implementation of the error handling method from IFTPSessionUpdateSink.
+- lines 761-1144
+  - CAutoDownloadImpl: Manages the auto-download process.
+  - OnFileCompleted: Handles completion of a file download.
+  - OnProgress: Updates progress during file downloads.
+  - OnTransferFinished: Notifies when the transfer is finished.
+  - ConnectToHTTPSite: Establishes connection to the HTTP server.
+  - BeginMainDownload: Starts the main download phase.
+  - OnFinishLocalFilesAnalysis: Analyzes local files and decides on next steps.
+  - MoveFilesThenRestartOrRelogOn: Moves downloaded files and restarts/relogs if necessary.
+- lines 1145-1545
+  - CLocalFilesVerifier: Manages local file verification and downloading.
+  - ContinueLocalFilesVerification: Continues the analysis of local files for updates.
+  - LaunchReloaderAndExit: Restarts Allegiance by launching Reloader.exe and exits the current process.
+  - SetLocalFileTime: Sets the file time for a given file.
+  - IsTimeClose: Checks if two system times are close within a specified tolerance.
+  - ConsiderDownloadingFile: Determines whether to download a file based on its attributes.
+  - OpenAndGetFileInfo: Opens a file and retrieves its information.
+  - TODOs: "Need to restart allegiance" "This command-line needs to be in sync with the command-line reader in Reloader.exe"
 
 #### `src/clintlib/AutoDownload.h`
 
@@ -16109,28 +19620,113 @@ NOTES:
 
 #### `src/clintlib/appmsg.cpp`
 
-**PURPOSE:** The `appmsg.cpp` file in Allegiance handles various messages received from the game server and processes them accordingly. It manages player interactions, ship updates, mission handling, and other game events.
+PURPOSE: Handles various messages and updates from the server to manage game state, player interactions, and ship statuses.
 
-**KEY PARTS:**
-- **BaseClient::HandleMsg**: Main function that routes incoming messages to specific handlers.
-- **FM_S_LOGONACK**: Handles logon acknowledgment, setting up client information.
-- **FM_S_EXPORT**: Processes export data to create objects in the game world.
-- **FM_S_RELAUNCH_SHIP**: Relaunches a ship with new settings.
-- **FM_S_EJECT**: Manages ejection of ships from their parent.
-- **FM_S_DESTROY_TREASURE**: Destroys treasure objects.
-- **FM_S_ACQUIRE_TREASURE**: Handles acquisition of treasures by players.
-- **FM_S_PLAYER_RESCUED**: Processes player rescue messages.
-- **FM_CS_PING**: Manages ping responses for time synchronization.
-- **FM_S_VIEW_CLUSTER**: Sets the view cluster for the player.
-- **FM_S_SHIP_DELETE**: Handles deletion of ships.
-- **FM_S_STATION_DESTROYED**: Adds explosions to destroyed stations.
+KEY PARTS:
+- BaseClient::HandleMsg: Processes incoming messages from the server.
+- BallotInfo: Represents a ballot with text, ID, and expiration time.
+- ServerLightShipUpdate: Updates for light ships.
+- Orientation: Represents an orientation in space.
+- FM_CS_SWAP_PART: Handles swapping parts between ships.
+- PlayerInfo: Manages player-specific information.
+- SideID: Represents a side or team ID.
 
-**CONNECTS TO:** Other game systems, particularly those handling client-server communication and game state management.
+CONNECTS TO: Allegiance game engine systems, including ship management, player interactions, and mission handling.
 
-**NOTES:**
-- Contains TODOs for future development or review.
-- Includes assertions and checks for robustness in handling edge cases.
-- Some commented-out code snippets indicate previous implementations or potential enhancements.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-359
+  - BaseClient::HandleMsg: Handles incoming messages from the server.
+  - FEDMESSAGE: Structure representing a message sent by the server.
+  - Time: Class for handling time-related operations.
+  - HRESULT: Return type indicating success or failure of an operation.
+  - S_OK: Success code.
+  - S_FALSE: Failure code indicating that the message was not handled.
+  - E_FAIL: Error code indicating a general failure.
+  - FM_S_LOGONACK: Message ID for logon acknowledgment.
+- lines 360-710
+  - BallotInfo: Represents a ballot with text, ID, and expiration time.
+  - ClientTimeFromServerTime: Converts server time to client time.
+  - SetViewCluster: Sets the current view cluster for the player.
+  - RemovePlayerFromSide and RemovePlayerFromMission: Handles player removal from sides and missions.
+  - PlaySoundEffect: Plays a sound effect based on station type.
+  - PostText: Posts text messages to the game interface.
+  - FM_S_CANCEL_BALLOT: Handles cancellation of a ballot.
+  - FM_CS_PING: Handles ping requests to measure network latency.
+- lines 712-1075
+  - ServerLightShipUpdate: Represents updates for light ships.
+  - ServerHeavyShipUpdate: Represents updates for heavy ships.
+  - ServerActiveTurretUpdate: Represents updates for active turrets.
+  - FM_S_HEAVY_SHIPS_UPDATE: Message type for heavy ship updates.
+  - FM_S_PROMOTE: Message type for promotion events.
+  - FM_S_WARP_BOMB: Message type for warp bomb events.
+  - FM_S_RIPCORD_ACTIVATE: Message type for ripcord activation events.
+  - FM_S_RIPCORD_DENIED: Message type for ripcord denial events.
+- lines 1076-1424
+  - Orientation: Represents an orientation in space.
+  - SetOrientation: Sets the orientation of a ship.
+  - ShipListIGC: A list of ships.
+  - GetShips: Retrieves the list of ships.
+  - ShipLinkIGC: A link to a ship in a list.
+  - IshipIGC: Interface for a ship.
+  - SetCluster: Assigns a ship to a cluster.
+  - Time: Represents a time value.
+- lines 1425-1771
+  - FM_CS_SWAP_PART: Handles swapping parts between ships.
+  - FM_CS_RELOAD: Manages reloading of weapons and other equipment.
+  - FM_CS_FIRE_MISSILE: Processes firing of missiles by players.
+  - FM_S_FIRE_EXPENDABLE: Handles firing of expendable items like mines.
+  - FM_S_CREATE_CHAFF: Creates chaff objects for anti-missile defense.
+  - FM_S_MISSILE_SPOOFED: Updates missile targets to chaff when spoofed.
+  - FM_S_END_SPOOFING: Resets the last created chaff object.
+  - FM_S_ASTEROID_DESTROYED: Handles asteroid destruction and explosions.
+- lines 1772-2141
+  - FM_S_BUILDINGEFFECT_DESTROYED: Handles the destruction of a building effect.
+  - FM_S_MISSILE_DESTROYED: Handles the destruction of a missile.
+  - FM_S_MINE_DESTROYED: Handles the destruction of a mine.
+  - FM_CS_ORDER_CHANGE: Processes changes in orders for ships.
+  - FM_S_TELEPORT_ACK: Handles teleportation acknowledgments.
+  - FM_S_BOARD_NACK: Handles negative responses to boarding requests.
+  - FM_S_LEAVE_SHIP: Manages when a ship leaves another ship.
+  - FM_S_ENTER_LIFEPOD: Handles entering a life pod.
+- lines 2142-2504
+  - PlayerInfo: Represents player information within a mission.
+  - MissionInfo: Manages mission details and state.
+  - SideIGC: Represents a side or team within a mission.
+  - IshipIGC: Interface for ship objects.
+  - FM_S_JOINED_MISSION: Message indicating a player has joined a mission.
+  - FM_S_PLAYERINFO: Message containing information about a player in the mission.
+  - FM_CS_PLAYER_READY: Client-to-server message indicating a player is ready.
+  - FM_S_MISSION_STAGE: Server-to-client message indicating the current stage of the mission.
+- lines 2505-2852
+  - PlayerInfo: Manages player-specific information.
+  - SideID: Represents a side or team ID.
+  - FM_CS_CHANGE_TEAM_CIV, FM_CS_SET_TEAM_INFO, etc.: Message types for changing team civilization, setting team info, and other related actions.
+  - CASTPFM: Macro to cast message pointers to specific types.
+  - FindPlayer: Function to find a player by ship ID.
+  - RemovePlayerFromMission: Removes a player from the mission with a given reason.
+  - m_pClientEventSource: Event source for client events.
+  - OnDelRequest, OnTeamCivChange, etc.: Methods on m_pClientEventSource to handle various team-related events.
+- lines 2853-3215
+  - pCluster->GetClusterSite()->AddExplosion(pship, ...): Adds an explosion effect to a ship based on its type.
+  - SoundID destroyedSound; switch (pship->GetPilotType()): Determines and plays the appropriate sound for a ship being destroyed.
+  - EjectPlayer(m_pCoreIGC->GetModel(...)): Sets up the camera view when a player dies.
+  - ChangeGameState(): Changes the game state based on the current event.
+  - AddPlayerToSide(pplayer, pfmJoinSide->sideID): Adds a player to a specific side in the mission.
+  - RemovePlayerFromSide(pplayer, pfmQuitSide->reason, ...): Removes a player from their side and handles the reason for quitting.
+  - ForwardSquadMessage(pfm): Forwards squad-related messages to the squads screen.
+  - ForwardCharInfoMessage(pfm): Forwards character information messages to the character info screen.
+- lines 3216-3594
+  - FM_S_OBJECT_SPOTTED: Handles messages about spotted objects.
+  - FM_S_DEV_COMPLETED: Handles messages about completed research developments.
+  - FM_S_SET_BRIEFING_TEXT: Handles messages setting briefing text.
+  - FM_LS_SQUAD_MEMBERSHIPS: Handles squad membership updates.
+  - FM_S_STATIC_MAP_INFO: Updates static map information.
+  - FM_S_RANK_INFO: Updates rank information.
+  - FM_L_AUTO_UPDATE_INFO: Initiates auto-update process.
+  - FM_L_CREATE_MISSION_ACK: Acknowledges mission creation request.
 
 #### `src/clintlib/badwords.cpp`
 
@@ -16152,72 +19748,258 @@ NOTES:
 
 #### `src/clintlib/badwords.h`
 
-PURPOSE: This file contains functions to handle bad words in the game, including loading a list of bad words and censoring them from text.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- LoadBadWords(): Loads a list of bad words from a file.
-- CensorBadWords(const ZString& string): Censors any bad words found in the input string.
-- ToggleCensorDisplay(): Toggles whether bad word censored messages are displayed to players.
-- CensorDisplay(): Returns the current state of bad word censoring display.
-
-CONNECTS TO: clintlib/badwords.cpp
-
-NOTES: None.
+    #ifndef _BADWORDS_H_
+    #define _BADWORDS_H_
+    //------------------------------------------------------------------------------
+    // functions to handle bad words
+    //------------------------------------------------------------------------------
+    void    LoadBadWords (void);
+    ZString CensorBadWords (const ZString& string);
+    void    ToggleCensorDisplay (void);
+    bool    CensorDisplay (void);
+    //------------------------------------------------------------------------------
+    #endif  //  _BADWORDS_H_
 
 #### `src/clintlib/clintlib.cpp`
 
-**Purpose:** The `clintlib.cpp` file in Allegiance is a critical component responsible for managing client-side operations such as thread synchronization, event handling, and player interactions with the game environment.
+PURPOSE: The file `clintlib.cpp` contains core functionality for managing client operations in Allegiance, including event handling, mission management, and player interactions.
 
-**Key Parts:**
-- **Class: CriticalSectionManager**: Manages critical sections for thread synchronization using Windows API functions.
-- **Class: ClientEventSource**: Implements an interface to manage a list of event sinks and notifies them about various game events.
-- **Class: ClientEventSinkDelegate**: A delegate class that forwards method calls to another `IClientEventSink` instance.
-- **Function: ForEachSink**: Iterates over each sink in the list, calling a specific method on each sink and removing any dead sinks.
-- **Data: g_bCheckFiles**: Global variable to check if files should be verified or not.
-- **Data: g_criticalSectionManager**: Global instance of `CriticalSectionManager` for thread synchronization.
+KEY PARTS:
+- CriticalSectionManager: Manages critical sections for thread synchronization.
+- ClientEventSource: Implements IClientEventSource to manage event sinks and dispatch events.
+- MissionInfo: Manages mission details, updates, and player information.
+- BaseClient: Main class handling client operations like connecting to servers, managing players, and sending messages.
 
-**Connects To:** Other client-side components such as mission handling, player management, and event processing.
+CONNECTS TO:
+- Allegiance game engine systems for networking, graphics, and user interface.
 
-**Notes:** Contains TODO comments indicating areas for future work. Uses COM initialization (`CoInitialize` and `CoUninitialize`) which is unusual in a non-COM application. Handles Steam authentication tokens within the login process.
+NOTES:
+- Contains TODO comments for documentation and code cleanup.
+- Uses specific macros and comments indicating features or contributors (e.g., #ALLY, // KGJV #114).
+
+PARTS (in file order):
+
+- lines 1-373
+  - CriticalSectionManager: Manages critical sections for thread synchronization.
+  - ClientEventSource: Implements IClientEventSource to manage event sinks and dispatch events to them.
+  - ForEachSink: Macro to iterate over all non-null sinks and call a method on each.
+  - ClientEventSinkDelegate: A delegate class implementing IClientEventSink that forwards calls to another sink.
+  - TODO: Add documentation for the classes and methods.
+  - Unusual code: The use of #ALLY and // KGJV #114 comments indicating specific features or contributors.
+- lines 374-737
+  - IClientEventSink::CreateDelegate: Creates a delegate for handling client events.
+  - ChatInfo::SetChat: Sets the chat information including recipient, text, and target model.
+  - ChatInfo::ClearTarget: Clears the target of the chat message if the model is not a buoy.
+  - MissionInfo::MissionInfo: Constructor for MissionInfo, initializes mission definition and side info.
+  - MissionInfo::~MissionInfo: Destructor for MissionInfo, cleans up mission definition and side info.
+  - MissionInfo::Update(FMD_S_MISSIONDEF): Updates mission information from a FMD_S_MISSIONDEF structure.
+  - MissionInfo::Update(FMD_LS_LOBBYMISSIONINFO): Updates mission information from a FMD_LS_LOBBYMISSIONINFO structure, handling lobby-specific details.
+  - TODO: Add comments to explain the purpose of some functions and variables.
+- lines 739-1098
+  - MissionInfo::Update: Updates mission parameters based on lobby information.
+  - MissionInfo::GuaranteedPositions: Calculates the number of guaranteed positions for players.
+  - MissionInfo::PurgePlayers: Removes all player information and resets mission state.
+  - MissionInfo::HasSquad: Checks if a specific squad exists in any side.
+  - MissionInfo::SetSideLeader: Sets a player as the leader of their side.
+  - MissionInfo::FindPlayer: Determines if a player is present on a given side.
+  - MissionInfo::AddPlayer: Adds a player to a specified side.
+  - MissionInfo::RemovePlayer: Removes a player from a specified side.
+- lines 1099-1466
+  - BaseClient: Main class for managing client operations.
+  - ConnectToServer: Method for connecting to a game server.
+  - ConnectToLobby: Method for connecting to the lobby server.
+  - FlushGameState: Method for cleaning up game state when disconnecting.
+  - Initialize: Method for initializing the client with a mission.
+  - Reinitialize: Method for reinitializing the client after disconnection.
+  - Terminate: Method for terminating client operations.
+  - UpdateLobbyLoginRequestWithSteamAuthTokenInformation: Method to update lobby login request with Steam authentication information.
+- lines 1467-1839
+  - BaseClient: Manages client-side operations such as connecting to servers, handling login, and managing player information.
+  - ConnectToClub: Handles the connection process to a club server using provided connection information.
+  - FindStandaloneServersByName: Searches for standalone servers by name and populates a list with results.
+  - SetCDKey: Sets the CD key used for authentication or other purposes.
+  - HandleAutoDownload: Manages automatic downloading of resources.
+  - GetWeapon: Retrieves the currently selected weapon from the ship.
+  - SetAutoPilot: Enables or disables autopilot mode on the ship.
+  - DisconnectLobby and DisconnectClub: Handles disconnection from lobby and club servers respectively.
+- lines 1840-2192
+  - BaseClient: Manages client-side operations such as sending updates and handling messages.
+  - SetMessageType: Sets the message type for sending messages.
+  - SendMessages: Sends all queued messages over the network.
+  - NextWeapon/PreviousWeapon/SetSelectedWeapon: Manage weapon selection on the player's ship.
+  - JoinMission/CreateMissionReq/ServerListReq: Handle mission creation and joining requests.
+  - CheckServerLag: Checks for server lag and handles session loss if necessary.
+  - ReceiveMessages: Receives messages from various messaging systems.
+  - OnSessionLost: Handles session termination events.
+- lines 2193-2535
+  - BaseClient::ParseShellCommand: Parses shell commands for muting and unmuting players.
+  - BaseClient::SendChat: Sends chat messages to recipients based on different targets and conditions.
+  - BaseClient::ScrollChatUp: and BaseClient::ScrollChatDown: Functions to scroll through the chat list.
+  - BaseClient::GetCurrentMessage: Retrieves the current selected message from the chat list.
+  - BaseClient::GetCurrentBallot: Retrieves the current ballot if any is available.
+  - BaseClient::Vote: Sends a vote response for the current ballot.
+  - BaseClient::SkipCurrentBallot: Removes the current ballot without voting.
+  - BaseClient::GetBucketStatus: Retrieves the status of a bucket at a specific station.
+- lines 2536-2892
+  - BaseClient::AddMoneyToBucket: Adds money to a bucket and updates client's money.
+  - BaseClient::DonateMoney: Handles player donations by updating recipient and sender's money.
+  - BaseClient::GetLobbyMission: Retrieves or creates a mission info based on a cookie.
+  - BaseClient::FindPlayerLink: Finds a player link by ship ID.
+  - BaseClient::FindAndCreatePlayerLink: Finds or creates a player link for a given ship ID.
+  - BaseClient::LookupRankName: Determines the rank name based on rank and civilization.
+  - BaseClient::TerminateModelEvent: Handles model termination events, updating references and notifying clients.
+  - BaseClient::LoadoutChangeEvent: Notifies clients about loadout changes.
+- lines 2893-3239
+  - BaseClient::CreateTreasureLocal: Creates a treasure object locally.
+  - BaseClient::KillAsteroidEvent: Handles asteroid destruction events.
+  - BaseClient::KillProbeEvent: Handles probe destruction events.
+  - BaseClient::KillMineEvent: Handles mine destruction events.
+  - BaseClient::KillMissileEvent: Handles missile destruction or disarming events.
+  - BaseClient::KillTreasureEvent: Handles treasure destruction events.
+  - BaseClient::KillShipEvent: Handles ship destruction events, including creating treasures and ejecting players.
+  - BaseClient::DamageStationEvent: Handles damage to stations.
+- lines 3240-3587
+  - BaseClient::Reload: Handles reloading of weapons and fuel for a ship.
+  - IexpendableTypeIGC pet = pDispenser->GetExpendableType(): Retrieves the type of expendable being used from the dispenser.
+  - ObjectType type = pet->GetObjectType(): Determines the type of object (chaff, mine, probe) based on the expendable type.
+  - switch (type): Handles different types of expendables with specific logic for each.
+  - SetMessageType(c_mtGuaranteed); BEGIN_PFM_CREATE(m_fm, pfmFE, C, FIRE_EXPENDABLE) END_PFM_CREATE: Sends a message to the server to fire an expendable if connected to the server.
+  - ReloadData reloads[c_MaxReloads]: Array used to store data about reloading operations.
+  - Mount   maxWeapons = pht->GetMaxWeapons(): Retrieves the maximum number of weapons that can be mounted on the ship.
+  - IweaponIGC pw = (IweaponIGC)(pship->GetMountedPart(ET_Weapon, i)): Iterates through mounted weapons to disable them if they use ammo.
+- lines 3588-3956
+  - BaseClient::OnQuitSide(): Handles actions when a player quits a side.
+  - BaseClient::OnJoinSide(): Initializes settings and data when a player joins a side.
+  - BaseClient::OnQuitMission(QuitSideReason reason, const char szMessageParam): Cleans up resources when a mission is quit.
+  - BaseClient::OnEnterGame(): Signals the start of a game session.
+  - BaseClient::CreateDummyShip(): Creates a placeholder ship for a player.
+  - BaseClient::DestroyDummyShip(): Placeholder function (does nothing).
+  - BaseClient::RemovePlayerFromSide(PlayerInfo pPlayerInfo, QuitSideReason reason, const char szMessageParam): Handles the removal of a player from a side.
+  - TODO: Remove commented-out code related to chat messages.
+- lines 3958-4394
+  - BaseClient::RemovePlayerFromMission: Handles player removal from a mission.
+  - BaseClient::AddPlayerToSide: Adds a player to a specific side in the mission.
+  - BaseClient::ResetStaticData: Reloads static game data.
+  - DoDecrypt: Decrypts data using XOR encryption.
+  - CfgInfo::GetCfgProfileString: Retrieves configuration profile string from a file.
+  - CfgInfo::Load: Loads configuration settings from a file.
+  - _debugf: Custom debug output function.
+  - TODO: Remove commented-out code related to duplicate logon handling.
 
 #### `src/clintlib/clintlib.h`
 
-**PURPOSE:** The `clintlib.h` header file defines interfaces and classes for managing client-side interactions in the Allegiance game, including event handling, player information management, mission joining, and various client operations like sending updates and buying parts.
+PURPOSE: Manages client-side operations and interactions within Allegiance, including player management, mission handling, and communication.
 
-**KEY PARTS:**
-- **Name:** IClientEventSource - Defines an interface for objects that can send events to sinks.
-- **Name:** IClientEventSink - Defines an interface for objects that receive events from sources.
-- **Name:** ChatInfo - Represents a chat message, including the sender, content, and target.
-- **Name:** PlayerInfo - Holds information about a player, such as their ship, mission, status, and connection data.
-- **Name:** SideInfo - Manages players on a side within a mission.
-- **Name:** MissionInfo - Represents a mission, including its state, players, and settings.
-- **Name:** CriticalSectionManager - Provides thread-safe locking mechanism using Windows critical sections.
-- **Class:** BaseClient - Manages the client's state and interactions with the game server.
-- **Function:** Initialize(Time timeNow) - Initializes the client at a given time.
-- **Function:** ConnectToLobby(ConnectInfo * pci) - Connects the client to the lobby server.
-- **Function:** JoinMission(MissionInfo * pMission, const char* szMissionPassword) - Joins a mission with a given password.
-- **Class:** Clintlib - Manages client-side logic for various game operations.
-- **Function:** RipcordLocal - Handles local ripcord actions when a ship is not connected to the server.
-- **Function:** BuyLoadout - Buys a loadout for a ship and handles the budget accordingly.
+KEY PARTS:
+- CriticalSectionManager: Manages critical sections for thread synchronization.
+- PlayerInfo: Holds detailed information about a player, including their ship, mission status, and connection data.
+- BaseClient: The main client class with various member variables and functions related to client operations.
+- SetWing: Sets the wing ID for a ship and updates the network if connected.
+- RequestRipcord: Requests a ripcord to another cluster or handles local ripcord logic.
+- RipcordLocal: Handles the actual ripcord process for a ship locally.
+- GetViewCluster: Returns the current view cluster.
+- SetViewCluster: Sets the view cluster and optionally updates the position.
+- RequestViewCluster: Requests a change in view cluster.
+- ResetShip: Resets the ship's state.
+- BuyLoadout: Buys a loadout for a ship and optionally launches it.
+- SaveCustomLoadout: Saves a custom loadout for a ship.
+- ReplaceLoadout: Replaces the current loadout of a ship with a cached loadout.
+- Mount: Enumerates mount points on a ship.
+- TryToBuyParts: Attempts to buy parts for a ship at a station within a budget.
 
-**CONNECTS TO:** Other files related to game state management, such as `mission.h`, `player.h`, and `network.h`.
+CONNECTS TO: Allegiance game engine, network communication systems, and player interface components.
 
-**NOTES:** The file contains extensive debugging statements (`debugf`) and assertions (`assert`), indicating thorough testing and development. There are TODO comments suggesting areas for further development or review.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-367
+  - CriticalSectionManager: Manages critical sections for thread synchronization.
+  - IClientEventSource: Interface for event sources that can notify sinks about various game events.
+  - IClientEventSink: Interface for event sinks that receive notifications from event sources.
+  - ChatInfo: Represents a chat message with details like sender, content, and target.
+  - BallotInfo: Holds information about a ballot or vote in the game.
+  - PlayerInfo: Contains detailed information about a player, including their ship, mission status, and connection data.
+  - Review TODOs related to player-pings feature (w0dk4).
+  - Investigate potential improvements for thread synchronization using CriticalSectionManager.
+- lines 368-713
+  - PlayerInfo: Holds information about a player including their side ID, ship ID, character name, money, and ship status.
+  - SideID: An identifier for a side or team in the game.
+  - ShipID: An identifier for a ship.
+  - Money: Represents an amount of money.
+  - ShipStatus: Contains details about the current state of a ship, such as its sector, hull type, and parent.
+  - PlayerList: A list wrapper for PlayerInfo objects.
+  - SideInfo: Holds information about a side including its members and requests.
+  - MissionInfo: Manages mission parameters and player information.
+- lines 715-1058
+  - BallotList: A list of ballots.
+  - ConnectInfo: Contains information needed for connecting and logging on to the server.
+  - FedMessaging: Manages messaging between clients and servers.
+  - BaseClient: The main client class with various member variables and functions related to client operations.
+  - Initialize: Initializes the client.
+  - Reinitialize: Reinitializes the client.
+  - Terminate: Terminates the client.
+  - FlushGameState: Flushes the game state.
+- lines 1059-1413
+  - SetWing(WingID wid, IshipIGC pship = NULL): Sets the wing ID for a ship and updates the network if connected.
+  - RequestRipcord(IshipIGC pship, IclusterIGC pcluster): Requests a ripcord to another cluster or handles local ripcord logic.
+  - RipcordLocal(IshipIGC pship, IclusterIGC pcluster): Handles the actual ripcord process for a ship locally.
+  - GetViewCluster() const: Returns the current view cluster.
+  - SetViewCluster(IclusterIGC pcluster, const Vector pposition = NULL): Sets the view cluster and optionally updates the position.
+  - RequestViewCluster(IclusterIGC pcluster, ImodelIGC pmodelTarget = NULL): Requests a change in view cluster.
+  - ResetShip(void): Resets the ship's state.
+  - BuyLoadout(IshipIGC pshipLoadout, bool bLaunch): Buys a loadout for a ship and optionally launches it.
+- lines 1414-1756
+  - SaveCustomLoadout: Saves a custom loadout for a ship.
+  - SaveLoadout: Saves the current loadout of a ship.
+  - RestoreLoadout: Restores a saved loadout to a ship, handling upgrades and budget constraints.
+  - RestoreLoadoutOnCarrier: Restores a saved loadout on a carrier, ensuring parts are duplicated correctly.
+  - m_sidTeleportAfterDisembark: Stores the object ID of the station where teleportation occurs after disembarking.
+  - BoardShip: Handles boarding a ship.
+  - CachedLoadoutLink: Represents a link in a cached loadout list.
+  - CachedPartLink: Represents a link in a cached part list.
+- lines 1757-2129
+  - ReplaceLoadout(IshipIGC pship, IstationIGC pstation, CachedLoadoutList & loadoutList): Replaces the current loadout of a ship with a cached loadout.
+  - ReplaceLoadout(IshipIGC pship, IstationIGC pstation, CachedLoadout pcl, Money budget, CachedLoadoutList & loadoutList): Overloaded version that allows specifying a specific loadout to replace the current one.
+  - RestoreLoadout(IstationIGC pstation): Restores the ship's loadout from a station.
+  - ReplaceLoadout(IstationIGC pstation, bool bLaunch = false): Replaces the ship's loadout at a station and optionally launches it.
+  - LoadCustomLoadoutFile(void): Loads custom loadouts from a file.
+  - SaveCustomLoadoutFile(void): Saves custom loadouts to a file.
+  - ExportCachedLoadout(CachedLoadoutList  loadouts, int num, byte  buffer): Exports cached loadouts to a buffer.
+  - ImportCachedLoadout(byte  buffer): Imports cached loadouts from a buffer.
+- lines 2131-2478
+  - Mount: Enumerates mount points on a ship.
+  - IpartIGC GetMountedPart(EquipmentType et, Mount mountID): Retrieves a part by equipment type and mount ID.
+  - TryToBuyParts(IshipIGC pship, IstationIGC pstation, IBudgetIGC pbudget, IhtIGC pht, const ZString& preferredPartTypes): Attempts to buy parts for a ship at a station within a budget.
+  - BuyPartOnBudget(IshipIGC pship, IpartTypeIGC ppt, Mount mountID, IBudgetIGC pbudget): Buys a part on a budget if possible.
+  - DropPart(IpartIGC ppart): Drops a part from the ship.
+  - SwapPart(IpartIGC ppart, Mount mountNew): Swaps parts between mounts.
+  - ForwardSquadMessage(FEDMESSAGE pSquadMessage), ForwardCharInfoMessage(FEDMESSAGE pCharInfoMessage), ForwardLeaderBoardMessage(FEDMESSAGE pLeaderBoardMessage): Forward messages to respective screens.
+  - OnReload(IpartIGC ppart, bool bConsumed): Handles part reload events.
 
 #### `src/clintlib/pch.cpp`
 
-PURPOSE:
-The file `pch.cpp` is a precompiled header file for the Allegiance game's client library. It includes standard headers and serves as a base for other source files to share common definitions and types.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include "pch.h"`: Includes the precompiled header file, which contains commonly used headers.
-- None of the specific classes, functions, or data are defined in this file; it's purely about including headers.
-
-CONNECTS TO:
-- Other source files that include `stdafx.h` will use this precompiled header for faster compilation.
-
-NOTES:
-- None.
+    /*
+    **  Copyright (C) 1996, 1997 Microsoft Corporation. All Rights Reserved.
+    **
+    **  File:	stdafx.cpp
+    **
+    **  Author:
+    **
+    **  Description:
+    **      The standard ATL stdafx file. This file was initially created by
+    **  the ATL wizard.
+    **
+    **  History:
+    */
+    // stdafx.cpp : source file that includes just the standard includes
+    //  stdafx.pch will be the pre-compiled header
+    //  stdafx.obj will contain the pre-compiled type information
+    #include "pch.h"
 
 #### `src/clintlib/pch.h`
 
@@ -16236,15 +20018,11 @@ NOTES: None.
 
 ### src/cvh
 
-**Overview:** The `src/cvh` folder in Allegiance contains source code for processing convex hulls, specifically focusing on converting input files into different output formats using various helper functions and classes.
+The `src/cvh` folder contains essential components for processing convex hull data in Allegiance, a 2000 Microsoft multiplayer space game. It includes functionality for converting mesh files, handling Gaussian elimination, and executing external commands.
 
-**Important Files:**
-- **main.cpp**: The primary entry point for the program, which processes command-line arguments to convert input files into a specific output format.
-- **x2pl.cpp**: Converts an input file (likely in a custom mesh format) into a PL (Polyhedron Library) format by reading vertices and faces from the input file and writing them to the output file with proper formatting.
-- **qh2cvh.cpp**: Converts a QHull output file into a CVH (Convex Hull) format, processing vertex and face data, filtering unused vertices, and writing the resulting convex hull to the output file.
-- **Vertex.h**: A struct representing a vertex in 3D space, containing coordinates (`xyz`), an ID, and a usage count (`cUsed`).
-- **Face.h**: A struct representing a face, containing indices of three vertices that form the face.
-- **pch.cpp** and **pch.h**: Precompiled header files to speed up compilation by including common headers across multiple source files.
+- main.cpp: Processes convex hull data from a `.dat` file and writes the results to a `.cvh` file.
+- pch.h: Precompiled header file that speeds up compilation by including commonly used headers.
+- pch.cpp: Implementation of the precompiled header functionality.
 
 #### `src/cvh/main.cpp`
 
@@ -16286,63 +20064,32 @@ NOTES: None.
 
 #### `src/cvh/pch.cpp`
 
-PURPOSE: This file is part of the Allegiance game's precompiled header (PCH) system, which helps speed up compilation by precompiling commonly used headers.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary include file for the PCH system.
-- `stdafx.h`: A placeholder that includes all necessary headers for the PCH to function correctly.
-
-CONNECTS TO: src/cvh/main.cpp - This file is included in other source files to utilize the precompiled header.
-
-NOTES: None.
+    #include    "pch.h"
 
 #### `src/cvh/pch.h`
 
-PURPOSE: This file is a precompiled header for the Allegiance game's client-side code. It includes standard C and Windows headers to provide basic functionality and data types across multiple source files.
+PURPOSE: tiny file (6 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include <stdio.h>`: Provides input/output functions.
-- `#include <stdlib.h>`: Includes general utilities like memory management and conversions.
-- `#include <string.h>`: Offers string manipulation functions.
-- `#include <math.h>`: Contains mathematical functions for calculations.
-- `#include <assert.h>`: Used for debugging to ensure conditions are met.
-- `#include <windows.h>`: Provides Windows-specific functions and data types.
-
-CONNECTS TO: Other source files that include this precompiled header, such as game logic, rendering, and input handling modules.
-
-NOTES: None.
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <math.h>
+    #include <assert.h>
+    #include <windows.h>
 
 ### src/effect
 
-### Folder Summary: src/effect
+The `src/effect` folder in Allegiance contains source code related to game effects and visual elements. It handles rendering, animation, and interaction of various graphical components within the game.
 
-The `src/effect` folder in Allegiance contains source code for managing various visual effects, UI elements, and game entities within the game. It includes classes and functions for rendering explosions, debris, particle effects, and other dynamic visual elements.
+- thinggeo.cpp: Manages and renders game entities' geometry.
+- efpane.cpp: Handles the creation and management of UI panes and their behaviors.
+- efgeo.cpp: Implements various geometric effects used throughout the game.
+- pagepane.cpp: Responsible for managing the rendering of UI elements such as words, strings, tabs, hyperlinks, and links within a page.
+- listpane.cpp: Manages painting, selection, and user input for list pane components.
 
-#### Key Files:
-
-- **CMakeLists.txt**: Configures the build process for the "Effect" module.
-- **alephgeo.cpp**: Implements a class for rendering an exploding star effect.
-- **combopane.cpp**: Contains implementations for combo panes, which are interactive UI elements for selecting items.
-- **conegeo.cpp**: Defines a cone-shaped geometry class used in rendering.
-- **debrisgeo.cpp**: Manages and renders visual debris particles based on camera movement.
-- **efapp.cpp**: Handles application initialization, optimization of geometric objects, and manages game effects like lighting and UI elements.
-- **efart.h**: Contains identifiers for various effect artwork used throughout the game.
-- **effect.h**: Defines interfaces and classes for managing different types of effects in the game.
-- **efgeo.cpp**: Implements various geometric effects such as mine fields, build effects, pulsating effects, trails, hit effects, particle bits, bolt-like effects, culling wrappers, and copy mode wrappers.
-- **efimage.cpp**: Contains implementations for image effects like joystick input handling, blending images with colors, displaying string grids, muzzle flare effects, and poster images.
-- **efpane.cpp**: Manages various UI elements such as panes, scroll bars, and hover states within the game's user interface.
-- **efpopup.cpp**: Implements a message box dialog for displaying messages and buttons to the user.
-- **efsound.cpp**: Provides implementations of sound template factories for managing and manipulating sound effects in the game engine.
-- **efwindow.cpp**: Contains the implementation of the EffectWindow class, which is used for creating and managing windows in the Allegiance game.
-- **explosion.cpp**: Implements an explosion effect with both shockwaves and individual explosions.
-- **framedata.cpp**: Manages frame data for game entities, including converting it to string representations and writing to binary files.
-- **gamestate.cpp**: Manages and displays various game-related information such as time elapsed/remaining and close functionality.
-- **help.cpp**: Implements a help system for displaying help pages and handling user interactions.
-- **listpane.cpp**: Manages and displays a scrollable list of items, including event handling and interaction.
-- **mmlpopup.cpp**: Creates and manages a popup window for displaying help information in the Allegiance game.
-- **navpane.cpp**: Implements a navigation pane component for a help system that displays hierarchical lists of topics.
-- **pagepane.cpp**: Manages and renders text-based pages, including parsing input text to determine what type of element to insert.
-- **panes.cpp**: Implements a gauge pane component used in the Allegiance game to render visual representations of values within a
+Largest files: thinggeo.cpp (1775 lines), efpane.cpp (1060 lines), efgeo.cpp (1055 lines), pagepane.cpp (1038 lines), listpane.cpp (922 lines).
 
 #### `src/effect/CMakeLists.txt`
 
@@ -16445,16 +20192,16 @@ NOTES:
 
 #### `src/effect/debrisgeo.h`
 
-PURPOSE: This header file is part of the Allegiance game engine and defines classes related to debris geometry in space combat.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- DebrisGeo: A class representing the geometric properties of debris objects.
-- DebrisGeoFactory: A factory class for creating instances of DebrisGeo.
-- DebrisGeoManager: Manages the lifecycle and rendering of debris geometries.
-
-CONNECTS TO: src/effect/debrisgeo.cpp, src/rendering/graphics.h
-
-NOTES: None.
+    #ifndef _DebrisGeo_h_
+    #define _DebrisGeo_h_
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // DebrisGeo header
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    #endif
 
 #### `src/effect/efapp.cpp`
 
@@ -16493,44 +20240,47 @@ NOTES: None
 
 #### `src/effect/efart.h`
 
-PURPOSE: This file contains definitions for various effect artwork identifiers used in the Allegiance game.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- AWF_EFFECT_ALEPH_STAR: Identifier for Aleph Star effect artwork.
-- AWF_EFFECT_MUZZLE_FLARE: Identifier for muzzle flare effect artwork.
-- AWF_EFFECT_LENS_FLARE_STAR_AURA: Identifier for lens flare star aura effect artwork.
-- AWF_EFFECT_LENS_FLARE_MID_RING: Identifier for lens flare mid-ring effect artwork.
-- AWF_EFFECT_LENS_FLARE_END_RING: Identifier for lens flare end-ring effect artwork.
-- AWF_EFFECT_AFTERBURNER_GLOW: Identifier for afterburner glow effect artwork.
-- AWF_EFFECT_STROBE: Identifier for strobe effect artwork.
-- AWF_EFFECT_TANGENT: Identifier for tangent effect artwork.
-- AWF_EFFECT_NORMAL: Identifier for normal effect artwork.
-- AWF_EFFECT_BIT: Identifier for bit effect artwork.
-- AWF_EFFECT_TRAIL: Identifier for trail effect artwork.
-
-CONNECTS TO: Effects system in the Allegiance game.
-
-NOTES: None.
+    #ifndef _EFFECTS_ARTWORK_H_
+    #define _EFFECTS_ARTWORK_H_
+    #define AWF_EFFECT_ALEPH_STAR                   "f02bmp"
+    #define AWF_EFFECT_MUZZLE_FLARE                 "f103bmp"
+    #define AWF_EFFECT_LENS_FLARE_STAR_AURA         "f105bmp"
+    #define AWF_EFFECT_LENS_FLARE_MID_RING          "f104bmp"
+    #define AWF_EFFECT_LENS_FLARE_END_RING          "f106bmp"
+    #define AWF_EFFECT_AFTERBURNER_GLOW             "f101bmp"
+    #define AWF_EFFECT_STROBE                       "f101bmp"
+    #define AWF_EFFECT_TANGENT                      "f103bmp"
+    #define AWF_EFFECT_NORMAL                       "fx11bmp"
+    #define AWF_EFFECT_BIT                          "utl10"
+    #define AWF_EFFECT_TRAIL                        "trailbmp"
+    #endif
 
 #### `src/effect/effect.h`
 
-PURPOSE: This file is a header file for managing various effects in the Allegiance game, including graphical and audio effects.
+PURPOSE: This header file includes declarations for various effect-related classes and functions used in Allegiance.
 
 KEY PARTS:
-- `Effect`: Base class for all effect types.
-- `GeoEffect`: Manages geometric effects like explosions and particles.
-- `ImageEffect`: Handles image-based effects.
-- `PaneEffect`: Manages UI elements as effects.
-- `SoundEffect`: Responsible for playing sound effects.
-- `PopupEffect`: Displays pop-up messages or notifications.
-- `ListPaneEffect`, `ComboPaneEffect`, `HelpEffect`: Manage specific types of UI panes.
-- `ExplosionEffect`: Specialized effect for explosions.
-- `FramedataEffect`: Manages frame-based animations.
-- `ThingGeoEffect`: Handles effects related to game objects.
-- `StarImageEffect`: Manages starfield background effects.
-- `EFApp`, `EFWindow`: Manage the application and window systems.
+- Effect: Base class for all effects.
+- EfGeo: Manages geometric effects.
+- ParticleGeo: Handles particle-based effects.
+- EfImage: Manages image-based effects.
+- EfPane: Represents a pane that can display effects.
+- EfSound: Manages sound effects.
+- GameState: Provides game state information to effects.
+- EfPopup: Displays popup messages or notifications.
+- ListPane: Manages list-based UI elements for effects.
+- ComboPane: Handles combo box UI elements for effects.
+- Help: Manages help-related effects.
+- Explosion: Represents explosion effects.
+- FrameData: Holds frame-specific data for animations.
+- ThingGeo: Manages object-based geometric effects.
+- StarImage: Handles star field images or backgrounds.
+- EfApp: Main application class that manages effects.
+- EfWindow: Manages window-based UI elements for effects.
 
-CONNECTS TO: engine.h, enginep.h, efgeo.h, particlegeo.h, efimage.h, efpane.h, efsound.h, gamestate.h, efpopup.h, listpane.h, combopane.h, help.h, explosion.h, framedata.h, thinggeo.h, starimage.h.
+CONNECTS TO: engine.h, enginep.h
 
 NOTES: None.
 
@@ -16715,16 +20465,22 @@ NOTES: None.
 
 #### `src/effect/efsound.h`
 
-PURPOSE: This header file defines the interface and functionality for managing sound effects in the Allegiance game.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- INameSpace: Interface for a namespace that organizes resources.
-- Modeler: Class responsible for loading and managing 3D models.
-- AddSoundFactories: Function to add factories for creating sound effect objects.
-
-CONNECTS TO: src/effect/efsound.cpp
-
-NOTES: None.
+    #ifndef _efsound_H_
+    #define _efsound_H_
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // effect sounds
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    class INameSpace;
+    class Modeler;
+    void AddSoundFactories(
+        INameSpace*      pns,
+        Modeler*         pmodeler
+    );
+    #endif
 
 #### `src/effect/efwindow.cpp`
 
@@ -17051,25 +20807,74 @@ NOTES: None.
 
 #### `src/effect/thinggeo.cpp`
 
-**PURPOSE:** The `thinggeo.cpp` file in Allegiance is responsible for managing the geometry and behavior of game objects, including rendering, updating, and handling various effects like fire, smoke, and thrust particles.
+PURPOSE: The file `src/effect/thinggeo.cpp` contains implementation details for managing and rendering game entities' geometry, including their position, orientation, radius, and visual effects like thrust particles and trails.
 
-**KEY PARTS:**
-- **ThingRef**: Manages references to objects with reference counting.
-- **ThingGeoImpl**: Main implementation class for `ThingGeo`, representing a geometric object in the game.
-- **TargetGeo**: Nested class implementing the `Geo` interface for target geometry.
-- **ThingGeoWrapper**: Nested class wrapping an instance of `ThingGeoImpl` and delegating calls to it.
-- **UpdateGlow**: Updates glow properties based on thrust value.
-- **SetAfterburnerThrust**: Sets afterburner thrust direction and power, updating glow.
-- **SetThrust**: Sets thrust level within a valid range (0 to 1), updating glow.
-- **AddFireAndSmoke**: Adds fire and smoke particles based on object movement and visibility.
-- **ComputeFireParticleParameters**: Computes parameters for generating fire particle effects.
+KEY PARTS:
+- ThingRef: Manages references to objects with reference counting.
+- ThingGeoImpl: Implements the ThingGeo interface, handling properties and methods related to game entities.
+- ThingGeo: Manages rendering and evaluation of a thing's geometry, including scaling, rendering, and evaluating state changes.
+- Thrust: Manages thrust properties and visual effects like glow and particle emission.
+- AddThrustParticles: Adds thrust particles based on frame velocity and acceleration.
+- LoadMDL: Loads a model from an MDL file.
+- TransformOffset: Transforms a vector based on orientation and scale.
+- GetChildModelOffset: Retrieves the offset of a child model by name.
+- SetVisible: Sets whether the thing is visible.
+- RenderTargetGeo: Renders the target geometry of the object.
+- RenderGeo: Handles the main rendering logic of the object.
 
-**CONNECTS TO:** Other rendering systems, game logic, and particle effect handling files.
+CONNECTS TO: Modeler, Number, Context, Geo interface
 
-**NOTES:**
-- Contains commented-out code related to exception handling and memory management.
-- Conditional compilation directives control behaviors based on compile-time settings.
-- Use of `__try` and `__except` blocks in the destructor indicates a history of crashes.
+NOTES:
+- The use of random function for generating random values.
+- "some awkwardness of the engine means that we have to use the last position but current characteristics like velocity and such."
+
+PARTS (in file order):
+
+- lines 1-366
+  - ThingRef: A template class for managing references to objects with reference counting.
+  - ThingGeoImpl: The implementation of the ThingGeo interface, containing various properties and methods related to game entities.
+  - m_pmodeler: A reference to a Modeler object used for rendering.
+  - m_ptime: A reference to a Number object representing time.
+  - m_timeLast: Stores the last recorded time.
+  - m_radius: Radius of the entity.
+  - m_orientation: Orientation of the entity.
+  - m_vecPosition: Current position of the entity.
+- lines 368-729
+  - ThingGeo: Manages rendering and evaluation of a thing's geometry.
+  - GetRadius(const Matrix& mat): Returns the radius of the thing's geometry based on a transformation matrix.
+  - Render(Context pcontext): Scales the target geometry to unit radius and renders it.
+  - Evaluate(): Evaluates the state of the thing and notifies changes.
+  - ThingGeoWrapper: A wrapper class for ThingGeoImpl that implements the Geo interface.
+  - GetGeo(): Returns a new instance of ThingGeoWrapper.
+  - Thrust: Manages thrust properties and visual effects like glow and particle emission.
+  - UpdateGlow(): Updates the glow color and scale based on current thrust value.
+- lines 730-1087
+  - AddThrustParticles: Adds thrust particles based on frame velocity and acceleration.
+  - ComputeFireParticleParameters: Computes parameters for fire particles.
+  - ComputeSmokeParticleParameters: Computes parameters for smoke particles.
+  - SetTrailColor: Sets the color of the trail effect.
+  - LoadMDL: Loads a model from an MDL file.
+  - TransformOffset: Transforms a vector based on orientation and scale.
+  - TODO: "some awkwardness of the engine means that we have to use the last position but current characteristics like velocity and such."
+  - Unusual code: The use of random function for generating random values, which is not shown in the provided snippet.
+- lines 1089-1466
+  - GetChildModelOffset: Retrieves the offset of a child model by name.
+  - GetChildOffset: Calculates the offset of a child based on its model offset and orientation.
+  - GetRadius: Returns the current radius of the thing.
+  - GetRadius(const Matrix& mat): Returns the radius scaled by a given matrix.
+  - SetVisible: Sets whether the thing is visible.
+  - SetVisibleShip: Sets visibility specifically for ships.
+  - UpdateTrailPosition: Updates the position of the trail.
+  - SetPosition: Sets the new position of the thing and updates the trail if necessary.
+- lines 1467-1775
+  - ThingGeo: Main class for rendering a thing with geometry.
+  - RenderTargetGeo: Renders the target geometry of the object.
+  - RenderGeo: Handles the main rendering logic of the object.
+  - Evaluate: Updates the state and evaluates the object's properties.
+  - s_lodBias: LOD bias factor for level of detail.
+  - s_bShowLights, s_bShowHullHits, s_bShowTrails, s_bShowBounds: Flags to control visibility of various elements.
+  - SetTransparentObjects, GetTransparentObjects: Functions to set and get the transparent objects flag.
+  - SetShowTrails, GetShowTrails: Functions to set and get the show trails flag.
 
 #### `src/effect/thinggeo.h`
 
@@ -17090,30 +20895,23 @@ NOTES: None.
 
 ### src/engine
 
-### Folder Overview:
-The `src/engine` folder contains core engine components for the Allegiance game, including rendering, input handling, configuration management, and utility functions. These components are essential for managing the game's graphics, user interactions, and overall functionality.
+The `src/engine` folder contains core components and utilities essential for managing rendering, configuration, input, and other fundamental functionalities in the Allegiance game engine.
 
-### Key Files:
+- CMakeLists.txt: Configures the build environment for the engine library.
+- Configuration.cpp & .h: Manages and stores configuration settings for the game.
+- D3DDevice9.cpp & .h: Handles DirectX 9 device management and rendering.
+- DeviceModesDX9.cpp & .h: Manages display modes and device settings for DirectX 9.
+- EngineSettings.h: Stores additional engine-specific settings for DirectX 9.
+- HashTable.cpp & .h: Implements a hash table for efficient object storage.
+- ImageTransfer.cpp & .h: Provides functions for image data manipulation.
+- LogFile.cpp & .h: Manages logging of game events and errors.
+- RasterD3D9.cpp: Implements a rasterizer for DirectX 9 rendering.
+- VBIBManager.cpp & .h: Manages vertex and index buffers for efficient rendering.
+- VRAMManager.cpp & .h: Handles memory management for textures in video memory.
+- VertexGenerator.cpp & .h: Generates vertices for UI elements.
+- VideoSettingsDX9.cpp & .h: Manages video settings through a dialog interface.
 
-- **CMakeLists.txt**: Manages the build process for the Engine module, setting up compiler definitions, include directories, and source files.
-  
-- **Configuration.cpp**: Handles configuration settings, including reading, writing, and updating various types of configuration values such as booleans, floats, integers, and strings.
-
-- **D3DDevice9.cpp**: Manages the DirectX 9 device for rendering graphics, handling initialization, shutdown, and various operations related to the device state and rendering.
-  
-- **DeviceModesDX9.cpp**: Manages device mode data for DirectX 9, including enumerating monitors, retrieving supported display modes and formats, and validating device settings.
-
-- **EngineSettings.h**: Stores additional engine settings specific to the DirectX 9 version of Allegiance, such as VSync, anti-aliasing, texture size, and more.
-  
-- **HashTable.cpp**: Implements a hash table used in the game engine to store and retrieve hash entries efficiently.
-  
-- **ImageTransfer.cpp**: Contains functions for transferring and manipulating image data between different color depths and formats.
-
-- **LogFile.cpp**: Manages the creation, writing to, and closing log files for logging messages within the game.
-
-- **RasterD3D9.cpp**: Implements a rasterizer for Direct3D 9, responsible for rendering graphics in Allegiance.
-
-- **VRAMManager.cpp**: Manages video memory (VRAM) for textures and render targets, handling allocation, locking, unlocking, setting, and retrieving properties of textures.
+Largest files: device3d.cpp (2792 lines), modeler.cpp (2686 lines), context.cpp (2474 lines), geometry.cpp (2029 lines), D3DDevice9.cpp (1942 lines).
 
 #### `src/engine/CMakeLists.txt`
 
@@ -17165,36 +20963,76 @@ NOTES:
 
 #### `src/engine/D3DDevice9.cpp`
 
-**PURPOSE:** The `src/engine/D3DDevice9.cpp` file is responsible for managing the DirectX 9 device used for rendering graphics in Allegiance. It handles initialization, shutdown, and various operations related to setting up and using the Direct3D device.
+PURPOSE: Manages the DirectX 9 device for rendering in Allegiance, handling initialization, resource management, and state caching.
 
-**KEY PARTS:**
-- **Class: CD3DDevice9**
-  - Manages the DirectX 9 device for rendering graphics.
-  
-- **Function: Initialise()**
-  - Initializes the D3D9 interface and sets up the device state.
+KEY PARTS:
+- CD3DDevice9: Main class managing DirectX device operations.
+- Initialise(): Sets up the Direct3D 9 interface and initializes the device.
+- Shutdown(): Cleans up resources and shuts down the D3D9 device.
+- ResetDevice(): Resets the device to either windowed or full-screen mode.
+- DrawIndexedPrimitiveUP(): Draws indexed primitives using user-provided data.
+- SetRenderState(): Sets a render state and updates the cache if necessary.
+- GetRenderState(): Retrieves the current value of a render state from the cache.
 
-- **Function: Shutdown()**
-  - Cleans up resources and shuts down the D3D9 device.
+CONNECTS TO: Allegiance engine rendering subsystems, DirectX 9 libraries.
 
-- **Function: CreateDevice()**
-  - Creates a new D3D9 device, handling different vertex processing modes (hardware, software) and fallbacks if creation fails.
+NOTES:
+- Contains TODOs for future enhancements.
+- Includes unusual code that forces an exception on DirectX device creation failure.
 
-- **Function: LastChanceCreateDevice()**
-  - Attempts to create a DirectX device using a backup method if the primary attempt fails.
+PARTS (in file order):
 
-- **Function: GetValidBackBufferFormat()**
-  - Determines a valid back buffer format for the display mode.
-
-- **Function: GetValidDepthStencilFormat()**
-  - Finds a suitable depth stencil format compatible with the chosen back buffer format.
-
-- **Data Structure: SD3DDevice9State**
-  - Holds state information about the D3D device, including pointers to interfaces and settings.
-
-**CONNECTS TO:** Other rendering-related classes and functions within Allegiance's engine.
-
-**NOTES:** The code includes memory leak fixes, a fallback mechanism for creating DirectX devices if the primary method fails, and checks for specific hardware identifiers to apply performance optimizations or workarounds.
+- lines 1-358
+  - CD3DDevice9: Manages the Direct3D device for rendering.
+  - Initialise(): Initializes the D3D9 interface and sets up the device.
+  - Shutdown(): Cleans up resources and shuts down the D3D9 device.
+  - ResetReferencedResources(): Resets any referenced resources to prevent memory leaks.
+  - CreateD3D9(): Creates the Direct3D 9 interface.
+  - GetValidBackBufferFormat(): Determines a valid back buffer format for the device.
+  - GetValidDepthStencilFormat(): Finds a valid depth stencil format compatible with the back buffer format.
+  - LastChanceCreateDevice(): Attempts to create a D3D9 device using hardware or software vertex processing if initial creation fails.
+- lines 359-709
+  - CD3DDevice9: Manages DirectX device creation and management.
+  - CreateAADepthStencilBuffer: Creates an additional depth stencil buffer for anti-aliasing if needed.
+  - ResetDevice: Resets the device to either windowed or full-screen mode.
+  - UpdateCurrentMode: Updates the current display mode based on whether running in windowed or full-screen.
+  - TODOs: "//imago 7/1/09 NYI test for multisample maskable optons (CSAA, etc) and set accordingly" "BT - Do not ship this one, this is just for Xynth to test!"
+  - Unusual code: ((int)0) = 0; // Forces an exception if the DirectX device creation fails. Conditional compilation based on EnablePerformanceCounters.
+- lines 710-1079
+  - CD3DDevice9: Manages DirectX 9 device settings and operations.
+  - InitialiseDeviceStateCache: Resets render state cache to default values.
+  - ResetReferencedResources: Evicts resources from VRAM and VBIBManager pools.
+  - CreateAADepthStencilBuffer: Recreates AA depth stencil buffer if needed.
+  - Device: Handles reinitialization of the DirectX device if it becomes null.
+  - InitialiseRenderStateCache: Initializes render state cache with default values.
+  - RESET_STATE_CACHE_VALUE: Macro to set and apply a single render state value.
+- lines 1080-1431
+  - CD3DDevice9: Main class for managing DirectX device state and operations.
+  - InitialiseTextureStageCache: Initializes cache values for texture stage states.
+  - InitialiseSamplerStateCache: Initializes cache values for sampler states.
+  - InitialiseTransformCache: Initializes transform cache (currently does nothing).
+  - InitialiseMaterialCache: Initializes material cache (currently does nothing).
+  - InitialiseLightCache: Initializes light cache, setting up the number of active lights.
+  - SetRenderState: Sets a render state and updates the cache if necessary.
+  - GetRenderState: Retrieves the current value of a render state from the cache.
+- lines 1433-1824
+  - CD3DDevice9: Main class for managing DirectX device state and operations.
+  - GetTransform: Retrieves the current transformation matrix for a specified type (projection, view, or world).
+  - SetMaterial: Sets the material properties to be used in rendering.
+  - GetMaterial: Retrieves the current material properties being used.
+  - SetLight: Configures a light source with the given parameters.
+  - GetLight: Retrieves the configuration of a specific light source.
+  - LightEnable: Enables or disables a light source.
+  - GetLightEnable: Checks whether a light source is enabled or disabled.
+- lines 1825-1942
+  - CD3DDevice9: Manages DirectX device operations.
+  - DrawIndexedPrimitiveUP: Draws indexed primitives using user-provided data.
+  - DrawPrimitiveUP: Draws primitives using user-provided data.
+  - ColorFill: Fills a surface with a specified color.
+  - Clear: Clears the back buffer to a specified color and depth.
+  - SetGammaRamp: Sets the gamma ramp for a swap chain.
+  - ResetPerformanceCounters: Resets performance counters used for statistics gathering.
+  - GetPerformanceCounter: Retrieves the value of a specific performance counter.
 
 #### `src/engine/D3DDevice9.h`
 
@@ -17215,28 +21053,56 @@ NOTES: The class uses a singleton pattern for CD3DDevice9. It includes performan
 
 #### `src/engine/DeviceModesDX9.cpp`
 
-**PURPOSE:** The file `DeviceModesDX9.cpp` manages device mode data for DirectX 9 adapters, including extracting available display modes and their properties, validating settings, and retrieving detailed information about resolutions.
+PURPOSE: Manages device mode data for DirectX 9, including enumerating monitors, retrieving display modes, and checking format support.
 
-**KEY PARTS:**
-- **Class:** CD3DDeviceModeData - Manages device mode data for DirectX 9.
-- **Function:** ExtractAdapterData(int iAdapter) - Extracts available display modes and their properties from a given adapter.
-- **Function:** GetFormatBitCount(D3DFORMAT fmt) - Determines the number of bits per pixel for a given DirectX format.
-- **Function:** GetModeParams(CD3DDevice9::SD3DDeviceSetupParams * pParams, int iDeviceIndex, int iResolutionIndex, int iAAIndex, CLogFile * pLogFile) - Retrieves and sets up device mode parameters based on the provided indices.
-- **Data Structure:** SAdapterMode - Holds information about a specific display mode.
-- **TODOs:**
-  - Fix memory leak in ExtractAdapterData.
-  - Try a hack at the end of GetModeParams.
-- **Unusual Code:**
-  - Use of `ZAssert` for assertions, which is likely a custom assertion macro used for debugging.
-  - Fallback mechanism to check device capabilities using different types (HAL, SW, REF).
-  - Logic in GetModeParams to handle cases where no suitable windowed mode is found.
+KEY PARTS:
+- CD3DDeviceModeData: Manages device mode data.
+- enumMonitorProc: Callback function to enumerate monitors.
+- getPrimaryMonitor: Retrieves the primary monitor handle.
+- pSupportedModes: Array of supported buffer formats.
+- GetNumAASettings: Returns number of anti-aliasing settings.
+- GetResolutionDetails: Provides details about a resolution.
+- CheckDeviceFormat: Checks if a format is supported for a given device type.
 
-**CONNECTS TO:** CD3DDevice9.cpp
+CONNECTS TO: DirectX API functions and Windows API functions like GetMonitorInfo.
 
-**NOTES:**
-- The file uses custom assertions through `ZAssert`.
-- There are fallback mechanisms for checking device capabilities.
-- Unusual code includes handling of different filter types and a TODO related to AA selection box population.
+NOTES:
+- Contains TODOs for texture filter options.
+
+PARTS (in file order):
+
+- lines 1-357
+  - CD3DDeviceModeData: Manages device mode data for DirectX 9.
+  - enumMonitorProc: Callback function to enumerate monitors.
+  - getPrimaryMonitor: Retrieves the primary monitor handle.
+  - pSupportedModes: Array of supported buffer formats in order of preference.
+  - pSupportedDepthStencil: Array of supported depth stencil formats in order of preference.
+  - pMultiSampleTypes: Array of supported multisample types.
+  - pTextureMinFilterTypes, pTextureMagFilterTypes, pTextureMipFilterTypes: Arrays of texture filter types.
+  - pszAAStrings, pszShortAAStrings, pszMaxTextureSizeStrings: String arrays for antialiasing and texture size descriptions.
+- lines 358-700
+  - CD3DDeviceModeData: Manages device mode data for DirectX 9.
+  - GetNumAASettings: Returns the number of anti-aliasing settings available for a given display mode.
+  - GetAASettingString: Retrieves the string representation of an anti-aliasing setting.
+  - GetResolutionDetails: Provides details about a specific resolution, such as width, height, and refresh rate.
+  - GetRelatedResolutions: Finds related resolutions for changing up/down in full-screen mode.
+  - GetFormatBitCount: Determines the bit count of a given D3DFORMAT.
+  - ExtractAdapterData: Extracts data about a graphics adapter's display modes.
+  - "try this hack Imago 7/10"
+- lines 701-1034
+  - CD3DDeviceModeData::GetModeParams: Retrieves device mode parameters based on given indices.
+  - CD3DDevice9::SD3DDeviceSetupParams: Structure for device setup parameters.
+  - SAdapterMode: Represents a display mode with various attributes like format, resolution, and depth stencil.
+  - GetMonitorInfo: Windows API function to retrieve monitor information.
+  - CheckDeviceType: DirectX function to check if a device type is supported.
+  - CheckDeviceFormat: DirectX function to check if a format is supported for a given device type.
+  - CheckDepthStencilMatch: DirectX function to check if a depth/stencil format matches the display mode.
+  - CheckDeviceMultiSampleType: DirectX function to check if multisample types are supported.
+- lines 1035-1162
+  - CD3DDeviceModeData::SAdapterMode: Represents a display mode for an adapter.
+  - FindMatchingWindowedMode(CD3DDevice9::SD3DDeviceSetupParams , WinPoint, int): Finds a matching windowed mode based on size and device index.
+  - GetMaxTextureString(int): Returns the string representation of a maximum texture size.
+  - TODOs: "Imago - Bug: the AA selection box is populated only with your primary adapter's caps" "// Texture minification filter." "// Texture magnification filter." "// Mipmap generation filter."
 
 #### `src/engine/DeviceModesDX9.h`
 
@@ -17347,26 +21213,25 @@ NOTES: None.
 
 #### `src/engine/LogFile.h`
 
-PURPOSE: The `LogFile.h` file defines a class for logging messages to a file with timestamping.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CLogFile: Class responsible for managing log file operations.
-  - m_hLogFile: Handle to the open log file.
-  - m_szFilePath: Path where the log file is stored.
-  - m_szFileName: Name of the log file.
-  - m_szTimeStamp: Buffer to store the current timestamp.
-
-FUNCTIONS:
-- CLogFile(const char *szLogName): Constructor that initializes the log file with a given name.
-- ~CLogFile(void): Destructor that closes the log file if it is still open.
-- CloseLogFile(): Explicitly closes the log file handle.
-- OutputString( const char * szString ): Writes a string to the log file.
-- OutputStringV( const char * szFormat, ... ): Writes formatted output to the log file using variable arguments.
-- GetTimeStampString(): Returns the current timestamp as a string.
-
-CONNECTS TO: `windows.h` for Windows API functions related to file handling and time management.
-
-NOTES: None.
+    #pragma once
+    #include <windows.h>
+    class CLogFile
+    {
+    private:
+    	HANDLE m_hLogFile;
+    	char m_szFilePath[ MAX_PATH ];
+    	char m_szFileName[ MAX_PATH ];
+    	char m_szTimeStamp[256];
+    public:
+        CLogFile(const char *szLogName );
+    	~CLogFile(void);
+    	void CloseLogFile();
+    	void OutputString( const char * szString );
+    	void OutputStringV( const char * szFormat, ... );
+    	char * GetTimeStampString();
+    };
 
 #### `src/engine/RasterD3D9.cpp`
 
@@ -17601,19 +21466,17 @@ NOTES:
 
 #### `src/engine/VideoSettingsDX9.h`
 
-PURPOSE: This header file defines a function to prompt the user for video settings in Allegiance, specifically related to fullscreen mode and adapter selection.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PromptUserForVideoSettings: Function that prompts the user for video settings.
-- bStartFullscreen: Boolean indicating whether to start in fullscreen mode.
-- iAdapter: Integer representing the adapter index.
-- hInstance: Handle to the instance of the application.
-- szArtPath: Path string for art assets.
-- UpdatingConfiguration: Reference to a configuration object.
-
-CONNECTS TO: Configuration.h, windows.h, zstring.h
-
-NOTES: None.
+    #ifndef _VIDEOSETTINGS_H_
+    #define _VIDEOSETTINGS_H_
+    #include <windows.h>
+    #include <zstring.h>
+    #include "Configuration.h"
+    //Imago added bool bStartFullscreen, bool bRaise 6/29/09, only prompts when "Safe Mode" and restored the -windowed command line switch
+    //Rock: Removed bRaise, maybe reintroduce when it would be used again. Config instead of registry path.
+    bool PromptUserForVideoSettings(bool bStartFullscreen, int iAdapter, HINSTANCE hInstance, PathString & szArtPath, TRef<UpdatingConfiguration> config );
+    #endif // _VIDEOSETTINGS_H_
 
 #### `src/engine/bounds.cpp`
 
@@ -17668,15 +21531,19 @@ NOTES:
 
 #### `src/engine/bspgeo.h`
 
-PURPOSE: This file defines an interface and function for creating a BSP (Binary Space Partitioning) geometry object used in the Allegiance game engine.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `Geo`: A class representing the BSP geometry.
-- `CreateBSPGeo()`: A function that creates and returns a reference to a `Geo` object.
-
-CONNECTS TO: `tref.h`, which is likely a header file for smart pointers or references used in the Allegiance engine.
-
-NOTES: None.
+    #ifndef _bspgeo_h_
+    #define _bspgeo_h_
+    #include <tref.h>
+    class Geo;
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    // BSP Geo
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    TRef<Geo> CreateBSPGeo();
+    #endif
 
 #### `src/engine/button.cpp`
 
@@ -17794,48 +21661,101 @@ NOTES: None.
 
 #### `src/engine/connectionmap.xml`
 
-PURPOSE: This XML file defines a list of connection maps used in the Allegiance game engine. It is likely used to manage and load different network configurations for various game modes.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ConnectionMapList: The root element that contains all the connection map definitions.
-- varName="connectionmaplist": Specifies the variable name associated with this XML data structure.
-
-CONNECTS TO: None explicitly mentioned, but it is part of the game engine's configuration system and likely interacts with network-related code.
-
-NOTES: none
+    <?xml-version ='1.0' encoding='UTF-8'?>
+    <ConnectionMapList varName="connectionmaplist" />
 
 #### `src/engine/connections.xml`
 
-PURPOSE: This XML file defines a list of connection definitions used by the Allegiance game engine to manage various types of connections.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ConnectionDefList: The root element that contains all the connection definition elements.
-- varName="connectiondeflist": Specifies the variable name for this list in the code.
-
-CONNECTS TO: src/engine/connections.cpp
-
-NOTES: None.
+    <?xml-version ='1.0' encoding='UTF-8'?>
+    <ConnectionDefList varName="connectiondeflist" />
 
 #### `src/engine/context.cpp`
 
-**PURPOSE:** The `context.cpp` file in Allegiance is responsible for managing the rendering context and providing functions to draw images, strings, rectangles, and 3D shapes. It also handles state changes and decal rendering.
+PURPOSE: Manages rendering operations for the Allegiance game engine, including state management, drawing images and strings, handling decals, and setting up lighting.
 
-**KEY PARTS:**
-- **Class: Plane**: Represents a plane in 3D space and provides methods to calculate distance and intersection.
-- **Class: StateChangeBase**: Base class for managing rendering state change flags.
-- **Class: State**: Holds properties like matrices, textures, colors, and rendering modes.
-- **Class: ContextImpl**: Implements the drawing context, manages states, surfaces, and decal rendering.
-- **Class: Decal**: Represents a 2D image applied to a 3D surface with methods to calculate vertices.
-- **Class: DecalSet**: Groups decals by their surfaces for efficient rendering.
-- **Function: DrawImage**: Renders a 2D image on the surface at a specified point.
-- **Function: DrawString**: Draws a string of text using a given font and color at a specified point.
-- **Function: FillRect**: Fills a rectangle on the surface with a specified color.
-- **Function: Begin3DLayer**: Begins rendering in a 3D layer, setting up camera transformations and clearing buffers.
-- **Function: End3DLayer**: Ends rendering in a 3D layer, restoring the original state and handling callbacks.
+KEY PARTS:
+- Plane: Represents a plane in 3D space with methods for distance calculation and intersection.
+- StateChangeBase: Base class for state change flags.
+- StateChange: Bitmask representing various rendering states that can be changed.
+- State: Manages the current rendering state including matrices, materials, textures, and other properties.
+- ContextImpl: Main implementation of the drawing context with methods for managing rendering state, vertex buffers, and decals.
+- DrawString: Renders a string at a specified point using a given font and color.
+- DrawRectangle: Draws a rectangle with specified corners and color.
+- Begin3DLayer: Begins rendering in 3D mode, setting up camera and lighting.
+- RenderCallbackGeos: Renders a list of geometric callbacks.
+- End3DLayer: Ends 3D rendering, restores previous state, and renders any remaining callbacks.
 
-**CONNECTS TO:** Other rendering-related files such as `device.cpp` for device management and `surface.cpp` for surface operations.
+CONNECTS TO: Allegiance game engine systems for graphics rendering.
 
-**NOTES:** The file contains several TODO comments indicating areas that need improvement or further investigation. There are assertions and checks to ensure the device mode is not in perspective transform, and there is a commented-out section in `DrawImage` related to anti-aliasing toggling.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-354
+  - Plane: Represents a plane in 3D space with methods for distance calculation and intersection.
+  - StateChangeBase: Base class for state change flags.
+  - StateChange: Bitmask representing various rendering states that can be changed.
+  - State: Manages the current rendering state including matrices, materials, textures, and other properties.
+  - ContextImpl: Main implementation of the drawing context with methods for managing rendering state, vertex buffers, and decals.
+  - WhiteSurfaceSite: Updates a surface to fill it with white color.
+  - Decal: Represents a decal with position, color, scale, angle, and orientation vectors.
+  - DecalSet: Groups decals by their associated surface.
+- lines 355-715
+  - ContextImpl: Manages rendering context and state.
+  - BeginRendering(): Initializes rendering process.
+  - EndRendering(): Finalizes rendering process.
+  - DrawImage(Surface, const Rect&, bool, const Point&): Renders a 2D image on the screen.
+  - DrawImage3D(Surface, const Rect&, const Color&, bool, const Point&): Renders a 3D image using textures.
+  - IsCulled(const Vector&, float, bool&): Determines if a sphere is within the view frustum.
+  - SetYAxisInversion(bool): Inverts the Y-axis for rendering.
+  - GetClipping(): Retrieves clipping state.
+- lines 716-1094
+  - DrawString: Renders a string at a specified point using a given font and color.
+  - DrawRectangle: Draws a rectangle with specified corners and color.
+  - GetQuadHandle: Creates a vertex buffer for rendering a quad (rectangle) with texture coordinates.
+  - FillRect: Fills a rectangle with a solid color.
+  - FillInfinite: Fills the entire surface with a solid color.
+  - Begin3DLayer: Begins rendering in 3D mode, setting up camera and lighting.
+  - RenderCallbackGeos: Renders a list of geometric callbacks.
+  - End3DLayer: Ends 3D rendering, restores previous state, and renders any remaining callbacks.
+- lines 1096-1440
+  - DrawCachedDecals: Draws cached decals.
+  - PopState: Ends the current state and pops the previous state.
+  - BeginScene: Begins a new scene for rendering.
+  - EndScene: Ends the current scene.
+  - SetLOD: Sets the level of detail.
+  - GetLOD: Retrieves the current level of detail.
+  - DoSetState: Template function to efficiently set device states with optional override.
+  - ForceState: Forces all state changes to be applied immediately.
+- lines 1441-1816
+  - StateChangeWrapMode: Sets the texture wrap mode.
+  - SetWrapMode: Applies the texture wrap mode to the device.
+  - StateChangeCullMode: Sets the culling mode for polygons.
+  - SetCullMode: Applies the culling mode to the device.
+  - PushState: Saves the current state on a stack.
+  - PopState: Restores the previous state from the stack.
+  - Transform2D: Transforms a 2D point to image coordinates.
+  - Clip: Clips drawing to a specified rectangle.
+- lines 1818-2179
+  - TransformEyeToImage: Transforms a vector from eye space to image space.
+  - TransformDirectionToImage: Transforms a direction vector to image space.
+  - TransformLocalToImage: Transforms a local vector to image space.
+  - TransformImageToSurface: Converts an image point to a surface point.
+  - GetImageRadius: Calculates the radius of an object in image space.
+  - DirectionalLight: Sets up directional lighting.
+  - BidirectionalLight: Sets up bidirectional lighting.
+  - SetAmbientLevel: Sets the ambient light level.
+- lines 2180-2474
+  - DrawTriangles: Draws triangles using vertex and index buffers.
+  - AddDecal: Adds a new decal to a surface.
+  - DrawDecal: Draws a decal on a surface facing the eye point.
+  - DrawVDecalSet: Draws all decals in a set.
+  - DrawCachedDecals: Renders cached decals with different blend modes.
+  - CreateContextImpl: Creates an implementation of a context for rendering.
 
 #### `src/engine/context.h`
 
@@ -17866,29 +21786,72 @@ NOTES: None.
 
 #### `src/engine/controls.cpp`
 
-**PURPOSE:** The `controls.cpp` file in Allegiance is responsible for managing various UI components and layout panes used within the game's user interface.
+PURPOSE: Manages various UI components and their layouts for a graphical user interface in Allegiance.
 
-**KEY PARTS:**
-- **Class: JustifyPane**: Manages text alignment within a pane.
-- **Class: FillPane**: Fills the entire area with a solid color.
-- **Class: BorderPane**: Adds borders around its child pane, customizable in terms of width and color.
-- **Class: EdgePane**: Creates edge effects on its child pane for visual separation or highlighting.
-- **Class: ColumnPane**: Arranges child panes vertically, supporting grids and expanding child panes.
-- **Class: RowPane**: Arranges child panes horizontally, similar to ColumnPane with grid support.
-- **Class: StringPane**: Displays text within the pane, supports font, color, and justification.
-- **Class: EditPaneImpl**: Manages editable text fields, handling character input and painting.
-- **Class: AnimatedImagePane**: Displays animated images with optional fixed rectangle positioning.
-- **Class: ImagePane**: Displays static images.
-- **Class: SurfacePane**: Displays another surface as its content.
-- **Function: CreateEditPane**: Factory function to create an instance of EditPaneImpl.
+KEY PARTS:
+- JustifyPane: Manages layout justification of its child pane.
+- FillPane: Fills itself with a specified color.
+- BorderPane: Adds a border around its child pane.
+- EdgePane: Draws an edge around its child pane.
+- ColumnPane: Arranges child panes vertically, optionally showing grid lines.
+- RowPane: Arranges child panes horizontally, optionally showing grid lines.
+- StringPane: Displays a string with optional clipping and justification.
+- EditPaneImpl: Implements an editable text pane, supports password masking and read-only mode.
+- AnimatedImagePane: Manages animated images within a UI component.
+- ImagePane: Blits static images to the surface.
+- TroughPane: Manages a scrollable pane with navigation controls.
+- ScrollPaneImpl: Implementation class for scroll panes, handling events and layout updates.
 
-**CONNECTS TO:** Other UI components and layout panes, such as `ButtonPane`, `ScrollPaneImpl`, and various other classes that manage different aspects of the game's user interface.
+CONNECTS TO: Allegiance's graphical user interface system.
 
-**NOTES:** 
-- TODO comments indicate areas for improvement, such as expanding child panes from right to left.
-- The commented-out code in `AnimatedImagePane::Paint` suggests a clipping region that was not implemented.
-- The use of `ZAssert(m_bClipped)` indicates the importance of the `m_bClipped` flag but lacks initialization and usage details.
-- The lack of a destructor for `TroughPane` could lead to memory leaks if event sinks are not properly removed.
+NOTES:
+- Contains TODOs for future enhancements.
+- Uses smart pointers (TRef) for managing UI component lifetimes.
+
+PARTS (in file order):
+
+- lines 1-367
+  - JustifyPane: Manages layout justification of its child pane.
+  - FillPane: Fills itself with a specified color.
+  - BorderPane: Adds a border around its child pane.
+  - EdgePane: Draws an edge around its child pane.
+  - ColumnPane: Arranges child panes vertically, optionally showing grid lines.
+  - RowPane: Arranges child panes horizontally, optionally showing grid lines.
+  - "!!! expand right first" in ColumnPane::UpdateLayout()
+  - yextra = 0 if yextra < 0 in ColumnPane::UpdateLayout()
+- lines 368-721
+  - RowPane: Manages a row of panes with optional grid lines.
+  - ShowGrid(bool bShowGrid): Sets whether to show grid lines and triggers layout and repaint.
+  - UpdateLayout(): Calculates and updates the layout of child panes based on their sizes and visibility.
+  - Paint(Surface psurface): Draws the grid lines if enabled.
+  - StringPane: Displays a string with optional clipping and justification.
+  - SetString(const ZString& str): Updates the displayed string and triggers layout and repaint.
+  - UpdateLayout(): Adjusts size based on whether text is clipped or not.
+  - EditPaneImpl: Implements an editable text pane, supports password masking and read-only mode.
+- lines 723-1091
+  - EditPaneImpl::SetString: Sets the string value and updates display.
+  - EditPaneImpl::SetType: Changes the type of edit pane and updates display.
+  - EditPaneImpl::SetMaxLength: Limits the length of the input string.
+  - EditPaneImpl::OnChar: Handles character input, including backspace and numeric checks.
+  - EditPaneImpl::Paint: Draws the text and cursor on the surface.
+  - AnimatedImagePane::UpdateLayout: Updates layout based on image size.
+  - AnimatedImagePane::Paint: Renders the image with transformations.
+  - ImagePane::Paint: Blits the image to the surface.
+- lines 1092-1452
+  - TroughPane: Manages a scrollable pane with left and right buttons for navigation.
+  - MakePoint: Function to create a WinPoint object.
+  - MakePointFlipped: Function to create a flipped WinPoint object.
+  - TroughPane::SetSizes: Updates the size of the trough and triggers layout and paint updates if necessary.
+  - TroughPane::SetPos: Sets the position of the scroll thumb and triggers layout and paint updates if necessary.
+  - TroughPane::UpdateLayout: Calculates and sets the layout for the scroll thumb, left, and right buttons.
+  - ScrollPaneImpl: Implementation class for ScrollPane interface, implementing IEventSink.
+- lines 1453-1706
+  - ScrollPaneImpl: Main class implementing a scroll pane with left and right controls.
+  - CreateScrollPane: Function to create a scroll pane with specified parameters.
+  - OnEvent: Event handler for button presses on the scroll pane.
+  - UpdateLayout: Method to update the layout of the scroll pane.
+  - TODOs: "//new BorderPane(0, RGB(255, 0, 0))," "//new BorderPane(0, RGB(0, 255, 0)),"
+  - Unusual code: Use of TRef for smart pointers. Creation of button panes and event sources within the scroll pane constructor.
 
 #### `src/engine/controls.h`
 
@@ -17944,107 +21907,224 @@ NOTES: None.
 
 #### `src/engine/device3d.cpp`
 
-**PURPOSE:** The `device3d.cpp` file in Allegiance manages the rendering operations using DirectX 9. It handles various aspects of 3D graphics including lighting, transformations, clipping, and drawing primitives.
+PURPOSE: Manages 3D rendering operations for the Allegiance game engine.
 
-**KEY PARTS:**
-- **Class: Device3D** - Manages the 3D device state and operations.
-- **Function: BeginScene()** - Begins rendering a new scene.
-- **Function: EndScene()** - Ends rendering of the current scene.
-- **Function: ClearZBuffer()** - Clears the depth buffer.
-- **Function: SetClipRect(const Rect& rectClip)** - Sets the clipping rectangle for rendering.
-- **Function: DirectionalLight(const Vector& vec, const Color& color)** - Configures a directional light source.
-- **Function: BidirectionalLight(const Vector& vec, const Color& color, const Color& colorAlt)** - Configures a bidirectional light source.
-- **Function: SetAmbientLevel(float level)** - Sets the ambient lighting level.
-- **Function: SetGlobalColor(const Color& color)** - Sets a global color for rendering.
-- **Function: GenerateWorldTransform()** - Transforms the world matrix to a format suitable for DirectX and sets it as the current world transform.
-- **Function: GenerateViewTransform()** - Transforms the view matrix to a format suitable for DirectX and sets it as the current view transform.
-- **Function: GetFullMatrix()** - Combines the model, view, and projection matrices into a single transformation matrix. Adjusts for clipping if necessary.
-- **Function: UpdateLighting()** - Configures lighting based on the current shading mode (none, global color, flat, gouraud). Sets up materials and lights accordingly.
-- **Function: SetClipping(bool bClip)** - Enables or disables clipping based on a boolean flag.
-- **Function:** `RemoveClipPlane(int indexRemove)` - Removes a clipping plane at the specified index.
-- **Function:** `AddClipPlane(const Plane& plane)` - Adds a new clipping plane to the device.
-- **Function:** `SetShadeMode(ShadeMode shadeMode)` - Sets the shading mode for rendering.
-- **Function:** `SetMaterial(Material* pmaterial)` - Assigns a material to the device.
-- **Function:** `SetBlendMode(BlendMode blendMode)` - Sets the blending mode for rendering.
-- **Function:** `SetTexture(Surface* psurfaceTexture)` - Sets the texture for rendering.
-- **Function:** `SizeVertexLBuffer(int count)` - Resizes the vertex buffer for large vertices.
-- **Function:** `SizeVertexTLBuffer(int count)` - Resizes the vertex buffer for transformed vertices.
-- **Function:** `SizeVertexScreenBuffer(int count)` - Resizes the vertex buffer for screen coordinates.
-- **Function:** `SizeIndexBuffer(int count)` - Resizes the index buffer for storing mesh indices.
-- **Function:** `StoreTriangle(MeshIndex index1, MeshIndex index2, MeshIndex index3)` - Stores a triangle in the index buffer.
-- **Function:** `ClipPolygonToPlane(const Plane& plane, Code bit, VertexTL* pvertexIn, int vcountIn, VertexTL* pvertexOut)` - Clips a polygon to a single plane.
-- **Function:** `ClipPolygonToPlanes(const Plane* pplane, int pcount, Code codeOr, const VertexTL& vertex0, const VertexTL& vertex1, const VertexTL& vertex2)` - Clips a polygon to multiple planes.
-- **Function:** `DrawPrimitives` - Handles drawing primitives using vertex buffer interfaces.
-- **Function:** `DrawLines`, `DrawPoints`, `DrawTriangles` - Specialized methods for drawing lines, points, and triangles.
+KEY PARTS:
+- Device3D: Main class managing device-specific rendering operations.
+- VertexTL: Represents a transformed and lit vertex with additional clipping information.
+- ClipFront, ClipBack: Constants representing different clipping planes.
+- PFNClip, PFNDraw, PFNVertex: Function pointers for various rendering stages.
+- Has3DAcceleration(): Checks if 3D acceleration is available.
+- BeginScene(), EndScene(): Start and end a rendering scene.
+- ClearZBuffer(): Clears the depth buffer.
+- SetYAxisInversion(bool): Inverts the Y-axis for clipping.
+- SetClipRect(const Rect&): Sets the clipping rectangle and updates projection transform.
+- DirectionalLight, BidirectionalLight: Configures directional and bidirectional lighting.
+- SetAmbientLevel(float), SetGlobalColor(const Color&): Sets ambient light level and global color.
 
-**CONNECTS TO:** DirectX 9 rendering library.
+CONNECTS TO: CVBIBManager (vertex buffer management), Rasterizer interface for rendering.
 
-**NOTES:**
--
+NOTES:
+- Bitwise operations used in plane clipping logic.
+- TODOs for fixing typos, removing unused assembly code.
+
+PARTS (in file order):
+
+- lines 1-371
+  - Device3D: Manages 3D rendering operations.
+  - VertexTL: Represents a transformed and lit vertex with additional clipping information.
+  - ClipFront, ClipBack, etc.: Constants representing different clipping planes.
+  - PFNClip, PFNDraw, PFNVertex, etc.: Function pointers for various rendering stages.
+  - m_prasterizer: Reference to the rasterizer interface used for rendering.
+  - m_sizeSurface: Size of the surface being rendered.
+  - m_rectClip: Clipping rectangle in screen coordinates.
+  - m_bClip: Flag indicating whether clipping is enabled.
+- lines 372-719
+  - Device3D::Has3DAcceleration(): Checks if 3D acceleration is available.
+  - BeginScene(), EndScene(): Start and end a rendering scene.
+  - ClearZBuffer(): Clears the depth buffer.
+  - SetYAxisInversion(bool): Inverts the Y-axis for clipping.
+  - SetClipRect(const Rect&): Sets the clipping rectangle and updates projection transform.
+  - DirectionalLight(const Vector&, const Color&), BidirectionalLight(const Vector&, const Color&, const Color&): Configures directional and bidirectional lighting.
+  - SetAmbientLevel(float): Sets the ambient light level.
+  - SetGlobalColor(const Color&): Sets a global color for rendering.
+- lines 720-1060
+  - Device3D::SetMatrix: Sets the model matrix and world transformation matrix.
+  - Device3D::SetPerspectiveMatrix: Sets the perspective projection matrix.
+  - Device3D::SetViewMatrix: Sets the view matrix.
+  - Device3D::UpdatePointers: Updates function pointers based on current state.
+  - Device3D::GetClipping: Returns whether clipping is enabled.
+  - Device3D::GetMatrix: Returns the current model matrix.
+  - Device3D::GetInverseModelMatrix: Returns the inverse of the model matrix.
+  - Device3D::GetInverseModelWorldMatrix: Returns the inverse of the world transformation matrix.
+- lines 1061-1433
+  - SetClipping(bool bClip): Enables or disables clipping.
+  - RemoveClipPlane(int indexRemove): Removes a clip plane at the specified index.
+  - AddClipPlane(const Plane& plane): Adds a new clip plane in eye coordinates.
+  - SetShadeMode(ShadeMode shadeMode): Sets the shading mode for rendering.
+  - SetMaterial(Material pmaterial): Sets the material to be used for rendering.
+  - SizeVertexLBuffer(int count): Resizes the vertex buffer for long vertices.
+  - SizeVertexTLBuffer(int count): Resizes the vertex buffer for transformed and lit vertices.
+  - SizeVertexScreenBuffer(int count): Resizes the vertex buffer for screen-space vertices.
+- lines 1434-1791
+  - ClipPolygonToPlanes: Clips a polygon to a set of planes.
+  - ClipPolygonToPlane: Clips a polygon to a single plane.
+  - ClipTriangles: Clips triangles based on their vertices and indices.
+  - ClipLineToPlanes: Clips a line to a set of planes.
+  - ClipLines: Clips lines based on their vertices and indices.
+  - TODOs: "// Additional guard to make sure we don't exceed array bounds in the next loop" "// Completely clipped"
+  - Unusual code: The use of bitwise operations for plane clipping logic.
+- lines 1792-2139
+  - ClipPoints: Clips points based on their clip codes.
+  - TransformDeformClip: Transforms vertices with deformation and clipping.
+  - TransformClip: Transforms vertices with clipping.
+  - TransformAndLightNoClip: Transforms and lights vertices without clipping.
+  - TODOs: Fix typo in MakeInt function call. Consider removing unused assembly code if not needed.
+- lines 2140-2510
+  - TransformNoClip: Transforms vertices without clipping.
+  - TransformNoClipNoLight: Transforms vertices without clipping or lighting.
+  - LightVertexCopy: Copies lighting data to a new buffer and transforms it.
+  - LightVertexGlobalColor: Applies global color to vertices and then transforms them.
+  - BidirectionalLightVertex: Applies bidirectional lighting to vertices and then transforms them.
+  - LightVertex: Applies directional lighting to vertices and then transforms them.
+  - MaterialLightVertex: Applies material-based lighting to vertices and then transforms them.
+  - StoreVertex: Stores vertex data in a structured format.
+- lines 2511-2792
+  - Device3D: Main class for managing device-specific rendering operations.
+  - DrawTriangles: Function to draw triangles using different vertex formats and hardware acceleration paths.
+  - DrawLines: Function to draw lines using different vertex formats and hardware acceleration paths.
+  - DrawPoints: Function to draw points using different vertex formats and hardware acceleration paths.
+  - DrawTriangles(const D3DPRIMITIVETYPE, const CVBIBManager::SVBIBHandle, const CVBIBManager::SVBIBHandle): Hardware-accelerated path for drawing indexed primitive lists using vertex and index buffers.
+  - DrawTriangles(const D3DPRIMITIVETYPE, const DWORD, const CVBIBManager::SVBIBHandle): Hardware-accelerated path for drawing primitive lists using vertex buffers.
+  - CreateDevice3D: Factory function to create an instance of Device3D.
 
 #### `src/engine/dinput.cpp`
 
-**PURPOSE:** The `dinput.cpp` file in Allegiance is responsible for managing input devices such as mice and joysticks using the DirectInput API. It handles device enumeration, data processing, event triggering, and force feedback effects.
+PURPOSE: Handles input devices such as mice and joysticks using DirectInput API.
 
-**KEY PARTS:**
-- **Class: DIDeviceCaps**: Represents the capabilities of a DirectInput device.
-- **Class: DIDeviceInstance**: Represents an instance of a DirectInput device.
-- **Class: DIDataFormat**: Represents the data format for DirectInput objects.
-- **Class: DIObjectDataFormat**: Represents the data format for individual DirectInput object data.
-- **Constant: g_pdfDIMouse**: Pointer to the DirectInput mouse data format.
-- **Struct: EFFECTS_NODE**: Used to manage effects associated with input devices.
-- **Class: DDInputObject**: Base class for input objects, providing common properties and methods.
-- **Class: ValueDDInputObject**: Represents an input object that holds a numeric value.
-- **Class: ButtonDDInputObject**: Represents an input object that holds a boolean value (button state).
-- **Class: MouseInputStreamImpl**: Implements the mouse input stream, handling device enumeration, data processing, and event triggering.
-- **Function: EnumObjectsCallback**: Callback function used to enumerate DirectInput objects.
-- **Function: StaticEnumObjectsCallback**: Static wrapper for `EnumObjectsCallback` to be used with DirectInput API.
+KEY PARTS:
+- DIDeviceCaps: Represents capabilities of a DirectInput device.
+- DDInputObject: Base class for input objects.
+- JoystickInputStreamImpl: Manages joystick input and force feedback.
+- InputEngineImpl: Implements the InputEngine interface for handling input devices.
 
-**CONNECTS TO:** Other input-related files such as `joystick.cpp` and `mouse.cpp`.
+CONNECTS TO: Allegiance game engine, other input-related files.
 
-**NOTES:** The file includes commented-out sections with macros and conditional compilation for different versions of DirectInput, indicating potential support for multiple branches or versions. There are instances where error checking is skipped, suggesting a design choice to prioritize performance over robustness in certain critical paths.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-366
+  - DIDeviceCaps: Represents capabilities of a DirectInput device.
+  - DIDeviceInstance: Represents an instance of a DirectInput device.
+  - DIDataFormat: Represents data format for DirectInput devices.
+  - DIObjectDataFormat: Represents object data format for DirectInput devices.
+  - g_pdfDIMouse: Global pointer to the mouse data format.
+  - EFFECTS_NODE: Node in linked list for storing DirectInput effects.
+  - DDInputObject: Base class for input objects.
+  - ValueDDInputObject: Derived class for value-based input objects.
+- lines 367-736
+  - CalculateDelta: Calculates the delta value based on input and sensitivity settings.
+  - DeltaPosition: Updates mouse position based on input deltas.
+  - DeltaWheel: Handles mouse wheel movement.
+  - ButtonChanged: Updates button state and triggers events.
+  - UpdateBuffered: Reads buffered input data from DirectInput device.
+  - UpdatePolled: Polls the DirectInput device for current state.
+  - Update: Main update function to acquire device and call appropriate update method.
+  - SetSensitivity and SetAccel: Set mouse sensitivity and acceleration.
+- lines 738-1114
+  - JoystickInputStreamImpl: Manages joystick input and force feedback.
+  - EnumObjectsCallback: Callback function to enumerate device objects.
+  - SetRanges: Sets properties for joystick axes and buttons.
+  - Update: Polls the joystick and updates values.
+  - SetFocus: Acquires or releases the joystick based on focus state.
+  - EnumEffectTypeProc: Enumerates effect types.
+  - EnumAndCreateBounceEffectsCallback: Creates force feedback effects from files.
+- lines 1115-1468
+  - EFFECTS_NODE: Represents a node in a linked list of DirectInput effects.
+  - EnumAndCreateBounceEffectsCallback, EnumAndCreateFireEffectsCallback, EnumAndCreateExplodeEffectsCallback: Callback functions for enumerating and creating DirectInput effects from files.
+  - PlayFFEFromFile: Plays all effects in a given linked list.
+  - EmptyEffectLists: Frees all effects in a given linked list.
+  - CreateEffects: Initializes and creates various force feedback effects.
+  - PlayFFEffect: Plays a specific force feedback effect based on an ID.
+  - HasForceFeedback: Checks if the joystick has force feedback capabilities.
+  - GetShortDescription, GetDescription, GetValueDescription: Methods to retrieve descriptions of joystick inputs.
+- lines 1470-1741
+  - InputEngineImpl: Implements the InputEngine interface for handling input devices.
+  - EnumDeviceCallback: Callback function to enumerate DirectInput devices and create appropriate InputStream objects.
+  - StaticEnumDeviceCallback: Static wrapper around EnumDeviceCallback to pass context.
+  - InputEngineImpl::InputEngineImpl: Constructor initializes DirectInput, enumerates devices, and sets up logging.
+  - EnumerateJoysticks: Method to enumerate and initialize joystick devices.
+  - GetJoystickCount: Returns the number of joystick devices.
+  - GetJoystick: Retrieves a specific joystick device by index.
+  - GetMouse: Retrieves the mouse input stream.
 
 #### `src/engine/engine.cpp`
 
-**PURPOSE:** The `src/engine/engine.cpp` file contains the implementation of the main game engine, responsible for rendering surfaces, managing device settings, and handling input.
+PURPOSE: The file `engine.cpp` contains the implementation of the engine's core functionalities related to rendering and device management.
 
-**KEY PARTS:**
-- **Class: EngineImpl**
-  - Implements the main engine functionality.
-  
-- **Function: EngineImpl::EngineImpl**
-  - Initializes member variables and sets up the Direct3D device.
-  
-- **Function: EngineImpl::~EngineImpl**
-  - Cleans up resources. Currently empty.
+KEY PARTS:
+- EngineImpl: Manages the private engine interface.
+- SurfaceList: Stores a list of surfaces used for rendering.
+- CDX9EngineSettings: Holds settings specific to DirectX 9 engine configurations.
+- SetGammaLevel: Adjusts the gamma level for display output.
+- CreatePrimarySurface: Initializes the primary surface for rendering operations.
+- InitializeFullscreen: Attempts to initialize fullscreen mode with various resolutions.
+- UpdateSurfacesPixelFormat: Updates the pixel format of surfaces as needed.
+- DeviceOK: Validates and initializes the device based on fullscreen mode requirements.
+- Flip: Swaps the back buffer with the front buffer for rendering output.
 
-- **Function: EngineImpl::TerminateDevice**
-  - Terminates the Direct3D device, but currently does nothing.
+CONNECTS TO: DirectX 9 libraries, windowing system (e.g., `g_hwndMainWindow`), and other engine components.
 
-- **Function: EngineImpl::TerminateEngine**
-  - Terminates the engine and cleans up resources.
+NOTES:
+- Contains commented-out sections related to previous functionality that has been removed or disabled.
 
-- **Function: EngineImpl::IsValid**
-  - Checks if the Direct3D device is valid.
+PARTS (in file order):
 
-- **Function: EngineImpl::SetFocusWindow**
-  - Sets the focus window for the engine. Should only be called once.
-
-- **Function: EngineImpl::UpdateSurfacesPixelFormat**
-  - Updates the pixel format of surfaces that depend on the Direct3D device.
-
-- **Function: EngineImpl::SetGammaRamp**
-  - Sets the gamma ramp for the display.
-
-- **Function: EngineImpl::CreatePrimarySurface**
-  - Creates a primary surface. Currently returns true without actual implementation.
-
-- **Data Member: m_modes**
-  - List of valid screen resolutions and refresh rates supported by the Direct3D device.
-
-**CONNECTS TO:** Other engine-related files, such as `engine.h`, for declarations and interfaces.
-
-**NOTES:** The destructor is empty, and the `TerminateDevice` function does nothing. There are commented-out sections related to DirectDraw, indicating a history of switching from DirectDraw to Direct3D. Several TODOs and warnings need addressing.
+- lines 1-359
+  - EngineImpl: Implements the private engine interface.
+  - SurfaceList: A list of surfaces.
+  - CDX9EngineSettings: Represents DirectX 9 engine settings.
+  - g_hwndMainWindow: Global handle to the main window.
+  - m_bValid: Indicates if the engine is valid.
+  - m_bValidDevice: Indicates if the device is valid.
+  - m_ppf: Pixel format for surfaces.
+  - m_sizeResolution: Resolution of the size.
+- lines 360-737
+  - SetGammaLevel: Sets the gamma level for the display.
+  - GetGammaLevel: Retrieves the current gamma level.
+  - CreatePrimarySurface: Creates a primary surface for rendering.
+  - InitializeWindowed: Initializes the windowed mode for the game.
+  - SwitchToFullscreenDevice: Switches to fullscreen mode with specified resolution and refresh rate.
+  - TODO: The commented-out code related to fullscreen initialization and device switching needs review.
+  - Unusual Code: The commented-out sections suggest that there was previous functionality for handling different display modes and cooperative levels, which has been removed or disabled.
+- lines 738-1085
+  - UpdateSurfacesPixelFormat(): Updates pixel format of surfaces.
+  - InitializeFullscreen(bool& bChanges): Initializes fullscreen mode by trying different resolutions until a valid one is found.
+  - DebugSetWindowed(): Sets windowed mode (commented out).
+  - ForceReset(): Forces a reset of the device, clearing screen and rendering finished.
+  - SetMaxTextureSize(int iMaxTextureSize): Sets maximum texture size and forces a reset if changed.
+  - SetVSync(bool bVsync): Enables or disables vertical synchronization and forces a reset if changed.
+  - SetAA(DWORD dwAA): Sets anti-aliasing level and forces a reset if changed.
+  - SetAutoGenMipMaps(bool bUseAutoGenMipMaps): Enables or disables automatic mip-map generation and forces a reset if changed.
+- lines 1086-1453
+  - DeviceOK: Validates and initializes the device based on fullscreen mode.
+  - IsDeviceReady: Checks if the device is ready to render, handling various states like lost or not reset.
+  - Flip: Flips the back buffer to the front buffer for rendering.
+  - BltToWindow: Blits a surface to a window at a specified position and rectangle.
+  - GetPixelFormat: Retrieves a pixel format based on given parameters, caching results for efficiency.
+  - GetPrimaryPixelFormat: Returns the primary pixel format used by the device.
+  - RemovePrivateSurface: Removes a private surface from the cache and cleans up associated resources.
+  - TODO: The commented-out code sections suggest potential optimizations or features that were not implemented.
+- lines 1454-1710
+  - CreateDummySurface: Creates a dummy surface with valid dimensions but no VRAM resources.
+  - CreateRenderTargetSurface: Creates a render target surface.
+  - CreateSurface: Creates a device format surface based on given parameters.
+  - CreateCompatibleSurface: Creates a compatible surface from an existing one.
+  - CreateSurface(HBITMAP): Creates a surface from an HBITMAP, currently commented out.
+  - CreateSurface(WinPoint, PixelFormat, int, BYTE, IObject, bool, Color, ZString, bool): Creates a surface with custom pixel data and format.
+  - CreateSurfaceD3DX: Creates a surface using D3DXIMAGE_INFO, currently commented out.
+  - TODOs: Fix memory leak in CreateEngine Remove commented-out code related to bitmap handling
 
 #### `src/engine/engine.h`
 
@@ -18115,42 +22195,69 @@ NOTES:
 
 #### `src/engine/enginewindow.cpp`
 
-**PURPOSE:** The `enginewindow.cpp` file in Allegiance manages the main game window, handling initialization, rendering, input, and performance monitoring.
+PURPOSE: Manages the main window of Allegiance, handling creation, rendering, input, and state changes.
 
-**KEY PARTS:**
-- **Class: EngineWindow**: Manages the main game window.
-  - Handles initialization, rendering, input, and window state changes.
-  
-- **Function: EngineWindow::EngineWindow()**: Constructor for EngineWindow.
-  - Initializes various components such as input engine, mouse, keyboard filters, and performance counters.
-  - Sets up fullscreen mode based on command line arguments or configuration settings.
+KEY PARTS:
+- EngineWindow: Manages the main game window lifecycle and rendering.
+- MenuCommandSink: Handles menu commands for engine settings.
+- UpdateSurfacePointer: Adjusts surface pointer based on fullscreen/windowed mode.
+- SetFullscreen: Switches between fullscreen and windowed modes.
+- RenderFrame: Handles frame rendering, including clipping and performance counters.
+- OnPaint: Processes painting events for the window.
+- HandleMouseMessage: Manages mouse input processing.
+- UpdateInput: Updates input states like mouse position.
 
-- **Function: EngineWindow::~EngineWindow()**: Destructor for EngineWindow.
-  - Cleans up resources and terminates the modeler and engine.
+CONNECTS TO: Allegiance engine systems, particularly those related to graphics, input handling, and user interface elements.
 
-- **Function: EngineWindow::PostWindowCreationInit()**: Initializes window-specific components after creation.
-  - Sets up rendering surfaces, image groups, and popup containers.
+NOTES: None.
 
-- **Function: EngineWindow::StartClose()**: Posts a close message to the window.
+PARTS (in file order):
 
-- **Function: EngineWindow::IsValid()**: Checks if the engine is valid.
-
-- **Function: EngineWindow::OnClose()**: Handles cleanup when the window is closed.
-  - Removes keyboard input filters and terminates modeler and engine components.
-
-- **Function: EngineWindow::ParseCommandLine()**: Parses command line arguments to determine fullscreen mode.
-
-- **Function: EngineWindow::InitialiseTime()**: Initializes time-related components.
-
-- **Function: EngineWindow::UpdateSurfacePointer()**: Updates the surface pointer based on window state (fullscreen or windowed).
-
-- **Function: EngineWindow::UpdateWindowStyle()**: Updates the window style based on fullscreen mode.
-
-- **Function: EngineWindow::UpdateRectValues()**: Updates rectangle values for rendering and mouse clipping.
-
-**CONNECTS TO:** Other game engine components, input handling, rendering subsystems, and system settings.
-
-**NOTES:** The file contains several TODO comments indicating areas that need further work or are not yet implemented. There is commented-out code related to image handling that was likely intended but not fully implemented. The `EngineWindowKeyboardInput` class handles keyboard input filtering for specific keys like F4, Return, and F (fullscreen toggle). The code includes assertions and debug output functions (`ZAssert`, `ZDebugOutput`) which are useful for development and debugging.
+- lines 1-376
+  - EngineWindow: Manages the main window of the game.
+  - MenuCommandSink: Handles menu commands for the engine window.
+  - s_pmodes: Array defining available screen modes.
+  - EngineWindowKeyboardInput: Filters keyboard input to handle specific keys like F4, Alt+Enter, etc.
+  - EngineWindow::EngineWindow: Constructor initializing various components and settings.
+  - EngineWindow::~EngineWindow: Destructor cleaning up resources.
+  - PostWindowCreationInit: Initializes window-specific components after creation.
+  - StartClose: Posts a close message to the window.
+- lines 377-741
+  - EngineWindow::UpdateSurfacePointer: Updates the surface pointer based on whether the game is in fullscreen or windowed mode.
+  - EngineWindow::UpdateWindowStyle: Adjusts the window style and properties when switching between fullscreen and windowed modes.
+  - EngineWindow::UpdateRectValues: Updates the screen and render rectangle values based on the current mode (fullscreen or windowed).
+  - EngineWindow::SetMoveOnHide: Sets whether the window should move when hidden.
+  - EngineWindow::UpdateCursor: Manages the visibility and position of the cursor in both fullscreen and windowed modes.
+  - EngineWindow::GetScreenRectValue: Returns a pointer to the screen rectangle value object.
+  - EngineWindow::GetRenderRectValue: Returns a pointer to the render rectangle value object.
+  - EngineWindow::SetFullscreen: Switches the game between fullscreen and windowed modes.
+- lines 742-1097
+  - EngineWindow: Manages the main window and rendering loop.
+  - GetFullscreenSize: Returns the size of the fullscreen mode.
+  - SetFullscreenSize: Sets the size of the fullscreen mode and triggers a render size change.
+  - ChangeFullscreenSize: Adjusts the fullscreen resolution based on user input.
+  - GetEngineMenu: Creates a menu for engine settings such as brightness, resolution, and device information.
+  - UpdatePerformanceCounters: Updates performance counters and outputs them to debug strings or renders them on the screen.
+  - RenderFrame: Handles rendering of the frame by beginning and ending scenes, clipping, setting blend modes, rendering images, updating performance counters, and rendering performance counters.
+  - OnPaint: Handles painting events for the window.
+- lines 1098-1460
+  - EngineWindow::ShouldDrawFrame: Determines if a frame should be drawn based on fullscreen mode and window state.
+  - EngineWindow::DoIdle: Handles idle processing including input updates, device readiness checks, and rendering.
+  - EngineWindow::SetShowFPS: Configures whether to show FPS and sets the label for it.
+  - EngineWindow::ToggleShowFPS: Toggles the display of FPS between off and on states.
+  - EngineWindow::OnActivate: Updates window activation state and focus.
+  - EngineWindow::OnActivateApp: Handles application-wide activation events.
+  - EngineWindow::SetCursorImage: Sets the cursor image for the window.
+  - EngineWindow::GetCursorImage: Retrieves the current cursor image.
+- lines 1461-1679
+  - EngineWindow: Manages the window and handles mouse events.
+  - HandleMouseMessage: Processes different mouse messages like button clicks and wheel movements.
+  - OnEvent: Handles button state changes by calling HandleMouseMessage.
+  - UpdateInput: Updates input states, including mouse position.
+  - SetCaption: Sets the caption of the window.
+  - OnCaptionMinimize: Minimizes the window.
+  - OnCaptionMaximize: Maximizes the window.
+  - OnCaptionFullscreen: Toggles fullscreen mode.
 
 #### `src/engine/enginewindow.h`
 
@@ -18238,34 +22345,84 @@ NOTES: None.
 
 #### `src/engine/geometry.cpp`
 
-**PURPOSE:** The `geometry.cpp` file in Allegiance contains implementations and definitions for various geometric objects and their functionalities, including rendering, transformation, material application, and level of detail management.
+PURPOSE: The file `geometry.cpp` contains implementations for various geometry-related classes and functions used in rendering and managing geometric objects in Allegiance.
 
-**KEY PARTS:**
-- **Class: EmptyGeo** - Represents an empty geometry object.
-- **Function: Geo::GetEmpty()** - Returns a singleton instance of `EmptyGeo`.
-- **Class: MeshGeo** - Base class for mesh-based geometric objects.
-- **Template Class: TMeshGeo<VertexType>** - Template class for handling different vertex types and managing vertex buffers.
-- **Function: Geo::CreateMesh()** - Factory functions to create instances of `TMeshGeo` with various vertex types.
-- **Class: WrapGeo** - Wrapper class extending `Geo` with additional functionality like transformation and material application.
-- **Class: DecalGeo** - Represents a decal applied to a 3D surface.
-- **Class: VisibleGeo** - Controls the visibility of a geometric object.
-- **Class: ClipGeo** - Clips rendering based on a boolean flag.
-- **Class: ClipPlaneGeo** - Clips rendering using a plane.
-- **Class: TransformGeo** - Applies transformations to a geometric object.
-- **Class: MaterialGeo** - Applies materials to a geometric object.
-- **Class: TextureGeo** - Manages texture application and folding of textures.
-- **Class: TimedGeo** - Manages geometries with lifespans, evaluating events based on time.
-- **Class: GroupGeoImpl** - Concrete implementation of `GroupGeo` managing multiple geometries.
-- **Class: LODGeoImpl** - Concrete implementation of `LODGeo` handling Level of Detail for geometry.
-- **Class: CallbackGeo** - Provides a callback mechanism for rendering geometries.
-- **Class: BlendGeo** - Adds blending functionality to rendered geometries.
+KEY PARTS:
+- EmptyGeo: Represents an empty geometry object.
+- Geo: Base class for all geometry objects, providing default implementations for various methods.
+- MeshGeo: Abstract base class for mesh-based geometry.
+- TMeshGeo<VertexType>: Template class representing a specific type of mesh geometry.
+- WrapGeo: Base class for various geometry transformations and effects.
+- DecalGeo: Represents a decal applied to an image at a specific position and orientation.
+- VisibleGeo: Controls visibility of a wrapped geometry.
+- ClipGeo: Clips rendering based on a boolean flag.
+- TransformGeo: Applies transformations to a geometry.
+- MaterialGeo: Applies materials to a geometry.
+- TextureGeo: Manages texture application and folding.
+- TimedGeo: Represents a geometry that has a lifespan and evaluates whether to trigger based on time.
+- GroupGeoImpl: Implements the GroupGeo interface with additional functionality for managing child geometries.
+- LODGeoImpl: Implements level-of-detail (LOD) functionality for geometric objects, managing different levels based on radius.
 
-**CONNECTS TO:** Other systems or files it depends on or serves, one line.  
-- Depends on rendering and graphics subsystems for actual rendering operations.
+CONNECTS TO: Other rendering systems within Allegiance.
 
-**NOTES:**  
-- Contains commented-out sections that could be used for testing or alternative implementations.
-- Multiple instances of static mesh creation might indicate potential performance issues if these meshes are frequently recreated.
+NOTES:
+- Use of TRef for smart pointers to manage memory automatically.
+
+PARTS (in file order):
+
+- lines 1-350
+  - EmptyGeo: Represents an empty geometry object.
+  - Geo: Base class for all geometry objects, providing default implementations for various methods.
+  - MeshGeo: Abstract base class for mesh-based geometry.
+  - TMeshGeo<VertexType>: Template class representing a specific type of mesh geometry.
+  - GetString(Vertex): Converts a vertex to a string representation.
+  - GetString(VertexL): Converts a prelit vertex to a string representation.
+  - Render(Context pcontext): Renders the mesh geometry using the provided context.
+  - CallGroupGeoCallback(const Matrix& mat, GroupGeoCallback pcallback): Calls a callback function for each triangle in the mesh.
+- lines 351-711
+  - TMeshGeo: Represents a mesh geometry with vertices and indices.
+  - ApplyTransform: Applies a transformation to the mesh's vertices and normals.
+  - GetTriangleCount: Returns the number of triangles in the mesh.
+  - GetRadius: Calculates the radius of the mesh after applying a transformation.
+  - GetString: Generates a string representation of the mesh for debugging or logging.
+  - IsConstant: Indicates that the geometry is constant and does not change over time.
+  - GetFunctionName: Returns the name of the function, which is "MeshGeo".
+  - Write: Writes the mesh data to a binary file.
+- lines 713-1077
+  - WrapGeo: Base class for various geometry transformations and effects.
+  - DecalGeo: Represents a decal applied to an image at a specific position and orientation.
+  - VisibleGeo: Controls visibility of a wrapped geometry.
+  - ClipGeo: Clips rendering based on a boolean flag.
+  - ClipPlaneGeo: Clips rendering using a plane.
+  - TransformGeo: Applies transformations to a geometry.
+  - MaterialGeo: Applies materials to a geometry.
+  - TextureGeo: Manages texture application and folding.
+- lines 1079-1449
+  - TextureGeo::Render: Renders a texture geometry using a context.
+  - TimedGeo: Represents a geometry that has a lifespan and evaluates whether to trigger based on time.
+  - GroupGeoImpl: Implements the GroupGeo interface with additional functionality for managing child geometries.
+  - GroupGeoImpl::FoldTexture: Folds textures of child geometries into a single texture if possible.
+  - GroupGeoImpl::Fold: Removes empty geometries, folds child groups, combines meshes, and determines whether to fold this node based on children count.
+  - TODOs: "!!! should this be push end?"
+  - Unusual code: Use of TRef for smart pointers, which is a common pattern in C++ for managing memory automatically.
+- lines 1450-1822
+  - GroupGeoImpl: Manages a group of geometric objects and provides methods for rendering, hit testing, and other operations.
+  - LODGeoImpl: Implements level-of-detail (LOD) functionality for geometric objects, managing different levels based on radius.
+  - AddGeo: Adds a geometric object to the group at the correct position based on its radius.
+  - GetTriangleCount: Calculates the total number of triangles across all child geometries.
+  - GetRadius: Determines the maximum radius of all child geometries when transformed by a given matrix.
+  - Render: Renders the appropriate level of detail based on the current LOD setting in the context.
+  - RemoveTextures: Creates a new LODGeo with only the textures removed from each child geometry.
+  - HitTest: Checks if any child geometry intersects with a ray originating from a given point.
+- lines 1823-2029
+  - LODGeoImpl: Implementation of a level-of-detail geometry class.
+  - Duplicate: Creates a duplicate of a Geo object.
+  - Fold: Reduces the number of children to one if possible.
+  - GetFunctionName: Returns the name of the function as "LODGeo".
+  - GetString: Generates a string representation of the LODGeo object.
+  - Write: Writes the LODGeo object to an MDL binary file.
+  - LODGeo::Create: Factory method for creating a new LODGeo instance.
+  - CallbackGeo: A callback geometry class that wraps another Geo object.
 
 #### `src/engine/geometry.h`
 
@@ -18292,27 +22449,75 @@ NOTES: None.
 
 #### `src/engine/image.cpp`
 
-**PURPOSE:** The `image.cpp` file in Allegiance contains implementations and definitions for various image-related classes and functions used for rendering images in the game. These classes handle different types of images such as constant images, string images, gauge images, and more complex composite images with transformations and animations.
+PURPOSE: The file `image.cpp` contains various classes and functions related to image handling in Allegiance, including creating, manipulating, and rendering images.
 
-**KEY PARTS:**
-- **EmptyImage**: Represents an empty image that can be used as a placeholder.
-- **ConstantImage**: Represents an image with a constant surface and color.
-- **ConstantImage3D**: Represents a 3D version of a constant image with additional color information.
-- **StringImage**: Represents an image containing text, which can be rendered at different positions and sizes.
-- **GaugeImage**: Represents an image that displays a gauge based on a numeric value, optionally in 3D.
-- **CreateConstantImage3D**: Function to create a `ConstantImage3D` instance.
-- **CreateStringImage**: Functions to create `StringImage` instances with different parameter sets.
-- **JustifyImage**: Wraps an existing image and applies justification based on the provided `Justification` enum.
-- **WrapImage**: A base class for images that can wrap another image, allowing transformations and hit testing.
-- **AnimatedImage**: Represents an animated image by breaking a source surface into frames and updating the current frame based on time.
-- **GeoImage**: Represents a 3D image that can be rendered with lighting effects.
-- **SwitchImageImpl**: A concrete implementation of SwitchImage that switches between images based on a number value.
+KEY PARTS:
+- EmptyImage: Represents an empty image.
+- Image: Base class for all images, providing common functionality.
+- ConstantImage: Represents a constant image with a surface and optional color.
+- StringImage: Represents a string-based image that can be rendered as text.
+- GaugeImage: Displays a gauge based on a number value, which can be 3D or flat.
+- AnimatedImage: Manages an animated image by breaking it into frames from a source surface.
+- WrapImage: Wraps another image, handling mouse events and capturing them if necessary.
+- UndetectableImageImpl: A class that wraps an Image and implements IMouseInput methods to make the image undetectable.
+- TransformImage: Class that applies a transformation to an Image, including translation, rotation, scaling, etc.
+- GroupImage: Class that groups multiple Images together and renders them as a single entity. It also handles mouse events for the group.
+- GeoImage: Represents a 3D image with lighting and rendering capabilities.
+- SwitchImageImpl: Manages multiple images based on a numeric value.
+- ColorImage: Represents an image with a single color.
+- ExtentImage: Represents an image with a specified extent and color.
 
-**CONNECTS TO:** Other rendering systems, such as `Context`, `Viewport`, and `Modeler`.
+CONNECTS TO: Other systems or files it depends on or serves, one line. None
 
-**NOTES:**
-- The code includes TODO comments for handling NaN and infinity values in the `GaugeImage::Render` function.
-- There are no explicit TODO comments in other parts of the file.
+NOTES: Contains TODOs for fixing NaN & infinity handling in GaugeImage rendering and ensuring proper bounds calculation in WrapImage.
+
+PARTS (in file order):
+
+- lines 1-372
+  - EmptyImage: Represents an empty image.
+  - Image: Base class for all images, providing common functionality.
+  - ConstantImage: Represents a constant image with a surface and optional color.
+  - ConstantImage3D: Represents a 3D constant image with a surface and color.
+  - StringImage: Represents a string-based image that can be rendered as text.
+  - GetString(int indent): Returns the string representation of an image, useful for debugging or logging.
+  - GetFunctionName(): Returns the function name associated with an image, typically used in scripting or configuration files.
+  - Write(IMDLBinaryFile pfile): Writes the image to a binary file, likely for saving game state or configurations.
+- lines 373-733
+  - StringImage: Represents an image that displays a string with specified justification and color.
+  - GaugeImage: Displays a gauge based on a number value, which can be 3D or flat.
+  - AnimatedImage: Manages an animated image by breaking it into frames from a source surface.
+  - WrapImage: Wraps another image, handling mouse events and capturing them if necessary.
+  - CreateStringImage: Factory function to create instances of StringImage.
+  - CreateGaugeImage: Factory function to create instances of GaugeImage.
+  - AnimatedImage::AnimatedImage(Number ptime, Surface psurfaceSource, int nRows, int nCols): Constructor for creating an animated image from a source surface and dimensions.
+  - TODOs: Fix NaN & infinity handling in GaugeImage rendering. Ensure proper bounds calculation in WrapImage.
+- lines 734-1102
+  - UndetectableImageImpl: A class that wraps an Image and implements IMouseInput methods to make the image undetectable.
+  - CreateUndetectableImage: Function to create an instance of UndetectableImageImpl.
+  - TransformImage: Class that applies a transformation to an Image, including translation, rotation, scaling, etc.
+  - TranslateImage: A subclass of TransformImage that translates an Image by a specified offset.
+  - GroupImage: Class that groups multiple Images together and renders them as a single entity. It also handles mouse events for the group.
+  - HitTest: Method in GroupImage to determine which image within the group is being interacted with.
+  - RemoveCapture: Method in GroupImage to release capture from any currently captured Image.
+  - Button: Method in GroupImage to handle button press events for images within the group.
+- lines 1103-1485
+  - GeoImage: Represents a 3D image with lighting and rendering capabilities.
+  - SwitchImageImpl: Manages multiple images based on a numeric value.
+  - CreateSwitchImage: Factory function to create a SwitchImageImpl instance.
+  - GeoImage2D: Represents a 2D image using a Geo object.
+  - CreateGeoImage2D: Factory function to create a GeoImage2D instance.
+  - ClipImage: Clips an image to a specified rectangle.
+  - CreateClipImage: Factory function to create a ClipImage instance.
+  - PickImageImpl: Allows picking an image by clicking, triggering events.
+- lines 1486-1832
+  - ColorImage: Represents an image with a single color.
+  - ExtentImage: Represents an image with a specified extent and color.
+  - TransparentImage: Represents an invisible image.
+  - VisibleImage: Wraps another image and makes it visible or invisible based on a boolean value.
+  - JustifyImage: Wraps another image and justifies its position based on a justification type.
+  - MDLFileImageImpl: Loads an image from an MDL file.
+  - CreateColorImage: Factory function to create a ColorImage object.
+  - CreateExtentImage: Factory function to create an ExtentImage object.
 
 #### `src/engine/image.h`
 
@@ -18543,28 +22748,86 @@ NOTES: None.
 
 #### `src/engine/modeler.cpp`
 
-**PURPOSE:** The `modeler.cpp` file in Allegiance is responsible for handling model and image loading, as well as creating various graphical objects such as panes, images, and transforms.
+PURPOSE: The file `modeler.cpp` contains various factory classes and utility functions for creating and managing different types of model elements and resources in a game engine.
 
-**KEY PARTS:**
-- **Class: ModelerSiteImpl**: Implements the `ModelerSite` interface to log errors.
-- **Function: ImportXFile**: Imports a model from an X file using the `xfile.cpp` module.
-- **Classes: AnimatedImagePaneRectFactory, AnimatedImagePaneFactory, PaneImageFactory, FrameImageButtonPaneFactory**: Implement the `IFunction` interface to create different types of graphical panes and images.
-- **Classes: PointXFactory, PointYFactory, ImageSizeFactory, MDLFileImageFactory, StringImageFactory**: Implement the `IFunction` interface to apply transformations and create specific image types.
-- **Class: ImportXFileFactory**: Imports XFiles using a Modeler object.
-- **Class: ImportMDLFactory**: Imports MDL files by retrieving an INameSpace from a Modeler object.
-- **Class: ZPackFile**: A custom file class that reads data from memory instead of disk.
-- **Classes: ImportImageFromFileFactory, ImportFontFactory, FillImageFactory, TranslateImageFactory, VisibleImageFactory, ScaleImageFactory, RotateImageFactory, GeoImageFactory**: Implement the `IFunction` interface to create and transform images.
-- **Class: ModelerImpl**: Implements the `Modeler` interface for model loading and management.
-- **Function: Apply() (LODGeoFactory)**: Creates a LOD geometry object based on pixel distance.
-- **Function: Apply() (KeyFramedTranslateFactory)**: Creates a key-framed translation transform.
-- **Class: CameraFactory**: Creates camera objects with specified parameters.
-- **Function: Apply() (Win32FontFactory)**: Creates font objects using Windows API functions.
-- **Classes: NumberString, RealNumberString, ConcatenatedString**: Represent different types of string values.
-- **Function: Apply() (GetResolutionFactory)**: Retrieves the current screen resolution.
+KEY PARTS:
+- ModelerSiteImpl: Manages error handling for modeler sites.
+- AnimatedImagePaneRectFactory: Creates animated image panes with rectangular transformations.
+- GaugeImageFactory: Generates gauge images based on specified parameters.
+- RGBColorFactory: Creates ColorValues from RGB color components.
+- TStaticValue<StaticType>: Represents a static value with a specific type.
+- ModelerImpl: Manages model loading and resource management.
+- CameraFactory: Creates camera objects for different viewing perspectives.
 
-**CONNECTS TO:** `xfile.cpp`, other model and image handling modules, and graphical rendering components.
+CONNECTS TO: Other model-related files, such as `modeler.h`, and utility libraries like `mathutils.cpp`.
 
-**NOTES:** The file contains several TODO comments indicating potential issues or areas that need improvement. There are multiple factory classes for creating various types of objects, suggesting a modular design. The use of `ZAssert` to ensure certain conditions, such as file extensions being "bmp".
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-360
+  - ModelerSiteImpl: Implements error handling for a modeler site.
+  - AnimatedImagePaneRectFactory: Creates an animated image pane with a rectangle.
+  - AnimatedImagePaneFactory: Creates an animated image pane.
+  - PaneImageFactory: Creates a pane image based on the provided parameters.
+  - FrameImageButtonPaneFactory: Creates a frame image button pane.
+  - PointXFactory: Applies the X transformation to a point value.
+  - PointYFactory: Applies the Y transformation to a point value.
+  - ImageSizeFactory: Retrieves the size of an image.
+- lines 361-713
+  - GaugeImageFactory: Creates a gauge image with specified justification and number.
+  - GaugeImageRectFactory: Creates a gauge image with specified justification, rectangle, boolean flag, and number.
+  - UndetectableImageFactory: Creates an undetectable image from the given image.
+  - ClipImageFactory: Clips an image to a specified rectangle.
+  - PickImageFactory: Creates a pickable image from the given image.
+  - ColorImageFactory: Applies a color to an image.
+  - ExtentImageFactory: Creates an extent image with specified rectangle and color.
+  - ImportXFileFactory: Imports a model from an X file.
+- lines 714-1083
+  - ImportFontFactory: Creates a font value by reading from a binary reader site.
+  - ImportImageLRFactory: Imports an image and applies a vertical translation.
+  - ImportImage3DFactory: Loads a surface and creates a constant 3D image with a specified color.
+  - FillImageFactory: Creates a fillable image that can be evaluated to generate a surface filled with a given color.
+  - BlendImageFactory: Blends two images based on a blend mode.
+  - TranslateImageFactory: Translates an image by a specified point.
+  - VisibleImageFactory: Makes an image visible or invisible based on a boolean value.
+  - ScaleImageFactory: Scales an image by a specified factor.
+- lines 1084-1443
+  - TRefIObject: A typedef for a reference-counted pointer to an IObject.
+  - TIFunctionBinary: A template class that implements the IFunction interface for binary operations.
+  - RGBColorFactory: Creates a ColorValue from three float values representing RGB colors.
+  - RGBAColorFactory: Creates a ColorValue from four float values representing RGBA colors.
+  - VectorFactory: Creates a VectorValue from three float values representing a vector.
+  - PointFactory: Creates a PointValue from two float values representing a point.
+  - PointVFactory: Creates a PointValue using a transformation.
+  - RectFactory: Creates a RectValue from four float values representing a rectangle.
+- lines 1444-1826
+  - TStaticValue<StaticType>: Represents a static value with a specific type.
+  - TSwitchFactory<StaticType>: A factory class for creating switch values based on conditions.
+  - SwitchImageFactory: Factory class for creating switch images based on conditions.
+  - GroupImageFactory: Factory class for grouping multiple images together.
+  - GroupGeoFactory: Factory class for grouping multiple geos (geometric shapes) together.
+  - MeshGeoFactory: Factory class for creating mesh geometries from vertex and index lists.
+  - LODGeoFactory: Factory class for creating level-of-detail geometries.
+  - KeyFramedTranslateFactory: Factory class for creating key-framed translate transformations.
+- lines 1827-2203
+  - ModelerImpl: Manages model loading and resource management.
+  - CameraFactory: Creates camera objects based on parameters.
+  - Win32FontFactory: Creates font objects for Windows platforms.
+  - ModFactory: Performs modulo operation on numbers.
+  - MinFactory: Returns the minimum of two numbers.
+  - MaxFactory: Returns the maximum of two numbers.
+  - AddFactory: Adds two numbers together.
+  - SubtractFactory: Subtracts one number from another.
+- lines 2204-2686
+  - Modeler::Create: Factory method to create a new instance of Modeler.
+  - ModelerImpl: Implementation class for the Modeler interface.
+  - TBaseMDLType: Base class for model types.
+  - Number, Boolean, Color, Point, Vector, Rect, Orientation, String, Image, Geo: Specific model types.
+  - CreateStringMDLType, CreateIObjectMDLType: Functions to create specific model types.
+  - ModifiableNumberFactory, WrapNumberFactory, etc.: Factories for creating numbers, colors, vectors, etc.
+  - MinFactory, MaxFactory, etc.: Factories for mathematical operations on numbers.
+  - ImportImageFactory, ImportImageFromFileFactory, etc.: Factories for importing images in various formats.
 
 #### `src/engine/namespace.cpp`
 
@@ -18662,15 +22925,21 @@ NOTES: None.
 
 #### `src/engine/paneimage.h`
 
-PURPOSE: Defines a function to create an image pane in the Allegiance game engine.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PaneImage: A class representing an image pane.
-- CreatePaneImage: A function that creates and returns a TRef<Image> object, which is likely used to manage image resources within the game engine.
-
-CONNECTS TO: engine.h (Engine), image.h (Image), pane.h (Pane)
-
-NOTES: None.
+    #ifndef _PaneImage_H_
+    #define _PaneImage_H_
+    #include <tref.h>
+    class Engine;
+    class Image;
+    class Pane;
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    // PaneImage
+    //
+    /////////////////////////////////////////////////////////////////////////////
+    TRef<Image> CreatePaneImage(Engine* pengine, bool bColorKey, Pane* ppane);
+    #endif
 
 #### `src/engine/pixel.h`
 
@@ -18750,72 +23019,99 @@ NOTES: None.
 
 #### `src/engine/settings.xml`
 
-PURPOSE: This XML file defines settings properties for the Allegiance game engine, including associations for different operations.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- PropertyList varName="Settings": Root element containing all settings.
-- Associations varName="Diff Associations": Contains settings related to differences.
-  - RunExternal: Boolean indicating whether external processes should be run for diff operations.
-- Associations varName="Merge Associations": Contains settings related to merging.
-  - RunExternal: Boolean indicating whether external processes should be run for merge operations.
-
-CONNECTS TO: None explicitly mentioned, but likely referenced by other parts of the game engine that need to access these settings.
-
-NOTES: none
+    <?xml-version ='1.0' encoding='UTF-8'?>
+    <PropertyList varName="Settings" >
+     <Property>
+      <Associations varName="Diff Associations" >
+       <RunExternal>false</RunExternal>
+      </Associations>
+     </Property>
+     <Property>
+      <Associations varName="Merge Associations" >
+       <RunExternal>false</RunExternal>
+      </Associations>
+     </Property>
+    </PropertyList>
 
 #### `src/engine/stdafx.cpp`
 
-PURPOSE: This file is part of the Allegiance game engine and serves as a precompiled header for the project. It includes standard headers to speed up compilation times.
+PURPOSE: tiny file (6 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `stdafx.h`: The precompiled header file that includes common headers.
-- `Engine.pch`: The precompiled header output file.
-
-CONNECTS TO: None, it is used internally by the engine.
-
-NOTES: Contains a TODO comment suggesting additional headers should be referenced in `stdafx.h` rather than this file.
+    // stdafx.cpp : source file that includes just the standard includes
+    // Engine.pch will be the pre-compiled header
+    // stdafx.obj will contain the pre-compiled type information
+    #include "stdafx.h"
+    // TODO: reference any additional headers you need in STDAFX.H
+    // and not in this file
 
 #### `src/engine/stdafx.h`
 
-PURPOSE: This file is a precompiled header for the Allegiance project, including standard system headers and project-specific headers that are used frequently but rarely change.
+PURPOSE: tiny file (7 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- WIN32_LEAN_AND_MEAN: Excludes rarely-used parts of Windows headers to reduce compile time.
-- TODO: Placeholder for additional headers required by the program.
-
-CONNECTS TO: Other project files that include stdafx.h.
-
-NOTES: None.
+    // stdafx.h : include file for standard system include files,
+    // or project specific include files that are used frequently, but
+    // are changed infrequently
+    //
+    #pragma once
+    #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+    // TODO: reference additional headers your program requires here
 
 #### `src/engine/surface.cpp`
 
-**PURPOSE:** The `surface.cpp` file in Allegiance is responsible for managing surfaces within the game engine, including their creation, allocation, and rendering.
+PURPOSE: Manages surfaces and textures for rendering in Allegiance, handling surface creation, management, and operations.
 
-**KEY PARTS:**
-- **Class: PrivateSurfaceImpl**: Manages private surface implementations.
-  - Initializes member variables.
-  - Allocates textures and render targets.
-  - Handles different pixel formats and memory allocations.
-  
-- **Class: Surface**: Represents a drawable surface such as textures or back buffers.
-  - Creates compatible surfaces.
-  - Copies the current surface.
-  - Sets and gets various properties like site, format, and name.
+KEY PARTS:
+- PrivateSurfaceImpl: Main class for managing surfaces with detailed logic.
+- AllocateSurface: Allocates a surface and creates a texture.
+- CreateCompatibleSurface: Creates a compatible surface based on current properties.
+- BitBlt: Blits an area from one surface to another.
+- DrawString: Draws a string on the surface.
+- FillRect: Fills a rectangle on the surface with a given pixel or color.
 
-- **Class: PrivateSurface**: Manages private rendering surfaces.
-  - Performs bit blitting operations.
-  - Fills rectangles with specified colors.
-  - Creates dummy and render target surfaces.
+CONNECTS TO: Allegiance engine systems, DirectX for rendering.
 
-**CONNECTS TO:** 
-- Engine management system for surface lifecycle.
-- Graphics subsystem for rendering operations.
-- Memory management for texture allocations.
+NOTES: None.
 
-**NOTES:**
-- Contains TODOs indicating areas needing further work or review.
-- Includes commented-out code related to transitioning from DirectDraw to DirectX9.
-- Uses `ZAssert` for assertions, typical in game development.
+PARTS (in file order):
+
+- lines 1-345
+  - PrivateSurfaceImpl: Main class for managing surfaces.
+  - Initialize(): Initializes member variables.
+  - AllocateSurface(): Allocates a surface and creates a texture.
+  - AllocateRenderTarget(): Allocates a render target surface.
+  - GetTexHandle(): Returns the texture handle.
+  - PrivateSurfaceImpl(PrivateEngine, const WinPoint&, SurfaceSite, SurfaceType): Constructor for creating a dummy top-level surface.
+  - PrivateSurfaceImpl(D3DFORMAT, DWORD, DWORD, const char): Constructor for creating a surface from binary data.
+  - PrivateSurfaceImpl(PrivateEngine, PixelFormat, const WinPoint&, SurfaceType, SurfaceSite): Constructor for creating a device format surface.
+- lines 346-705
+  - Surface: Manages a surface object with texture handling.
+  - PrivateSurfaceImpl: Implementation class for Surface, containing detailed logic for surface creation and management.
+  - CreateCompatibleSurface: Creates a compatible surface based on the current surface's properties.
+  - Copy: Creates a copy of the current surface.
+  - ~PrivateSurfaceImpl: Destructor that releases associated resources.
+  - SetSite: Sets the site for the surface.
+  - ClearDevice: Clears device-specific surface data (commented out).
+  - SetPixelFormat: Updates the pixel format and re-allocates the surface.
+- lines 707-1054
+  - Surface: Manages rendering and surface operations.
+  - UnclippedBlt: Performs a blit operation without clipping.
+  - CopySubsetFromSrc: Copies a subset of another surface to this one.
+  - BitBlt: Blits (copies) an area from one surface to another.
+  - BitBltFromCenter: Blits an area from one surface to another centered at the specified point.
+  - DrawString: Draws a string on the surface.
+  - DrawStringWithShadow: Draws a string with a shadow effect.
+  - Offset: Offsets the rendering context by a given point.
+- lines 1056-1421
+  - BitBlt: Blits a source surface to a target rectangle.
+  - UnclippedFill: Fills a rectangle with a specified pixel color using hardware acceleration if possible.
+  - FillRect: Fills a rectangle on the surface with a given pixel or color.
+  - FillSurface: Fills the entire surface with a given pixel or color.
+  - CreatePrivateDummySurface: Creates a dummy top-level surface.
+  - CreatePrivateRenderTargetSurface: Creates a render target surface.
+  - CreatePrivateSurface: Creates a surface with a specified pixel format and dimensions.
+  - CreatePrivateSurface (memory mapped file): Creates a surface from a memory-mapped file.
 
 #### `src/engine/surface.h`
 
@@ -19044,66 +23340,63 @@ NOTES: None.
 
 #### `src/engine/xfile.cpp`
 
-**PURPOSE:** The `xfile.cpp` file in Allegiance is responsible for parsing and processing XFile format files, which store 3D models, animations, and other game assets.
+PURPOSE: The file `xfile.cpp` contains classes and functions for parsing X-Files, a file format used by Microsoft games for storing 3D models, animations, and other resources.
 
-**KEY PARTS:**
-- **Class: XToken**: Abstract base class for tokenizers that parse X-Files.
-- **Class: XBinaryToken**: Tokenizer for binary X-Files.
-- **Class: XTextToken**: Tokenizer for text X-Files.
-- **Class: XParser**: Parses X-Files and constructs a model.
-- **Function: ReadMesh(const ZString& strName, TRef<Geo>& pgeo)**: Parses a mesh section from an XFile. It reads vertex positions, normals, texture coordinates, materials, and textures, then constructs a geometric representation of the mesh.
-- **Function: CreateMaterial(Color colorDiffuse, Color colorSpecular, Color colorEmissive, float power)**: Creates a material object using diffuse, specular, emissive colors, and a shininess factor.
-- **Class: GroupGeo**: Represents a group of geometric objects. It can contain other groups or individual geometries and is used to organize the scene graph.
-- **Class: TransformGeo**: Combines a geometry with a transformation (translation, rotation, scale). This allows for complex transformations on 3D models.
-- **Function: ReadAnimationKey(Number* pnumberFrame, TRef<Transform>& ptransformTranslate, TRef<Transform>& ptransformScale, TRef<Transform>& ptransformRotate)**: Parses an animation key section from the XFile. It reads keyframes for translation, rotation, and scaling transformations.
-- **Class: KeyFramedTransform**: Base class for keyframed transformations (translation, rotation, scale). Derived classes handle specific types of transformations.
+KEY PARTS:
+- XToken: Abstract base class for tokenizing X-Files.
+- XBinaryToken: Concrete implementation of XToken for binary X-Files.
+- XTextToken: Concrete implementation of XToken for text X-Files.
+- XParser: Class responsible for parsing X-Files using a tokenizer.
+- ReadTransform: Reads and constructs a Transform object from the token stream.
+- ReadMesh: Reads and constructs a Geo (mesh) object from the token stream.
+- TRef<T>: A smart pointer template for managing resources.
+- ZString: A string class with additional functionality.
+- Matrix: Represents a 4x4 transformation matrix.
+- Vertex: Represents a vertex with position, texture coordinates, and normal.
+- Geo: Represents a mesh geometry.
+- ReadFrame: Reads frame data from an X-File and creates a GroupGeo object.
+- ReadAnimationKey: Reads animation keyframe data from an X-File and creates a Transform object.
+- ReadAnimation: Reads animation data from an X-File and applies it to a frame's transform.
+- ReadAnimationSet: Reads a set of animations from an X-File.
+- ImportXFile: Entry point for importing X-File data, creating a parser and reading the file.
 
-**CONNECTS TO:** Other systems or files it depends on or serves:
-- `Modeler`: Imports X-Files into the modeler.
-- `ZFile`: Handles file operations.
-- `Geo` and `GroupGeo`: Represent geometric entities in the game.
+CONNECTS TO: Other systems or files it depends on or serves, one line. None
 
-**NOTES:**
-- The code contains assertions and error handling to ensure data integrity.
-- There are TODO comments indicating unimplemented features, such as "AnimationOptions".
-- The function `ReadMesh` includes a commented-out section for parsing mesh vertex colors and face wraps, which suggests these features were intended but not fully implemented.
+NOTES: "ZError("Not Implemented");" in ReadAnimationKey
 
 #### `src/engine/xfile.h`
 
-PURPOSE: The file `xfile.h` defines a function to import XFile format data into the game engine.
+PURPOSE: tiny file (12 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ImportXFile: A function that imports XFile format data using a Modeler object and a ZFile object, returning a reference to a Geo object.
-- TRef<Geo>: A template class representing a reference-counted pointer to a Geo object.
-- Geo: A class representing geometric data in the game engine.
-- Modeler: A class responsible for modeling and importing 3D assets.
-- ZFile: A class representing a file handle or stream.
-
-CONNECTS TO: The game's model loading system, specifically the `Modeler` and `Geo` classes.
-
-NOTES: None.
+    #ifndef _xfile_h_
+    #define _xfile_h_
+    #include "value.h"
+    class Geo;
+    class Modeler;
+    //////////////////////////////////////////////////////////////////////////////
+    //
+    //
+    //
+    //////////////////////////////////////////////////////////////////////////////
+    TRef<Geo> ImportXFile(Modeler* pmodeler, ZFile* pfile, Number* pnumberFrame, bool& bAnimation);
+    #endif
 
 ### src/guids
 
-The `src/guids` folder in Allegiance is responsible for managing globally unique identifiers (GUIDs) and constants essential for OLE DB operations, facilitating database interactions within the game.
+The `src/guids` folder in Allegiance contains definitions of globally unique identifiers (GUIDs) used across various components of the game. These GUIDs facilitate the identification and management of different session applications and services.
 
-- `guids.cpp`: Initializes GUIDs and constants required for OLE DB operations.
-- `guids.h`: Declares GUIDs used throughout the game for various components and sessions.
+- guids.cpp: Tiny file containing a few lines of code, likely related to the implementation or usage of GUIDs.
+- guids.h: Contains detailed definitions of GUIDs essential for identifying and managing different session applications and services within the game.
 
 #### `src/guids/guids.cpp`
 
-PURPOSE: This file initializes GUIDs and OLE constants for use in the Allegiance game.
+PURPOSE: tiny file (5 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `INITGUID`: Macro to initialize GUIDs.
-- `DBINITCONSTANTS`: Macro to initialize OLE constants for database operations.
-- `#include <oledb.h>`: Includes the OLE DB header file.
-- `#include <sqloledb.h>`: Includes the SQL OLE DB provider header file.
-- `#include "guids.h"`: Includes a custom header file for GUID definitions.
-
-CONNECTS TO: Other files that require GUID initialization and OLE constants, such as database-related code.
-
-NOTES: None.
+    #define INITGUID
+    #define DBINITCONSTANTS // Initialize OLE constants...
+    #include <oledb.h>
+    #include <sqloledb.h>
+    #include "guids.h"
 
 #### `src/guids/guids.h`
 
@@ -19120,16 +23413,15 @@ NOTES: None.
 
 ### src/lobby
 
-**Folder Summary:** The `src/lobby` directory contains essential components for managing the lobby system in Allegiance, including auto-update functionality, Steam validation, network communications, and server management.
+The `src/lobby` folder contains essential components of Allegiance's lobby system, responsible for managing player logins, mission creation, and server interactions.
 
-**Important Files:**
-- **AutoUpdate.cpp & AutoUpdate.h**: Manages automatic updates by checking file integrity and downloading updates if necessary.
-- **CSteamValidation.cpp & CSteamValidation.h**: Handles user authentication using the Steam API.
-- **broadcast.cpp & broadcast.h**: Implements UDP socket operations for broadcasting messages across networks.
-- **client.cpp & client.h**: Manages client connections, logon processing, and mission-related requests.
-- **lobby.cpp & lobby.h**: Defines the main service module for the lobby system, handling registration and management of the service.
-- **lobbyapp.cpp & lobbyapp.h**: Manages initialization, message processing, performance counters, and game information updates.
-- **messagesall.h**: Contains definitions for messages used across multiple sessions in the lobby system.
+- AutoUpdate.cpp: Manages the AutoUpdate system, checking file integrity via FTP.
+- client.cpp: Handles client-side logic for player logins and interactions within the lobby.
+- lobbyapp.cpp: Manages the lobby application, including initialization and message processing.
+- lobby.cpp: Registers and manages the lobby service as a Windows service.
+- server.cpp: Implements server-related functionality for managing server connections and events.
+
+Largest files: lobbyapp.cpp (1180 lines), client.cpp (608 lines), lobby.cpp (576 lines), server.cpp (553 lines), zgameinfo.h (327 lines).
 
 #### `src/lobby/AutoUpdate.cpp`
 
@@ -19148,16 +23440,28 @@ NOTES: None.
 
 #### `src/lobby/AutoUpdate.h`
 
-PURPOSE: The file defines an interface and a function for managing the AutoUpdate system in Allegiance.
+PURPOSE: tiny file (20 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- IAutoUpdate: Interface defining methods for loading settings, CRC values, FTP server details, and retrieving file list information.
-- CreateAutoUpdate: Function to create an instance of the AutoUpdate system.
-- g_pAutoUpdate: Global pointer to the AutoUpdate interface, initialized as NULL if not enabled.
-
-CONNECTS TO: Allegiance game engine systems that require auto-update functionality.
-
-NOTES: None.
+    /*-------------------------------------------------------------------------
+      AutoUpdate.h
+      Management of the AutoUpdate system
+      Owner:
+      Copyright 1986-2000 Microsoft Corporation, All Rights Reserved
+     *-----------------------------------------------------------------------*/
+    class IAutoUpdate
+    {
+    public:
+        virtual void     LoadSettings(HKEY hk)           = 0;
+        virtual void     LoadCRC(char * szFileName)      = 0;
+        virtual char *   GetFTPServer()      = 0;
+        virtual char *   GetFTPInitialDir()  = 0;
+        virtual char *   GetFTPAccount()     = 0;
+        virtual char *   GetFTPPassword()    = 0;
+        virtual int      GetFileListCRC()    = 0;
+        virtual unsigned GetFileListSize()   = 0;
+    };
+    void CreateAutoUpdate(HKEY hk, char * szFileName);
+    extern IAutoUpdate * g_pAutoUpdate; // this is NULL is g_pAutoUpdate is not enabled
 
 #### `src/lobby/CSteamValidation.cpp`
 
@@ -19177,27 +23481,43 @@ NOTES: None.
 
 #### `src/lobby/CSteamValidation.h`
 
-PURPOSE: This file defines a class responsible for handling Steam authentication within the Allegiance game lobby system.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CSteamValidation: Manages the Steam authentication process.
-- BeginSteamAuthentication: Initiates the authentication process.
-- OnValidateAuthTicketResponse: Handles the response from Steam's validation service.
-
-CONNECTS TO: CSQLQuery, CQLobbyLogonData, Steam API
-
-NOTES: None
+    #pragma once
+    class CSteamValidation
+    {
+    private:
+    	DWORD			m_dwThreadID;
+    	CSQLQuery *		m_sqlQuery;
+    	CQLobbyLogonData *	m_lobbyLogonData;
+    	int				m_characterID;
+    	bool			m_bAuthenticationComplete = false;
+    public:
+    	CSteamValidation(DWORD dwThreadID, int characterID, CSQLQuery * pQuery, CQLobbyLogonData * pqd);
+    	void BeginSteamAuthentication();
+    private:
+    	// Tells us a client has been authenticated and approved to play by Steam (passes auth, license check, VAC status, etc...)
+    	STEAM_GAMESERVER_CALLBACK(CSteamValidation, OnValidateAuthTicketResponse, ValidateAuthTicketResponse_t);
+    	void OnValidateAuthTicketResponse(CSteamID m_SteamID, EAuthSessionResponse eAuthSessionResponse, CSteamID ownerSteamID);
+    };
 
 #### `src/lobby/LobbyAppSite.h`
 
-PURPOSE: Defines an interface for logging events in the lobby application.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ILobbyAppSite: Interface class with a method to log events.
-
-CONNECTS TO: None explicitly mentioned; likely used by other parts of the lobby application to report various events.
-
-NOTES: none.
+    #pragma once
+    #ifndef __LobbyAppSite_h__
+    #define __LobbyAppSite_h__
+    /////////////////////////////////////////////////////////////////////////////
+    // LobbyAppSite.h
+    //
+    class ATL_NO_VTABLE ILobbyAppSite
+    {
+    public:
+      virtual int LogEvent(WORD wType, int id, ...) = 0;
+    };
+    /////////////////////////////////////////////////////////////////////////////
+    #endif // !__LobbyAppSite_h__
 
 #### `src/lobby/broadcast.cpp`
 
@@ -19298,17 +23618,9 @@ NOTES:
 
 #### `src/lobby/lobby.h`
 
-PURPOSE: This file contains the definitions for the interfaces used in the Allegiance game's lobby system.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- LobbyManager: Manages the creation and management of lobby instances.
-- PlayerInfo: Holds information about a player within a lobby.
-- LobbyInterface: Defines the interface for interacting with lobbies, including creating, joining, and leaving.
-- NetworkLobbyService: Handles network communication related to lobby operations.
-
-CONNECTS TO: src/network/network.h (for network-related functions)
-
-NOTES: None
+    /* MIDL: this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 #### `src/lobby/lobby.rgs`
 
@@ -19421,14 +23733,20 @@ NOTES: None.
 
 #### `src/lobby/lobqguids.cpp`
 
-PURPOSE: This file defines GUIDs (Globally Unique Identifiers) for various lobby query operations in the Allegiance game.
+PURPOSE: tiny file (12 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- SQLGUID(CQLobbyLogon): Defines a GUID for the CQLobbyLogon class, which is likely used to identify or track lobby logon queries.
-
-CONNECTS TO: pch.h
-
-NOTES: None.
+    /*-------------------------------------------------------------------------
+      LobQGuids.cpp
+      Guids for LobQueries
+      Owner:
+      Copyright 1986-2000 Microsoft Corporation, All Rights Reserved
+     *-----------------------------------------------------------------------*/
+    #include "pch.h"
+    #define SQLGUID(X) GUID X::s_guid = GUID_NULL;
+    //Imago removed - 7/5/08
+    //#ifdef USEAUTH
+    SQLGUID(CQLobbyLogon)
+    //#endif
 
 #### `src/lobby/lobqueries.h`
 
@@ -19536,18 +23854,25 @@ NOTES:
 
 #### `src/lobby/pch.cpp`
 
-PURPOSE: This file is a precompiled header for the fedsrv project in Allegiance. It includes necessary headers and source files to speed up compilation by reducing the amount of code that needs to be compiled each time.
+PURPOSE: tiny file (17 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `pch.h`: The primary precompiled header file.
-- `<atlbase.h>`: Provides basic ATL (Active Template Library) functionality.
-- `<statreg.h>`: Header for static registry support, included conditionally based on `_ATL_STATIC_REGISTRY`.
-- `<TCAtl/UserAcct.cpp>`: Source code for user account management.
-
-CONNECTS TO: The fedsrv project and other components that use the precompiled header.
-
-NOTES:
-- There is commented-out code related to `statreg.cpp` and `atlimpl.cpp`, indicating potential future or past inclusion.
+    /*-------------------------------------------------------------------------
+     * pch.cpp
+     *
+     * Precompiled header for fedsrv
+     *
+     * Owner:
+     *
+     * Copyright 1986-1998 Microsoft Corporation, All Rights Reserved
+     *-----------------------------------------------------------------------*/
+    #include "pch.h"
+    #include <atlbase.h>
+    #ifdef _ATL_STATIC_REGISTRY
+    #include <statreg.h>
+    //#include <statreg.cpp> Imago removed (again)
+    #endif
+    //#include <atlimpl.cpp>
+    #include <../TCAtl/UserAcct.cpp>
 
 #### `src/lobby/pch.h`
 
@@ -19570,17 +23895,13 @@ NOTES:
 
 #### `src/lobby/resource.h`
 
-PURPOSE: This file contains resource definitions used by the Lobby application in Allegiance. It includes identifiers for strings and icons that are referenced in other resources.
+PURPOSE: tiny file (5 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- IDS_SERVICENAME: String identifier for the service name.
-- IDS_SERVICEDESC: String identifier for the service description.
-- IDR_Lobby: Resource ID for the lobby application.
-- ICO_LOBBY: Icon identifier for the lobby application.
-
-CONNECTS TO: Lobby.rc
-
-NOTES: none
+    // Used by Lobby.rc
+    #define IDS_SERVICENAME 100
+    #define IDS_SERVICEDESC 101
+    #define IDR_Lobby 100
+    #define ICO_LOBBY 101
 
 #### `src/lobby/server.cpp`
 
@@ -19670,11 +23991,11 @@ NOTES: The file includes multiple protocol versions (Z2, Z3, Z5) with varying le
 
 ### src/mdlc
 
-The `src/mdlc` folder contains the implementation of the MDL Compiler application, which handles operations related to model and animation files in the Allegiance game engine.
+The `src/mdlc` folder contains essential components for handling and compiling 3D model files in Allegiance. It includes:
 
-- `mdlc.cpp`: Implements the MDL Compiler application, handling compilation, optimization, conversion, and compression of MDL files. It also includes command-line parsing and video settings initialization.
-- `pch.cpp`: A precompiled header file for the MDLC module, including common headers used across multiple source files in that module.
-- `pch.h`: The primary include file for this precompiled header, defining necessary libraries, macros, and disabling compiler warnings.
+- `mdlc.cpp`: Implements the MDL Compiler application responsible for processing and compiling 3D model files.
+- `pch.h`: A precompiled header file that defines common includes and disables certain compiler warnings, enhancing build performance.
+- `pch.cpp`: A tiny file containing a single line of code, likely used in conjunction with `pch.h` to facilitate the precompilation process.
 
 #### `src/mdlc/mdlc.cpp`
 
@@ -19697,17 +24018,9 @@ NOTES:
 
 #### `src/mdlc/pch.cpp`
 
-PURPOSE: This file includes precompiled headers for the mdlc module of Allegiance, which is responsible for managing model data and rendering.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: pch.h - Header file containing precompiled headers for the mdlc module.
-- Name: CModelManager - Class that manages loading and caching of 3D models.
-- Name: CMeshRenderer - Class responsible for rendering 3D meshes.
-- Name: CMaterialCache - Manages caching of material data used in rendering.
-
-CONNECTS TO: src/mdlc/model.cpp, src/mdlc/render.cpp
-
-NOTES: None.
+    #include "pch.h"
 
 #### `src/mdlc/pch.h`
 
@@ -19724,39 +24037,74 @@ NOTES: None.
 
 ### src/mdledit
 
-**Overview:** The `src/mdledit` folder contains the source code for the MDL Editor application, which is used for editing and testing models in Allegiance. This toolset allows developers to visualize, test, and debug 3D models within the game environment.
+The `src/mdledit` folder contains the source code for the MDL Editor application in Allegiance, which is used to create and edit 3D models for the game.
 
-**Important Files:**
-- **mdledit.cpp**: Implements the main window of the MDL Editor, handling rendering, user input, and various geometric tests.
-- **TestGeo.h/.cpp**: Manages the initialization and rendering of different geometric tests using a `Modeler` instance.
-- **CursorSurfaceSite.h/.cpp**: Updates a cursor surface with a crosshair pattern.
-- **PopupImpl.h/.cpp**: Implements a popup window handling keyboard events to close it.
-- **pch.h**: A precompiled header file that includes necessary headers and disables specific compiler warnings for the MDLEdit application.
+- mdledit.cpp: Implements the main window class and various test geometry classes for the MDL Editor.
+- pch.h: A precompiled header file that includes necessary headers and disables certain compiler warnings for the MDLEdit application.
 
 #### `src/mdledit/mdledit.cpp`
 
-**PURPOSE:** The `src/mdledit/mdledit.cpp` file contains the implementation of the main window and core functionality for the MDL Editor application. It manages rendering, user input, menu interactions, and loading various assets like geometry, images, and MDL files.
+PURPOSE: The file `mdledit.cpp` contains the implementation of the MDL Editor application's main window class and various test geometry classes.
 
-**KEY PARTS:**
-- **Class: MDLEditWindow:** Manages the main window of the MDL Editor application.
-- **Function: Initialize():** Initializes components such as fonts, camera, viewport, geometry, and images.
-- **Function: AddMineFieldTest():** Adds a test for mine field generation and rendering.
-- **Function: OnKey(const KeyState& ks):** Handles keyboard input to toggle features and open menus.
-- **Function: OpenXFile(const ZString& strFilename):** Loads an XFile into the application's geometry group.
-- **Function: OpenMDL(const ZString& strFilename):** Opens and loads a MDL file, adding its geometry to the group.
-- **Function: EvaluateFrame(Time ttime):** Updates the frame number and positions of objects in the scene based on time.
-- **Function: MoveCamera():** Smoothly moves the camera around the scene with random offsets.
-- **Function: Terminate():** Cleans up resources and terminates the application.
+KEY PARTS:
+- **MDLEditWindow**: Main window class for the MDL Edit application, handling rendering, hit testing, and network communication.
+- **TestGeo**: Class representing a test geometry with different rendering modes and tests.
+- **InitializePolyTest**: Initializes polygonal test geometry.
+- **AddMineFieldTest**: Function to add mine field test elements.
+- **OpenXFile**: Loads an X file into the scene.
+- **OnMenuCommand**: Handles menu commands for user interactions.
+- **Render**: Method to render images on the screen.
+- **HitTest**: Method to handle mouse hit testing.
 
-**CONNECTS TO:** 
-- `EffectWindow`, `IIntegerEventSink`, `IMenuCommandSink`, `ISubmenuEventSink` (for window management and event handling).
-- Various rendering classes like `TestGeo`, `TestImage`, and `CursorSurfaceSite`.
-- Other MDL Editor components for managing geometry, images, and camera.
+CONNECTS TO: Allegiance engine, sound engine, network communication systems.
 
-**NOTES:** 
-- The code includes commented-out sections related to network functionality, LOD adjustments, sound engine updates, and other features that were either not implemented or intentionally left out.
-- Error handling uses `ZError` and `MessageBox`.
-- The function `Terminate()` returns `S_OK` after parsing certain command line arguments, which might be unexpected.
+NOTES:
+- Contains commented-out code related to fullscreen settings and sound engine initialization.
+- Member variable `m_pimageCursor` is declared but not used in the provided code.
+
+PARTS (in file order):
+
+- lines 1-369
+  - MDLEditWindow: Main window class for the MDL Editor.
+  - TestGeo: Class representing a test geometry with various rendering modes and tests.
+  - InitializePolyTest: Initializes polygonal test geometry.
+  - InitializeGeoTest: Initializes geometric test using ThingGeo.
+  - InitializeRingTest: Initializes ring test with multiple ThingGeos.
+  - SetTest: Sets the current test mode based on an integer value.
+  - NextTest: Advances to the next test mode.
+  - SetMode: Configures rendering context for different test modes.
+- lines 370-746
+  - MDLEditWindow: Main window class for MDLEdit application.
+  - Render: Method to render images on the screen.
+  - HitTest: Method to handle mouse hit testing.
+  - CursorSurfaceSite: Class to create a custom cursor surface.
+  - MDLEditWindow constructor: Initializes various components of the MDLEdit application.
+  - Add2DTests and Add3DTests: Methods to add 2D and 3D tests based on user input.
+  - TODOs: "// Move this call here, so that engine initialisation is performed AFTER we have a valid HWND." "// SetFullscreen(true);" "// GetEngine()->SetDebugFullscreen(true);" "//m_psoundEngine = CreateSoundEngine(GetHWND());"
+- lines 748-1118
+  - MDLEditWindow: Main class for the MDL edit window.
+  - AddMineFieldTest: Function to add mine field test elements.
+  - AddBoltTest: Function to add bolt test element.
+  - SweepNumber: Class that sweeps a number between a minimum and maximum value over a duration.
+  - CreateGeoPane: Function to create a pane with a rotating geo image.
+  - Receive, Disconnect, Connect, StartServer, ServerDoIdle, StartClient, ClientDoIdle: Functions related to network communication (commented out).
+  - TODOs or unusual code: //KG - old version here: Comment indicating an older version of the code. m_pimageCursor: Member variable for cursor image, but not used in the provided code.
+- lines 1119-1491
+  - AddDebris: Adds debris to the scene.
+  - AddThingGeo: Adds particle and bits geometry to the scene.
+  - AddLODScrollBar: Adds a LOD (Level of Detail) scroll bar to the interface.
+  - AddSphere: Adds a sphere to the scene (commented out).
+  - AddIcosahedron: Adds an icosahedron to the scene.
+  - OpenXFile: Loads an X file into the scene.
+  - OpenMDL: Opens an MDL file and adds its geometry to the scene.
+  - OpenImage: Loads an image from a path.
+- lines 1492-1770
+  - MDLEditWindow: Main window class for MDLEdit application.
+  - OnMenuCommand: Handles menu commands.
+  - OnKey: Processes keyboard input.
+  - Initialize: Initializes the MDLEdit application.
+  - Terminate: Cleans up resources before exiting.
+  - TODOs: Remove commented-out code related to "client" and "server". Consider refactoring key handling logic for better readability.
 
 #### `src/mdledit/pch.h`
 
@@ -19775,37 +24123,26 @@ NOTES:
 
 ### src/sharemem
 
-The `src/sharemem` folder in Allegiance contains essential code for managing shared memory, which is crucial for performance monitoring and tracking across different parts of the game.
+This folder contains source code related to shared memory and synchronization mechanisms used in performance monitoring within the Allegiance game.
 
-- **pch.cpp**: A precompiled header file that includes common headers used throughout the sharemem module to enhance compilation speed.
-- **pch.h**: Contains standard library headers and project-specific headers necessary for the sharemem module.
-- **sharemem.cpp**: Implements a shared memory system, including classes like `CPerfShare` with methods for locking, unlocking, initializing, terminating, allocating counters, and freeing counters. This file also connects to Windows API functions for managing shared memory resources.
+- pch.cpp: Precompiled header file for faster compilation.
+- pch.h: Declaration of symbols included in the precompiled header.
+- sharemem.cpp: Implements a class `CPerfShare` that manages shared memory and synchronization for performance counters, enabling efficient data sharing between different parts of the game.
 
 #### `src/sharemem/pch.cpp`
 
-PURPOSE: This file is a precompiled header for the Allegiance game's sharemem module, which likely includes common headers and definitions used across various source files in that module.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Name: pch.h - Contains precompiled headers to speed up compilation by reducing the number of times the same headers are parsed.
-- Name: pch.cpp - The implementation file for the precompiled header, though it may not contain any actual code and is often empty or minimal.
-
-CONNECTS TO: sharemem module source files
-
-NOTES: None.
+    #include "pch.h"
 
 #### `src/sharemem/pch.h`
 
-PURPOSE: This header file is part of the shared memory system in Allegiance and includes necessary Windows headers for shared memory operations.
+PURPOSE: tiny file (4 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `windows.h`: Provides essential Windows API functions.
-- `stdio.h`: Includes standard input/output functions.
-- `tchar.h`: Defines macros to handle Unicode and ANSI text seamlessly.
-- `sharemem.h`: Custom header file likely containing declarations specific to Allegiance's shared memory implementation.
-
-CONNECTS TO: Other files that use shared memory functionality, such as game modules or network components.
-
-NOTES: None.
+    #include <windows.h>
+    #include <stdio.h>
+    #include <tchar.h>
+    #include <sharemem.h>
 
 #### `src/sharemem/sharemem.cpp`
 
@@ -19826,50 +24163,100 @@ NOTES: None.
 
 ### src/soundengine
 
-The `src/soundengine` folder in Allegiance contains the core sound management system, responsible for handling audio playback, 3D positioning, and various sound effects.
+The `src/soundengine` folder in Allegiance contains essential components for managing audio playback and 3D sound positioning within the game. It includes classes and functions to handle sound buffers, engine management, utility tasks, virtual buffers, and template-based sound effects.
 
-- **ds3dbuffer.cpp**: Manages DirectSound buffers for static and streaming sounds.
-- **ds3dengine.cpp**: Implements the main sound engine using DirectSound 3D.
-- **ds3dvirtualbuffer.cpp**: Handles virtual sound buffers with support for 2D and 3D positioning.
-- **soundbase.cpp**: Initializes and manages the overall sound engine.
-- **soundtemplates.cpp**: Provides templates to customize and control sound properties.
-- **soundutil.cpp**: Manages loading, caching, and utility functions for sound files.
+- ds3dbuffer.cpp: Manages sound buffers using DirectSound3D for playback.
+- ds3dengine.cpp: Implements a sound engine using DirectSound3D for 3D audio rendering.
+- ds3dvirtualbuffer.cpp: Handles virtual sound buffers for both 2D and 3D audio effects.
+- soundtemplates.cpp: Manages and manipulates sound templates for various audio effects.
+- soundutil.cpp: Loads, parses, caches wave files, and manages basic sound source and listener properties.
+
+Largest files: soundtemplates.cpp (2101 lines), ds3dbuffer.cpp (1735 lines), soundutil.cpp (1131 lines), ds3dvirtualbuffer.cpp (916 lines), ds3dengine.cpp (732 lines).
 
 #### `src/soundengine/CMakeLists.txt`
 
-PURPOSE: This file is a CMake configuration script for building the SoundEngine module in the Allegiance game. It sets up the necessary definitions, includes directories, source files, and properties for compiling the SoundEngine library.
+PURPOSE: tiny file (14 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- ds3dbuffer.cpp: Manages 3D audio buffers.
-- ds3dengine.cpp: Handles the main 3D sound engine operations.
-- ds3dutil.cpp: Provides utility functions for 3D sound processing.
-- ds3dvirtualbuffer.cpp: Implements virtual buffer management for 3D sounds.
-- dummysound.cpp: Contains dummy implementations of sound-related classes for testing or fallback purposes.
-- soundbase.cpp: Defines the base class for all sound objects.
-- soundtemplates.cpp: Includes template definitions used in sound processing.
-- soundutil.cpp: Offers utility functions for general sound operations.
-
-CONNECTS TO: Other Allegiance modules, particularly those related to game audio and 3D graphics.
-
-NOTES: None.
+    ADD_DEFINITIONS(-D__MODULE__="SoundEngine")
+    INCLUDE_DIRECTORIES(../Inc ../zlib)
+    SET(SoundEngine_SRC
+        ds3dbuffer.cpp
+        ds3dengine.cpp
+        ds3dutil.cpp
+        ds3dvirtualbuffer.cpp
+        dummysound.cpp
+        soundbase.cpp
+        soundtemplates.cpp
+        soundutil.cpp
+       )
+    ADD_LIBRARY(SoundEngine ${SoundEngine_SRC})
+    SET_PROPERTY(TARGET SoundEngine PROPERTY CXX_STANDARD 14)
 
 #### `src/soundengine/ds3dbuffer.cpp`
 
-**PURPOSE:** The file `ds3dbuffer.cpp` is part of the sound engine in Allegiance and manages DirectSound buffers for audio playback. It includes classes and functions to handle both 2D and 3D sound effects, including creation, duplication, parameter setting, and status checking.
+PURPOSE: Manages sound buffers for playback using DirectSound3D in Allegiance.
 
-**KEY PARTS:**
-- **Class: DS3DSoundBuffer:** Manages a DirectSound buffer for sound playback.
-- **Function: DSoundVolume(float fGain):** Converts gain from dB to DirectSound volume level.
-- **Function: CreateBuffer8(IDirectSound8* pDirectSound, ISoundPCMData* pdata, DWORD dwBufferSize, bool bStatic, bool bSupport3D, ISoundEngine::Quality quality, bool bAllowHardware):** Creates an 8-bit sound buffer using DirectSound8.
-- **Class: DS3DStaticSoundBuffer:** Manages static sound buffers that are loaded into memory and played back repeatedly.
-- **Class: DS3DStreamingSoundBuffer:** Manages streaming sound buffers where data is continuously written to the buffer as it plays.
-- **Function: SetParameters:** Sets various parameters for the sound buffer, including position, velocity, and audio properties.
-- **Function: GetStatus:** Retrieves the current status of the sound buffer.
-- **Function: DebugDump:** Provides a human-readable description of the sound buffer's state.
+KEY PARTS:
+- DS3DSoundBuffer: Represents a DirectSound3D buffer and handles basic sound operations.
+- DSoundVolume: Converts gain in dB to DirectSound volume levels.
+- CreateBuffer8 and CreateBuffer: Initialize sound buffers with DirectSound8 or DirectSound interfaces.
+- DuplicateBuffer8 and DuplicateBuffer: Duplicate existing buffers, sharing memory for static buffers.
+- DSBCAPS_CTRL3D and other flags: Define buffer capabilities like 3D control and frequency control.
+- IDirectSound8 and IDirectSound: Interfaces for managing sound buffers in DirectX 8.
+- LPDIRECTSOUNDBUFFER and LPDIRECTSOUND3DBUFFER: Pointers to DirectSound buffer and 3D buffer interfaces.
+- ZAssert and ZFailed: Macros for assertions and error checking.
 
-**CONNECTS TO:** DirectSound interfaces (IDirectSound8, IDirectSound), ISoundPCMData interface for PCM data, and other parts of the Allegiance sound engine.
+CONNECTS TO: Allegiance's audio system, dependent on DirectX 8 libraries.
 
-**NOTES:** The file contains several TODO comments indicating areas that need further investigation or improvement. There are instances where the code checks for specific versions of DirectSound, and there is commented-out code related to hardware acceleration and static buffer flags.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-368
+  - DS3DSoundBuffer: Represents a DirectSound3D buffer.
+  - DSoundVolume: Converts gain in dB to DirectSound volume.
+  - CreateBuffer8 and CreateBuffer: Initialize buffers with DirectSound8 or DirectSound interfaces.
+  - DuplicateBuffer8 and DuplicateBuffer: Duplicate existing buffers, sharing memory for static buffers.
+  - DSBCAPS_CTRL3D and other flags: Define buffer capabilities like 3D control, frequency control, etc.
+  - IDirectSound8 and IDirectSound: Interfaces for managing sound buffers in DirectX 8.
+  - LPDIRECTSOUNDBUFFER and LPDIRECTSOUND3DBUFFER: Pointers to DirectSound buffer and 3D buffer interfaces.
+  - ZAssert and ZFailed: Macros for assertions and error checking.
+- lines 370-717
+  - DS3DSoundBuffer: Manages a DirectSound buffer for sound playback.
+  - StartImpl: Starts playing the sound buffer, optionally looping.
+  - UpdateState: Updates the volume and pitch of the sound buffer if they have changed.
+  - UpdateState3D: Updates 3D-specific properties of the sound buffer if they have changed.
+  - GetStatus: Retrieves the current status of the sound buffer (playing, buffer lost).
+  - DS3DStaticSoundBuffer: Manages a static sound buffer that can be restored after loss.
+  - RestoreBuffer: Restores and reloads the contents of the sound buffer after a buffer loss.
+  - LoadData: Locks the sound buffer and fills it with data from the data source.
+- lines 718-1075
+  - DS3DStaticSoundBuffer: Manages static sound buffers.
+  - DS3DStreamingSoundBuffer: Manages streaming sound buffers.
+  - CacheKey: Used to cache sound buffer instances.
+  - BufferCache: Stores cached sound buffer instances.
+  - Init8 and Init: Initializes sound buffers with various parameters.
+  - Start: Starts playing a sound buffer at a specified position.
+  - Stop: Stops the sound buffer.
+  - GetPosition: Retrieves the current position of the sound buffer.
+- lines 1076-1441
+  - DS3DStreamingSoundBuffer: Manages a streaming sound buffer for playback.
+  - StreamData: Streams data into the sound buffer.
+  - Init: Initializes the sound buffer with wave data and settings.
+  - Start: Starts playing the sound buffer from a specified position.
+  - Stop: Stops playing the sound buffer.
+  - GetPosition: Retrieves the current position of the sound.
+  - GetStatus: Checks if the buffer is playing or has been lost.
+  - DS3DASRSoundBuffer: Manages an ASR (Attack-Sustain-Release) sound buffer for playback.
+- lines 1442-1735
+  - DS3DASRSoundBuffer::StreamData: Streams data out to a buffer pointed to by pvBuffer.
+  - DS3DASRSoundBuffer::Init: Initializes this object with wave data, 3D support, and sound quality.
+  - DS3DASRSoundBuffer::Start: Starts the given buffer playing at the given position.
+  - DS3DASRSoundBuffer::Stop: Stops the given buffer.
+  - m_dwLoopOffset: Offset where the loop starts in the sound data.
+  - m_dwLoopLength: Length of the loop in the sound data.
+  - m_bPlayingSustain: Indicates if the buffer is currently playing the sustain part of the sound.
+  - m_bPlayingRelease: Indicates if the buffer is currently playing the release part of the sound.
 
 #### `src/soundengine/ds3dbuffer.h`
 
@@ -20054,43 +24441,91 @@ NOTES: None.
 
 #### `src/soundengine/soundengine.h`
 
-PURPOSE: This file contains declarations and definitions related to the sound engine in Allegiance, including compression utilities and management of sound templates.
+PURPOSE: tiny file (6 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `SoundEngine::SoundManager`: Manages the overall sound system, loading and playing sounds.
-- `SoundEngine::SoundBuffer`: Represents a buffer for storing audio data.
-- `SoundEngine::Compressor`: Utilizes zlib to compress audio data for efficient storage or transmission.
-- `SoundEngine::Decompressor`: Decompresses audio data that has been compressed using the Compressor class.
-- `SoundEngine::SoundTemplate`: Defines templates for sound effects, allowing for easy reuse and configuration.
-
-CONNECTS TO: `soundbase.h`, `soundutil.h`, `soundtemplates.h`
-
-NOTES: None.
+    #pragma once
+    #include "zlib.h"
+    #include "soundbase.h"
+    #include "soundutil.h"
+    #include "soundtemplates.h"
+    using namespace SoundEngine;
 
 #### `src/soundengine/soundtemplates.cpp`
 
-**PURPOSE:** The `soundtemplates.cpp` file in Allegiance is responsible for managing and creating various types of sound templates. These templates are used to define how sounds should be played, including properties like 3D positioning, pitch, gain, and looping.
+PURPOSE: Manages and manipulates sound templates for various audio effects in Allegiance.
 
-**KEY PARTS:**
-- **Name:** WaveFileTemplate - Loads wave files as sound templates.
-- **Name:** ThreeDSoundTemplate - Converts another template into a 3D sound with specified minimum distance.
-- **Name:** SoundConeTemplate - Adds a directional cone to control sound volume based on angle.
-- **Name:** SoundPitchTemplate - Adjusts the pitch of the sound.
-- **Name:** SoundGainTemplate - Adjusts the gain (volume) of the sound.
-- **Name:** SoundPriorityTemplate - Sets the priority of the sound.
-- **Name:** CreateWaveFileSoundTemplate - Creates a template for loading wave files.
-- **Name:** Create3DSoundTemplate - Creates a 3D sound based on another template and minimum distance.
-- **Name:** CreateSoundConeTemplate - Adds a directional cone to an existing sound template.
-- **Name:** CreatePitchSoundTemplate - Adjusts the pitch of the sound in a template.
-- **Name:** CreateGainSoundTemplate - Adjusts the gain of the sound in a template.
-- **Name:** CreatePrioritySoundTemplate - Sets the priority of the sound in a template.
+KEY PARTS:
+- WaveFileTemplate: Manages sound templates for wave files.
+- ThreeDSoundTemplate: Converts a sound template into a 3D sound.
+- SoundConeTemplate: Adds a sound cone to another sound template.
+- CreateWaveFileSoundTemplate: Creates a sound template from a wave file.
+- SoundGainTemplate: Adjusts the gain of a sound.
+- GainInstance: A wrapper for ISoundInstance that adjusts the gain.
+- CreateGainSoundTemplate: Creates a sound template with adjusted gain.
+- PairedSoundTemplate: Merges two sound templates into one.
+- RepeatFirePCMData: Generates data for repeat-fire sounds.
+- RepeatFireBufferSource: Wraps a buffer source to create ASR sounds for repeat-fire effects.
+- RepeatFireTemplate: Template for creating repeat-fire weapon sounds.
+- IntermittentSoundTemplate: Manages a sound template for sounds that play intermittently.
 
-**CONNECTS TO:** Other sound-related classes and functions, such as `ISoundInstance`, `ISoundBufferSource`, and `ISoundPositionSource`.
+CONNECTS TO: Allegiance's audio engine and game logic systems.
 
-**NOTES:**
-- Assertions are used to ensure valid input parameters.
-- Caching is implemented for repeat-fire PCM data to optimize performance.
-- Some methods contain assertions that should never be hit (`assert(false);`), indicating potential areas for refactoring or implementation.
+NOTES:
+- Contains multiple sections with similar logic for adding and processing samples, which could be refactored into a common function.
+- Assertions (ZAssert) throughout the code to ensure correct input values.
+
+PARTS (in file order):
+
+- lines 1-374
+  - WaveFileTemplate: Manages sound templates for wave files.
+  - ThreeDSoundTemplate: Converts a sound template into a 3D sound.
+  - SoundConeTemplate: Adds a sound cone to another sound template.
+  - SoundPitchTemplate: Adjusts the pitch of another sound template.
+  - CreateWaveFileSoundTemplate: Creates a sound template from a wave file.
+  - Create3DSoundTemplate: Creates a 3D sound template from another sound template.
+  - CreateSoundConeTemplate: Creates a sound template with a sound cone.
+  - CreatePitchSoundTemplate: Creates a sound template with adjusted pitch.
+- lines 375-745
+  - SoundGainTemplate: Adjusts the gain of a sound.
+  - GainInstance: A wrapper for ISoundInstance that adjusts the gain.
+  - CreateGainSoundTemplate: Creates a sound template with adjusted gain.
+  - SoundPriorityTemplate: Adjusts the priority of a sound.
+  - PriorityInstance: A wrapper for ISoundInstance that adjusts the priority.
+  - CreatePrioritySoundTemplate: Creates a sound template with adjusted priority.
+  - LoopingSoundTemplate: Makes a sound loop.
+  - LoopingSoundBufferSource: A wrapper for ISoundBufferSource that forces looping sounds.
+- lines 746-1124
+  - PairedSoundTemplate: A class that merges two sound templates into one.
+  - CreatePairedSoundTemplate: A function to create a new instance of PairedSoundTemplate.
+  - RepeatFirePCMData: A class to generate data for repeat-fire sounds.
+  - RepeatFirePCMData::Create: A static method to create a repeat fire data source for the given sample and repeat delay.
+- lines 1125-1480
+  - RepeatFirePCMData: Manages sound data for repeat-fire weapons.
+  - RepeatFireBufferSource: Wraps a buffer source to create ASR sounds for repeat-fire effects.
+  - RepeatFireTemplate: Template for creating repeat-fire weapon sounds.
+  - CreateRepeatingFireSoundTemplate: Function to create a template for repeat-fire weapon sounds.
+  - RandomSoundTemplate: Template for randomly selecting sound templates.
+  - CreateRandomSoundTemplate: Function to create a random sound template.
+  - IntermittentSoundTemplate: Template for intermittently playing sounds.
+  - TODOs or unusual code: The code has multiple sections with similar logic for adding and processing samples, which could be refactored into a common function. There are assertions (ZAssert) throughout the code to ensure correct input values, which is good practice but might be overkill depending on the context.
+- lines 1481-1838
+  - IntermittentSoundTemplate: Manages a sound template for sounds that play intermittently.
+  - CreateIntermittentSoundTemplate: Creates an instance of IntermittentSoundTemplate.
+  - DelayedSoundInstance: Represents a sound instance with a delayed start.
+  - SoundMutex: A helper class for serialized sounds, handling serialization.
+  - SoundInstanceList: An iterator over a list of playing sound instances.
+  - IsPlaying: Checks if the sound is currently playing.
+  - Stop: Stops the sound, either immediately or after fading out.
+  - SetGain: Adjusts the volume of the sound.
+- lines 1839-2101
+  - TemplateData: Holds data about a sound template instance.
+  - TemplateMap: Maps sound templates to their data.
+  - StartSound: Starts a new sound and handles bookkeeping.
+  - QueueNextSound: Queues the next sound based on urgency and expiration.
+  - CreateSound: Creates or updates a sound template, handling single-instance sounds.
+  - OnEvent: Handles when a sound finishes playing.
+  - Reset: Resets all pending sounds without playing them.
+  - CreateSoundMutex: Creates a mutex for serialized sound templates.
 
 #### `src/soundengine/soundtemplates.h`
 
@@ -20168,35 +24603,40 @@ NOTES: None.
 
 ### src/test/Inc
 
-**Folder Overview:** The `src/test/Inc` directory contains header files for various components of the Allegiance game, including system headers, custom dialog classes, development environment integration, memory management, COM interfaces, utility functions, and window finding utilities.
+This folder contains header and implementation files related to testing and development utilities in Allegiance. It includes custom dialog classes, memory management overrides, IDL definitions for COM interfaces, ATL extensions, and utility functions.
 
-**Important Files:**
-- **Allegiance.h**: Main header file setting up the environment for other source files.
-- **AppWizStepDlg.h**: Defines a custom wizard step dialog class with methods to enable/disable the finish button and customize UI elements.
-- **DevStudio.h**: Integrates with Microsoft's development environment components using COM interfaces.
-- **FixDelete.h**: Provides a custom `delete` operator for memory management in debug builds.
-- **TCAtl.cpp** and **TCAtl.h**: Contains utility functions and classes for handling interfaces, stream operations, and object persistence.
-- **TCLib.h**: Offers a collection of utility functions for debugging, memory management, error handling, and interface querying.
-- **WindowFinder.h**: Defines a class to find windows by title and process ID using Windows API functions.
+- Allegiance.h: Tiny header file with basic definitions.
+- AppWizStepDlg.h: Defines a custom wizard step dialog class for handling initialization and message processing.
+- TCLib.h: Contains various utility functions and macros for debugging, error reporting, and type manipulation.
+- ScrRun.idl: IDL definitions for file system operations and scripting in a COM-based environment.
+- TCAtl.cpp: Utility functions and implementations for handling interfaces and determining object sizes.
+
+Largest files: TCLib.h (1143 lines), ScrRun.idl (555 lines), TCIDL.idl (508 lines), AppWizStepDlg.h (400 lines), TCAtl.cpp (347 lines).
 
 #### `src/test/Inc/Allegiance.h`
 
-PURPOSE: This header file includes various system and game-related headers for the Allegiance project.
+PURPOSE: tiny file (20 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `utility.h`: Provides utility functions and macros.
-- `engine.h`: Contains core engine functionality.
-- `effect.h`: Handles visual effects in the game.
-- `igc.h`: Includes interfaces and classes related to the game's interface components.
-- `Zone.h`: Manages game zones and environments.
-- `mapmakerigc.h`: Provides tools for creating and editing game maps.
-- `messagesAll.h`, `messages.h`, `messagesLC.h`: Define message structures used in communication within the game.
-- `clintlib.h`: Library for client-server interactions.
-- `AutoDownload.h`: Handles automatic downloading of resources.
-
-CONNECTS TO: Various Allegiance subsystems such as engine, graphics, networking, and map creation.
-
-NOTES: None.
+    #ifndef __Allegiance_h__
+    #define __Allegiance_h__
+    /////////////////////////////////////////////////////////////////////////////
+    #include <utility.h>
+    #include <..\engine\engine.h>
+    #include <..\effect\effect.h>
+    #include <..\igc\igc.h>
+    #include <..\Zone\Zone.h>
+    //#include <..\zone\zauth.h>
+    #include <..\igc\mapmakerigc.h>
+    #include <messagesAll.h>
+    #include <messages.h>
+    #include <messagesLC.h>
+    //#include <networkgame.h>
+    #include <..\clintlib\clintlib.h>
+    #include <..\clintlib\AutoDownload.h>
+    //#include <..\drones\actionlib.h>
+    #include <..\igc\shipigc.h>
+    /////////////////////////////////////////////////////////////////////////////
+    #endif // !__Allegiance_h__
 
 #### `src/test/Inc/AppWizStepDlg.h`
 
@@ -20311,30 +24751,56 @@ NOTES: None.
 
 #### `src/test/Inc/TCLib.h`
 
-**PURPOSE:** The `TCLib.h` header file contains a collection of utility macros and functions that extend the functionality of the C++ Runtime Library. These utilities are designed to simplify common tasks such as memory management, error handling, debugging, and type manipulation.
+PURPOSE: The file `TCLib.h` contains utility functions and macros for various purposes such as debugging, error reporting, type manipulation, and COM error handling.
 
-**KEY PARTS:**
-- **Class Libraries**: Extensions to the C++ Runtime Library.
-- **sizeofArray Macro**: Counts elements in a fixed-length array.
-- **HiBits and HiBit Templates**: Extract high-order bits from a value.
-- **LoBits and LoBit Templates**: Extract low-order bits from a value.
-- **VARBOOL Macro**: Translates boolean expressions to VARIANT_BOOL.
-- **ClearOut Template Function**: Initializes output parameters safely within exception handlers.
-- **TRACE_MODULE_INIT Function**: Outputs debug strings for module initialization or termination under _DEBUG builds.
-- **TCZeroMemory Template Function**: Clears memory safely within exception handlers.
-- **TCSafeQI Template Function**: Safely queries interfaces of IUnknown pointers.
-- **64-bit Integer Types (TCINT64 and TCUINT64)**: Defines 64-bit integer types for compatibility across different architectures.
-- **FileTime Conversions**: Functions to convert between FILETIME and 64-bit unsigned integers, as well as converting FILETIME to milliseconds.
-- **_VERIFY, _SVERIFY Macros**: Debug macros that generate reports when conditions are not met (debug version only).
-- **DEBUG_ONLY Macro**: Evaluates expressions only under _DEBUG builds.
-- **_TRACE Macros**: Macros for sending formatted strings to a debug monitor under _DEBUG builds.
+KEY PARTS:
+- sizeofArray(x): Counts the number of elements in a fixed-length array.
+- HiBits<T>(x, nBitCount): Extracts high-order bits and shifts them to the low order.
+- VARBOOL(expression): Translates a boolean expression to a valid VARIANT_BOOL.
+- TCReportComErr: Reports COM errors.
+- TCERRLOG: Macro for logging error messages.
+- PRIVATE_ASSERTE, PRIVATE_VERIFY, PRIVATE_VERIFYE: Macros for assertions and verification that behave differently in debug and release builds.
 
-**CONNECTS TO:** Other system files and libraries, including the C++ Runtime Library, ATL, MFC, and COM interfaces.
+CONNECTS TO: None
 
-**NOTES:**
-- The use of `_alloca` for dynamic memory allocation within macros.
-- Conditional compilation based on `_DEBUG`.
-- Inclusion of `#pragma once` at the top to prevent multiple inclusions.
+NOTES: The file is part of the Allegiance game's source code and includes both C++ and C# components.
+
+PARTS (in file order):
+
+- lines 1-345
+  - sizeofArray(x): Counts the number of elements in a fixed-length array.
+  - HiBits<T>(x, nBitCount): Extracts high-order bits and shifts them to the low order.
+  - HiBit<T>(x): Extracts the most significant bit from a value.
+  - LoBits<T>(x, nBitCount): Masks a value to keep only the specified number of low-order bits.
+  - LoBit<T>(x): Masks a value to keep only the least significant bit.
+  - VARBOOL(expression): Translates a boolean expression to a valid VARIANT_BOOL.
+  - ClearOut<T>(dest, init): Initializes an out parameter within an exception handler.
+  - CLEAROUT(dest, init): Macro wrapper for ClearOut that returns if initialization fails.
+- lines 347-673
+  - _SVERIFY: Evaluates an expression and generates a debug report when the result of passing the expression to the SUCCEEDED macro is FALSE (debug version only).
+  - _SVERIFYE: Similar to _SVERIFY but with additional functionality.
+  - DEBUG_ONLY: Provides a shorthand way to evaluate an expression only under _DEBUG builds.
+  - TCTrace: Sends a formatted string to a debug monitor.
+  - _TRACE0 to _TRACE5: Macros for sending formatted strings to the debug monitor, depending on the number of parameters.
+  - _TRACE_BEGIN_SIZE and _TRACE_BEGIN: Begin tracing a message with a specified maximum size.
+  - _TRACE_PART0 to _TRACE_PART5: Append parts of a formatted string to the trace buffer.
+  - _TRACE_END: End tracing and output the message.
+- lines 674-1038
+  - TCReportComErr: Reports COM errors.
+  - TCReportHR: Reports HRESULT errors.
+  - TCTypeName_EatPrefixesV: Removes specified prefixes from a type name.
+  - TCTypeName_EatPrefixes: Wrapper for TCTypeName_EatPrefixesV.
+  - TCTypeName: Macro to get a modified type name without specific prefixes.
+  - RegisterComponentCategory: Registers a component category.
+  - UnregisterComponentCategory: Unregisters a component category.
+  - GetVariantDateTime: Retrieves the current date and time as a variant date.
+- lines 1040-1143
+  - TCERRLOG: Macro for logging error messages.
+  - TCERRLOG0 to TCERRLOG5: Macros with varying numbers of parameters for logging formatted strings.
+  - TCERRLOG_BEGIN_SIZE and TCERRLOG_BEGIN: Macros for initializing a buffer to hold the log message.
+  - TCERRLOG_PART0 to TCERRLOG_PART5: Macros for appending formatted parts to the log message buffer.
+  - TCERRLOG_END: Macro for outputting the log message, either using ZDebugOutputImpl or OutputDebugString based on build configuration.
+  - PRIVATE_ASSERTE, PRIVATE_VERIFY, PRIVATE_VERIFYE: Macros for assertions and verification that behave differently in debug and release builds.
 
 #### `src/test/Inc/UnkDoc.idl`
 
@@ -20364,62 +24830,157 @@ NOTES: None.
 
 ### src/test/TCAtl
 
-**Folder Summary:** The `src/test/TCAtl` folder in Allegiance contains source code for various ATL (Active Template Library) components used for managing COM modules, property pages, event handling, and other Windows-based functionalities.
+This folder contains source code related to COM (Component Object Model) functionality and Windows-based UI components in the Allegiance game. It includes classes for managing COM modules, handling combo boxes, dual event calls, error formatting, property pages, persistence, and user accounts.
 
-**Important Files:**
-- **ComModule.h**: Manages COM module operations such as registration, security settings, and command-line parsing.
-- **EditWindow.h**: Encapsulates a Windows edit control with methods to interact with and manipulate the text.
-- **EventsCP.h**: Provides macros for managing connection points in a COM-based system, facilitating event handling.
-- **PropertyClass.cpp**: Implements a base class for property handling, focusing on persistence mechanisms like loading and saving objects using streams and property bags.
-- **SliderWindow.h**: Defines a class for creating and managing a slider control in a Windows application.
+- ComModule.h: Manages COM module functionality including command-line parsing, error reporting, security initialization, and shutdown handling.
+- ComboBoxWindow.h: Defines classes and functions for handling combo box controls in Windows applications.
+- PropertyPageBase.cpp: Implements a base class for property pages in Allegiance, providing common functionality and interfaces for managing property page components.
+- PropertyClass.h: Provides a framework for property persistence and management using COM interfaces.
+- PropertyPageImpl.h: Contains a template class for implementing property pages in a Microsoft application.
+
+Largest files: ComboBoxWindow.h (2085 lines), PropertyPageBase.cpp (1568 lines), ComModule.h (1344 lines), PropertyPageImpl.h (1315 lines), PropertyClass.h (1108 lines).
 
 #### `src/test/TCAtl/ComModule.h`
 
-**PURPOSE:** The `TCAtl::ComModule` class template in Allegiance is designed to manage COM module operations, including registration, revocation, and outputting text. It also handles command-line parsing, shutdown handling, and security settings.
+PURPOSE: The file `ComModule.h` contains definitions and implementations for managing COM module functionality, including command-line parsing, error reporting, security initialization, and shutdown handling.
 
-**KEY PARTS:**
-- **Class: TCComModule**
-  - Extends `CComModule` with additional functionality for command-line parsing, registration, and shutdown handling.
-  
-- **Function: ParseCommandLine(LPCTSTR pszCmdLine)**
-  - Parses a command line string and processes the options based on predefined mappings.
+KEY PARTS:
+- TCComModule: Template class for managing COM module functionality.
+- XCmdLineOption: Structure defining command-line options and their handlers.
+- ParseCommandLine: Parses a command line string or arguments.
+- OnRegServer, OnUnregServer, OnNoExit, OnExit, OnHelp: Handlers for specific command-line options.
+- ReportError, ReportSuccess: Functions to report errors and successes with descriptions.
+- TCComModule<T>: Main class template for COM module functionality with methods like OnRegServer, OnUnregServer, etc.
+- OpenAppIDRegKey: Opens the registry key associated with an application ID.
+- InitializeSecurity, RegisterSecurity: Initializes and registers security settings.
+- GetAccessSecurity, GetLaunchSecurity: Retrieves security descriptors for access and launch permissions.
+- CreateShutdownEvent, ConsoleCtrlHandler: Handles shutdown events and console control signals.
 
-- **Function: OnRegServer(int argc, TCHAR* argv[], int* pnArgs)**
-  - Handles the registration of server components, including user account management and security settings.
-  
-- **Function: OnUnregServer(int argc, TCHAR* argv[], int* pnArgs)**
-  - Handles the unregistration of server components.
-  
-- **Function: OnNoExit(int argc, TCHAR* argv[], int* pnArgs)**
-  - Keeps the application running indefinitely by setting a flag.
-  
-- **Function: OnExit(int argc, TCHAR* argv[], int* pnArgs)**
-  - Signals the shutdown event to terminate the server.
-  
-- **Function: Syntax()**
-  - Displays the usage syntax for the command-line options.
-  
-- **Data Member: m_spfnCmdLineOption**
-  - Pointer to the currently processed command line option, used for reporting success or failure.
+CONNECTS TO: Other COM-related files and system libraries.
 
-**CONNECTS TO:** Other COM-related classes and functions within Allegiance, particularly those involved in server management and security.
+NOTES: None.
 
-**NOTES:** The code includes assertions and error handling typical of ATL components. It uses `_alloca` for stack-based memory allocation, which is unusual in modern C++. There are TODO comments indicating areas that need further work or review, such as the assertion in `CreateShutdownEvent()` and the commented-out function `GetCurrentCmdLineOption()`.
+PARTS (in file order):
+
+- lines 1-354
+  - TCComModule: Template class for managing COM module functionality.
+  - XCmdLineOption: Structure defining command-line options and their handlers.
+  - ParseCommandLine(LPCTSTR pszCmdLine): Parses a command line string.
+  - ParseCommandLine(int argc, TCHAR argv[]): Parses command-line arguments.
+  - OnRegServer, OnUnregServer, OnNoExit, OnExit, OnHelp: Handlers for specific command-line options.
+  - ReportError(HRESULT hr, LPCTSTR pszDesc): Reports an error with description.
+  - ReportSuccess(LPCTSTR pszDesc): Reports a successful operation.
+  - Echo functions: Output formatted text to the console or message window.
+- lines 355-708
+  - TCComModule<T>: Main class template for COM module functionality.
+  - OnRegServer: Registers server components and security options.
+  - OnUnregServer: Unregisters server components.
+  - OnNoExit: Marks the module as permanent.
+  - OnExit: Signals the shutdown event to exit the server.
+  - OnHelp: Displays help syntax.
+  - Syntax: Calls on derived class to display its syntax.
+  - ReportError: Reports errors with system messages.
+- lines 709-1061
+  - OpenAppIDRegKey: Opens the registry key associated with an application ID.
+  - InitializeSecurity: Initializes security settings for the module.
+  - RegisterSecurity: Registers security permissions and authentication levels.
+  - GetAccessSecurity: Retrieves a security descriptor for access permissions.
+  - GetLaunchSecurity: Retrieves a security descriptor for launch permissions.
+  - GetAuthenticationLevel: Retrieves the authentication level for the module.
+  - OutputText: Outputs text to debug monitor and standard output.
+  - parse_cmdline: Parses the command line into arguments.
+- lines 1062-1344
+  - CreateShutdownEvent: Creates a shutdown event with appropriate security settings.
+  - ConsoleCtrlHandler: Handles console control events by signaling the server to exit.
+  - MonitorThunk: Thunk function to delegate to the non-static MonitorProc method.
+  - MonitorProc: Monitors for idle time and shuts down if no activity is detected.
+  - BEGIN_CMDLINE_OPTION_MAP: Macro to define a command line option map.
+  - CMDLINE_OPTION_ENTRY: Macro to add an entry to the command line option map.
+  - CMDLINE_OPTION_ENTRY_EX: Extended macro for adding entries with additional parameters.
+  - CMDLINE_OPTION_Automation: Macro for automation-related command line options.
 
 #### `src/test/TCAtl/ComboBoxWindow.h`
 
-**PURPOSE:** The file `src/test/TCAtl/ComboBoxWindow.h` contains definitions for classes and functions related to managing combo box controls in the Allegiance game. It provides encapsulation and functionality for handling items, selection, and visual aspects of combo boxes.
+PURPOSE: The file `ComboBoxWindow.h` contains definitions for classes and functions related to handling combo box controls in a Windows application.
 
-**KEY PARTS:**
-- **Class: TCComboBoxWindow**: Base class for combo box windows, providing default implementations for various message handlers.
-- **Function: GetCount()**: Retrieves the number of items in the list box of a combo box.
-- **Function: SetCurSel(int nSelect)**: Selects a string in the list box and updates the edit control accordingly.
-- **Class: TCTypedComboBox<I>**: Template class for typed combo boxes, allowing association of typed data with each item.
-- **Class: TCSelfDrawComboBox<T, I>**: Template class for self-draw combo boxes, providing overrides for owner-draw functionality.
+KEY PARTS:
+- TCComboBoxWindow: Derivation of CWindowImpl that encapsulates a Windows combo box control.
+- TCTypedComboBox: Template class derived from TCComboBoxWindow for accessing list item data as specified type I.
+- TCSelfDrawComboBox: Template class derived from TCTypedComboBox, subclasses parent window to handle owner-draw messages.
+- GetCount: Retrieves the number of items in the list box of a combo box.
+- GetCurSel: Retrieves the index of the currently selected item in the list box of a combo box.
+- SetCurSel: Selects an item in the list box of a combo box by its zero-based index.
+- AddString: Adds a string to the list box of a combo box.
+- DrawItem: Virtual function for drawing items in owner-draw mode.
 
-**CONNECTS TO:** Other classes and functions within the Allegiance game that handle UI elements and interactions.
+CONNECTS TO: CWindowImpl, other Windows API functions
 
-**NOTES:** The file includes TODOs to remove unused code and assertions to ensure window handles are valid before sending messages.
+NOTES: None
+
+PARTS (in file order):
+
+- lines 1-343
+  - TCComboBoxWindow: Derivation of CWindowImpl that encapsulates a Windows combo box control.
+  - TCTypedComboBox: Template class derived from TCComboBoxWindow for accessing list item data as specified type I.
+  - TCSelfDrawComboBox: Template class derived from TCTypedComboBox, subclasses parent window to handle owner-draw messages.
+  - GetCount: Retrieves the number of items in the list box of a combo box.
+  - GetCurSel: Retrieves the index of the currently selected item in the list box of a combo box.
+  - SetCurSel: Selects an item in the list box of a combo box by its zero-based index.
+  - AddString: Adds a string to the list box of a combo box.
+  - DrawItem: Virtual function for drawing items in owner-draw mode.
+- lines 344-657
+  - TCComboBoxWindow::SetCurSel: Selects a string in the list box of a combo box.
+  - TCComboBoxWindow::GetCurSelRaw: Retrieves the application-supplied DWORD value associated with the selected combo-box item.
+  - TCComboBoxWindow::SetCurSelRaw: Sets the DWORD (32-bit) value associated with the selected item in a combo box.
+  - TCComboBoxWindow::GetLocale: Retrieves the locale identifier for a combo box.
+  - TCComboBoxWindow::SetLocale: Sets the locale identifier for a combo box.
+  - TCComboBoxWindow::GetTopIndex: Returns the index of the first visible item in the list-box portion of the combo box.
+  - TCComboBoxWindow::SetTopIndex: Tells the list-box portion of the combo box to display the item with the specified index at the top.
+  - TCComboBoxWindow::InitStorage: Preallocates blocks of memory for items and strings in the list-box portion of the combo box.
+- lines 658-976
+  - TCComboBoxWindow: Class representing a combo box window.
+  - SetEditSel: Sets the selection range of text in the edit control of a combo box.
+  - LimitText: Limits the length of text that can be entered into the edit control of a combo box.
+  - GetItemDataRaw: Retrieves the application-supplied DWORD value associated with a specified item in the combo box.
+  - SetItemDataRaw: Sets the application-supplied DWORD value for a specified item in the combo box.
+  - GetLBText: Retrieves a string from the list box of a combo box.
+  - GetLBTextLen: Gets the length of a string in the list box of a combo box.
+  - SetItemHeight: Sets the height of list items or the edit-control/static-text portion of a combo box.
+- lines 977-1286
+  - TCComboBoxWindow::ShowDropDown: Shows or hides the drop-down list box of a combo box.
+  - TCComboBoxWindow::AddString: Adds a string to the list box of a combo box.
+  - TCComboBoxWindow::AddStringItemRaw: Adds a string and associates a DWORD value with it in the list box of a combo box.
+  - TCComboBoxWindow::DeleteString: Deletes a string from the list box of a combo box.
+  - TCComboBoxWindow::InsertString: Inserts a string into the list box of a combo box at a specified position.
+  - TCComboBoxWindow::InsertStringItemRaw: Inserts a string and associates a DWORD value with it into the list box of a combo box at a specified position.
+  - TCComboBoxWindow::ResetContent: Removes all items from the list box and edit control of a combo box.
+  - TCComboBoxWindow::Dir: Adds a list of filenames to the list box of a combo box based on specified attributes and wildcards.
+- lines 1287-1611
+  - TCComboBoxWindow::FindStringExact: Finds an exact string match in a combo box's list.
+  - TCComboBoxWindow::FindItemDataRaw: Searches for an item by its associated DWORD value.
+  - TCComboBoxWindow::SelectItemDataRaw: Selects an item by its associated DWORD value and updates the edit control.
+  - TCComboBoxWindow::Clear: Deletes the current selection from the edit control.
+  - TCComboBoxWindow::Copy: Copies the current selection to the clipboard in CF_TEXT format.
+  - TCComboBoxWindow::Cut: Cuts the current selection to the clipboard in CF_TEXT format.
+  - TCComboBoxWindow::Paste: Pastes text from the clipboard into the edit control at the cursor position.
+  - TCTypedComboBox<I>::GetItemData: Retrieves a typed value associated with an item.
+- lines 1612-1941
+  - TCTypedComboBox<I>: A template class for a typed combo box window.
+  - AddStringItem(LPCTSTR pszString, I itemData): Adds a string to the list box and associates it with a typed value.
+  - InsertStringItem(int nIndex, LPCTSTR pszString, I itemData): Inserts a string into the list box at a specified position and associates it with a typed value.
+  - FindItemData(int nIndexStart, I itemData) const: Finds the first list-box item that matches a given typed value.
+  - SelectItemData(int nIndexStart, I itemData): Searches for an item by its typed data and selects it if found.
+  - operator=(HWND hwnd): Subclasses the specified window.
+  - TCSelfDrawComboBox<T, I>: A template class for a self-draw combo box.
+  - SubclassWindow(HWND hWnd): Subclasses a combo box window and attaches it to the CWindowImpl object.
+- lines 1942-2085
+  - TCSelfDrawComboBox<T, I>: A template class for handling owner-draw ComboBoxes.
+  - OnCreate: Handles the WM_CREATE message by subclassing the parent window.
+  - OnDrawItem: Delegates drawing of items to the most derived class.
+  - OnMeasureItem: Delegates measurement of items to the most derived class.
+  - OnCompareItem: Delegates comparison of items to the most derived class.
+  - OnDeleteItem: Delegates deletion of items to the most derived class.
+  - TODOs or unusual code: None identified in this snippet.
 
 #### `src/test/TCAtl/DualEventCall.h`
 
@@ -20482,30 +25043,69 @@ NOTES:
 
 #### `src/test/TCAtl/EditWindow.h`
 
-**PURPOSE:** The `EditWindow.h` file in Allegiance defines the `TCEditWindow` class, which encapsulates a Windows edit control with additional functionality for managing text input and display.
+PURPOSE: The file `EditWindow.h` contains the definition and implementation of the `TCEditWindow` class, which encapsulates a Windows edit control and provides various operations for managing its content.
 
-**KEY PARTS:**
-- **Class: TCEditWindow**
-  - Inherits from `CWindowImpl<TCEditWindow>`
-  - Provides methods to interact with an edit control, such as setting and getting text, handling selections, and managing undo operations.
-  
-- **Functions:**
-  - `CanUndo() const`: Determines if the last operation can be undone.
-  - `GetLineCount() const`: Retrieves the number of lines in a multiple-line edit control.
-  - `GetModify() const`: Checks if the contents have been modified.
-  - `SetModify(BOOL bModified = TRUE)`: Sets or clears the modification flag.
-  - `GetRect(LPRECT lpRect) const`: Gets the formatting rectangle.
-  - `GetSel(int& nStartChar, int& nEndChar) const`: Retrieves selection positions.
-  - `GetHandle() const` and `SetHandle(HLOCAL hBuffer)`: Manage memory handles for multiple-line edit controls.
-  - `GetLine(int nIndex, BSTR* pbstr) const` and `GetLine(int nIndex, LPTSTR pszBuffer, int nMaxLength) const`: Retrieve lines of text.
-  - `EmptyUndoBuffer()`, `FmtLines(BOOL bAddEOL)`, `LimitText(int nChars)`: Additional control over edit behavior.
-  
-- **TODOs:**
-  - The BSTR version of `GetLine` does not handle memory allocation.
+KEY PARTS:
+- TCEditWindow: A class derived from CWindowImpl that manages an edit control.
+- DECLARE_WND_SUPERCLASS: Macro to set the window superclass for TCEditWindow.
+- BEGIN_MSG_MAP and END_MSG_MAP: Macros defining the message map for handling messages sent to TCEditWindow.
+- CanUndo, GetLineCount, GetModify, SetModify, GetRect, GetSel, GetHandle, SetHandle, GetLine, EmptyUndoBuffer, FmtLines, LimitText, LineFromChar, LineIndex, LineLength, LineScroll, ReplaceSel, SetPasswordChar, SetRect, SetRectNP, SetSel, SetTabStops, SetTabStops(int), Undo: Member functions providing various operations and attributes for TCEditWindow.
+- GetLine: Retrieves a specified line of text from an edit control.
+- EmptyUndoBuffer: Resets the undo flag of an edit control.
+- FmtLines: Sets the inclusion of soft line-break characters in a multiple-line edit control.
+- LimitText: Limits the length of text that can be entered into an edit control.
+- LineFromChar: Retrieves the line number containing a specified character index.
+- LineIndex: Retrieves the character index of a specified line in a multiple-line edit control.
+- LineLength: Retrieves the length of a line in an edit control.
+- SetRect: Sets the formatting rectangle of a multiple-line edit control.
+- SetRectNP: Sets the formatting rectangle without redrawing the control window.
+- SetSel: Selects a range of characters in an edit control.
+- SetTabStops(int nTabStops, LPINT rgTabStops): Sets tab stops for a multiple-line edit control using an array of dialog units.
+- SetTabStops(): Sets default tab stops to 32 dialog units.
+- SetTabStops(const int& cxEachStop): Sets tab stops at every specified number of dialog units.
+- Undo: Reverses the last edit-control operation.
 
-**CONNECTS TO:** Other Windows API functions and classes, specifically those related to handling edit controls in a Windows application.
+CONNECTS TO: CWindowImpl
 
-**NOTES:** None.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-320
+  - TCEditWindow: A class derived from CWindowImpl that encapsulates a Windows edit control.
+  - DECLARE_WND_SUPERCLASS: Macro to set the window superclass for TCEditWindow.
+  - BEGIN_MSG_MAP and END_MSG_MAP: Macros defining the message map for handling messages sent to TCEditWindow.
+  - CanUndo, GetLineCount, GetModify, SetModify, GetRect, GetSel, GetHandle, SetHandle, GetLine, EmptyUndoBuffer, FmtLines, LimitText, LineFromChar, LineIndex, LineLength, LineScroll, ReplaceSel, SetPasswordChar, SetRect, SetRectNP, SetSel, SetTabStops, SetTabStops(int), Undo: Member functions providing various operations and attributes for TCEditWindow.
+  - CanUndo(): Determines if the last edit operation can be undone.
+  - GetLineCount(): Retrieves the number of lines in a multiple-line edit control.
+  - GetModify(): Checks if the contents of an edit control have been modified.
+  - SetModify(BOOL): Sets or clears the modification flag for an edit control.
+- lines 321-635
+  - TCEditWindow::GetLine: Retrieves a specified line of text from an edit control.
+  - TCEditWindow::GetLine(int nIndex, LPTSTR pszBuffer, int nMaxLength): Retrieves a specified line of text into a buffer with a maximum length.
+  - TCEditWindow::EmptyUndoBuffer: Resets the undo flag of an edit control.
+  - TCEditWindow::FmtLines: Sets the inclusion of soft line-break characters in a multiple-line edit control.
+  - TCEditWindow::LimitText: Limits the length of text that can be entered into an edit control.
+  - TCEditWindow::LineFromChar: Retrieves the line number containing a specified character index.
+  - TCEditWindow::LineIndex: Retrieves the character index of a specified line in a multiple-line edit control.
+  - TCEditWindow::LineLength: Retrieves the length of a line in an edit control.
+- lines 636-951
+  - TCEditWindow::SetRect: Sets the formatting rectangle of a multiple-line edit control.
+  - TCEditWindow::SetRectNP: Sets the formatting rectangle without redrawing the control window.
+  - TCEditWindow::SetSel: Selects a range of characters in an edit control.
+  - TCEditWindow::SetTabStops(int nTabStops, LPINT rgTabStops): Sets tab stops for a multiple-line edit control using an array of dialog units.
+  - TCEditWindow::SetTabStops(): Sets default tab stops to 32 dialog units.
+  - TCEditWindow::SetTabStops(const int& cxEachStop): Sets tab stops at every specified number of dialog units.
+  - TCEditWindow::Undo: Reverses the last edit-control operation.
+  - TCEditWindow::Clear: Deletes (clears) the current selection in the edit control.
+- lines 952-1081
+  - TCEditWindow: A class representing an edit window control.
+  - GetMargins: Returns the left and right margins of the edit window.
+  - SetLimitText: Sets the maximum number of characters that can be entered into the edit window.
+  - GetLimitText: Retrieves the current limit on the number of characters in the edit window.
+  - PosFromChar: Gets the coordinates of a specified character index within the edit window.
+  - CharFromPos: Retrieves the line and character indices for the character closest to a specified position.
+  - operator=: Subclasses an existing window with this TCEditWindow object.
 
 #### `src/test/TCAtl/ErrorFormatter.h`
 
@@ -20548,26 +25148,21 @@ This file contains a template class `TCComEventCall` used in the connection poin
 
 #### `src/test/TCAtl/EventsCP.h`
 
-**PURPOSE:** The file `src/test/TCAtl/EventsCP.h` contains definitions for a base class and macros to facilitate the implementation of connection points with v-table interface sinks in a C++ application. It provides mechanisms for firing events to connected sinks and handling event calls.
+PURPOSE: The file contains definitions and macros for handling events in a COM-based connection point system.
 
-**KEY PARTS:**
-- **Class: TCComEventsCP:** A template class that implements connection points with a v-table interface sink.
-  - Template parameters include `T`, `IV`, and `piid`.
-- **Function: OnGetUnknown:** Returns the *IUnknown* of this connection point by calling `static_cast<T*>(this)->GetUnknown()`.
-- **Function: OnGetWorkItemRelProc:** Returns the address of the static `ReleaseArgs` method.
-- **Function: OnMessage:** Handles messages, specifically firing events when the message is `e_idFireEvents`.
-- **Function: ReleaseArgs:** Deletes the object derived from `TCComEventCall` if the message is `e_idFireEvents`.
-- **Function: FireEvents:** Fires the event to all connected sinks.
-- **Function: GetEventSinks:** Copies the derived-class's event sinks to the specified vector.
-- **Function: RemoveFailedSink:** Removes an event sink if an event call failed.
-- **Class: CCall##name:** Template class used to handle event calls with a specific number of arguments.
-- **Function: Fire_##name:** Template function that creates an instance of `CCall##name`, sets its event name, and posts a message to fire the event.
-- **Macros: TCComEventCP_FnX:** Macros that generate classes and functions for firing events with X arguments.
-- **Macros: DECLARE_CTOR_X:** Macros that generate constructors for classes with X arguments.
+KEY PARTS:
+- TCComEventsCP: Base class for managing event sinks connected to a COM interface.
+- BEGIN_TCComEventsCP, END_TCComEventsCP: Macros for declaring classes that inherit from TCComEventsCP.
+- TCComEventCP_Fn0-TCComEventCP_Fn10: Macros for defining event functions with varying numbers of parameters.
+- FireEvents: Method to fire an event to all connected sinks.
+- GetEventSinks: Method to copy the derived-class's event sinks to a vector.
+- RemoveFailedSink: Method to remove an event sink if an event call failed.
+- OnGetUnknown: Override method returning the IUnknown of this connection point.
 
-**CONNECTS TO:** Other parts of the application that use connection points to handle events, such as property change notifications.
+CONNECTS TO: COM interfaces and sinks.
 
-**NOTES:** The use of macros to generate classes and functions for different numbers of arguments is unusual and can lead to code bloat if not managed carefully. The presence of `_DOCJET_ONLY` conditional compilation suggests that this code might be specific to a particular build configuration or feature set.
+NOTES:
+- Receiving results or [out] parameters from connected sinks is not supported.
 
 #### `src/test/TCAtl/ExternalConnectionImpl.h`
 
@@ -20641,14 +25236,10 @@ None.
 
 #### `src/test/TCAtl/Message.txt`
 
-PURPOSE: This file is a placeholder within the TCAtl project and does not contain any buildable code. It exists to house other files related to the project.
+PURPOSE: tiny file (2 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None
-
-CONNECTS TO: none
-
-NOTES: The file serves as a placeholder for other files in the TCAtl project and has no functional content.
+    TCAtl: This project has nothing to build.
+    It only serves as a placeholder for the files it contains.
 
 #### `src/test/TCAtl/ObjectMap.h`
 
@@ -20760,46 +25351,72 @@ NOTES:
 
 #### `src/test/TCAtl/PropertyPageBase.cpp`
 
-**PURPOSE:** The `TCPropertyPageBase.cpp` file contains the implementation of a base class for property pages in a dialog-based application. It manages embedded property pages and handles initialization, advisory connections, and changes to properties.
+PURPOSE:
+TCAtl/PropertyPageBase.cpp contains a base class for property pages in Allegiance, providing functionality to manage embedded property pages and handle user interface interactions.
 
-**KEY PARTS:**
-- **Class: TCPropertyPageBase**
-  - Inherits from `CComObjectRootEx` and implements `IPropertyPage`.
-  - Manages a collection of embedded property pages.
-  
-- **Function: GetInsidePage(UINT idCtrl)**
-  - Retrieves an embedded property page by its identifier.
-  
-- **Function: GetInsidePageData(UINT idCtrl)**
-  - Retrieves application-defined data associated with an embedded property page.
-  
-- **Function: GetInsidePageText(UINT idCtrl)**
-  - Retrieves application-defined text associated with an embedded property page.
-  
-- **Function: GetDirtyInsidePage(UINT idCtrl)**
-  - Checks if a specific embedded property page is marked as dirty.
-  
-- **Function: SetDirtyInsidePage(UINT idCtrl, bool bDirty)**
-  - Sets the dirty state of an embedded property page.
-  
-- **Function: GetVisiblePageOfGroup(UINT idGroup)**
-  - Retrieves the currently visible embedded property page within a group.
-  
-- **Function: HideInsidePageOfGroup**
-  - Hides the window of an embedded property page within a group.
-  
-- **Function: OnInitDialogHandler**
-  - Handles the initialization of the dialog, setting up embedded property pages and advisory connections.
-  
-- **Function: OnChangedHandler**
-  - Handles changes in properties by updating the dialog fields.
-  
-- **Function: OnNcDestroyHandler**
-  - Cleans up advisory connections and embedded property pages when the window is destroyed.
+KEY PARTS:
+- TCPropertyPageBase: Base class for property pages.
+- GetInsidePage: Retrieves a pointer to an embedded property page.
+- SetDirty: Sets the dirty state of a property page.
+- CreateInsidePages: Creates all embedded property pages specified in the property page map.
+- DestroyInsidePages: Destroys all instances of embedded property pages.
+- ApplyToInsidePages: Applies changes to embedded property pages.
+- OnInitDialogHandler: Handles WM_INITDIALOG message.
+- OnChangedHandler: Handles property change notifications.
 
-**CONNECTS TO:** Other property page classes and dialog-based application components.
+CONNECTS TO:
+TCAdviseHolder class for advisory connections.
 
-**NOTES:** The file uses Microsoft's tracing utilities `_TRACE1` and `_TRACE3` for debugging. There are no explicit TODO comments in this snippet, but typical C++ code might include them for future enhancements or bug fixes.
+NOTES:
+- TODO comments suggest improvements, such as using TCAdviseHolder and setting advises before updating fields.
+
+PARTS (in file order):
+
+- lines 1-325
+  - TCPropertyPageBase: Base class for property pages.
+  - GetInsidePage: Retrieves a pointer to an embedded property page.
+  - GetInsidePageData: Retrieves application-defined data associated with an embedded property page.
+  - GetInsidePageText: Retrieves application-defined text associated with an embedded property page.
+  - GetDirtyInsidePage: Checks if the dirty flag is set for an embedded property page.
+  - SetDirtyInsidePage: Sets or clears the dirty flag for an embedded property page.
+  - GetInsidePageOfGroup: Retrieves a pointer to an embedded property page within a group.
+  - GetInsidePageOfGroupText: Retrieves application-defined text associated with an embedded property page in a group.
+- lines 326-647
+  - TCPropertyPageBase::SetDirty: Sets the dirty state of a property page.
+  - TCInsidePropPage TCPropertyPageBase::GetVisiblePageOfGroup: Retrieves the currently visible embedded property page within a group.
+  - bool TCPropertyPageBase::ShowInsidePage: Makes the window of an embedded property page visible.
+  - bool TCPropertyPageBase::HideInsidePage: Hides the window of an embedded property page.
+  - bool TCPropertyPageBase::ShowInsidePageOfGroup: Shows a specific embedded property page within a group, hiding others.
+  - bool TCPropertyPageBase::HideInsidePageOfGroup: Hides a specific embedded property page within a group.
+  - bool TCPropertyPageBase::OnInitDialog: Override for derived classes to initialize user interface elements.
+  - UINT TCPropertyPageBase::GetInsidePageTable: Retrieves the table of embedded property pages.
+- lines 648-972
+  - TCPropertyPageBase::OnSetAllAdvises: Handles setting advisory connections for property pages.
+  - TCPropertyPageBase::OnClearAllAdvises: Handles clearing advisory connections for property pages.
+  - TCPropertyPageBase::CreateInsidePage: Creates a window for an embedded property page.
+  - TCPropertyPageBase::CreateInsidePages: Creates all embedded property pages specified in the property page map.
+  - TCPropertyPageBase::DestroyInsidePages: Destroys all instances of embedded property pages.
+  - TCPropertyPageBase::DestroyInsidePageMap: Destroys all embedded property pages within a specified map.
+  - TCPropertyPageBase::GetInsidePageTable: Retrieves the table of child property pages.
+  - TODO: Consider using TCAdviseHolder class for advisory connections.
+- lines 973-1296
+  - TCPropertyPageBase::_GetInsidePage: Retrieves a pointer to an embedded property page and ensures its window is created.
+  - TCPropertyPageBase::_GetInsidePageOfGroup: Retrieves a pointer to an embedded property page within a group and ensures its window is created.
+  - TCPropertyPageBase::SetObjects: Filters a set of objects based on the property field map, updating fields and setting advises if applicable.
+  - TCPropertyPageBase::SetObjectsOfInsidePages: Forwards the original set of objects to each embedded property page.
+  - TCPropertyPageBase::SaveObjectsForInsidePages: Saves the original set of objects for use by new embedded property pages.
+  - TCPropertyPageBase::SetObjectsToInsidePage: Forwards the original set of objects to a newly created embedded property page.
+  - TODO: Shouldn't the advises be set prior to UpdateFields?
+  - __try/__except block: Handles exceptions and cleans up resources in case of failure.
+- lines 1297-1567
+  - TCPropertyPageBase::ApplyToInsidePages: Applies changes to embedded property pages.
+  - TCPropertyPageBase::ReleaseObjectsForInsidePages: Releases objects for inside pages.
+  - TCPropertyPageBase::ReleaseSupportedInterfaces: Releases interfaces supported by the property page.
+  - TCPropertyPageBase::SetAllAdvises: Establishes advisory connections with specified objects.
+  - TCPropertyPageBase::SetAdvises: Establishes a single advisory connection with an object.
+  - TCPropertyPageBase::OnInitDialogHandler: Handles WM_INITDIALOG message.
+  - TCPropertyPageBase::OnChangedHandler: Handles property change notifications.
+  - TCPropertyPageBase::OnNcDestroyHandler: Handles WM_NCDESTROY message.
 
 #### `src/test/TCAtl/PropertyPageBase.h`
 
@@ -20817,25 +25434,60 @@ NOTES: None.
 
 #### `src/test/TCAtl/PropertyPageImpl.h`
 
-**PURPOSE:** The `TCAtl/PropertyPageImpl.h` file provides a template class and associated functions to implement the `IPropertyPage` interface for managing property pages in the Allegiance game. It includes methods for updating fields, applying changes, handling dirty flags, and managing various states of property page fields.
+PURPOSE: The file `PropertyPageImpl.h` contains a template class `TCPropertyPageImpl` and related utilities for implementing property pages in a Microsoft application, likely Allegiance.
 
-**KEY PARTS:**
-- **Class: TCPropertyPageImpl<T>**: Manages property pages for objects, handling updates, applies changes, and manages dirty flags.
-- **Function: UpdateFields(DISPID dispid)**: Updates dialog fields from objects based on the provided DISPID or all properties if DISPID_UNKNOWN is used.
-- **Function: OnUpdateFields(DISPID dispid)**: Loops through property field entries and calls update methods for each entry that matches the specified DISPID.
-- **Function: OnApplyFields()**: Applies changes from dialog fields to objects based on property field entries.
-- **Function: GetPageFieldTable(const XPageFieldEntry** ppTable)**: Returns the table of supported interfaces and the number of entries in the property page's field map.
-- **Function: OnInitDialogHandler(UINT, WPARAM, LPARAM, BOOL&)**: Initializes the dialog handler by calling the base class method and returning FALSE to prevent setting focus to the first tabstop control.
-- **Function: GetPageInfo(PROPPAGEINFO *pPageInfo)**: Fills a PROPPAGEINFO structure with information about the property page. Handles resource loading and error checking.
-- **Function: SetObjects(ULONG cObjects, IUnknown** ppUnk)**: Sets objects associated with this property page and delegates to the base class method.
-- **Function: Apply()**: Applies current property page values to underlying objects and resets the dirty flag.
-- **Function: Help(LPCOLESTR pszHelpDir)**: Provides help functionality, always returning E_NOTIMPL as help is provided through PROPPAGEINFO.
-- **Function: OnStatusChange(DWORD dwFlags)**: Notifies the frame that property values have changed and sets the dirty flag accordingly. Delegates to the site's method.
-- **Function: GetLocaleID(LCID* pLocaleID)**: Returns the locale identifier for country-specific settings, delegating to the site's method.
+KEY PARTS:
+- TCPropertyPageImpl: Template class providing a consistent implementation of the IPropertyPage interface.
+- Checked_true and Checked_false: Convert boolean expressions to check box state constants.
+- VARIANT_TRUE_Checked and VARIANT_TRUE_Unchecked: Convert check box states to VARIANT_BOOLs.
+- COM_INTERFACE_ENTRIES_TCPropertyPageImpl and CHAIN_MSG_MAP_TCPropertyPageImpl: Macros for interface map and message map entries.
+- XPageFieldEntry: Struct representing an entry in a table of property page fields.
+- SetDirty, SetDirtyNoApply, Create, GetPageWindow, GetPageUnknown, IsObjectKnown, UpdateFields: Methods for managing the state and behavior of property pages.
+- OnSetDirty, OnSetDirtyNoApply, OnInitDialogHandler, GetPageInfo, SetObjects, Apply, Help: Implementations of IPropertyPage methods.
+- GetPageContainer, TranslateAccelerator, OnChanged, OnRequestEdit, put_EnableField, get_EnableField, put_ShowField, get_ShowField, FieldToggle: Additional implementations for handling property changes and interface interactions.
 
-**CONNECTS TO:** Other systems or files it depends on or serves include `IPropertyPage`, `IPropertyPageSite`, `ITCPropertyFieldToggle`, and `IPropertyNotifySink` interfaces within the Allegiance game framework.
+CONNECTS TO: Other parts of the Allegiance application that use property pages for configuration or editing settings.
 
-**NOTES:** The file includes TODOs for implementing additional functionality, such as handling user interface interactions with fields more efficiently by marking them as 'dirty' and ensuring properties are not modified from multiple instances.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-341
+  - TCPropertyPageImpl: Template class providing a consistent implementation of the IPropertyPage interface.
+  - Checked_true: Converts a boolean expression to a check box state constant (BST_CHECKED).
+  - Checked_false: Converts a boolean expression to a check box state constant (BST_UNCHECKED).
+  - VARIANT_TRUE_Checked: Converts a check box state constant to a VARIANT_BOOL (VARIANT_TRUE if BST_CHECKED).
+  - VARIANT_TRUE_Unchecked: Converts a check box state constant to a VARIANT_BOOL (VARIANT_TRUE if BST_UNCHECKED).
+  - COM_INTERFACE_ENTRIES_TCPropertyPageImpl: Macro for interface map entries.
+  - CHAIN_MSG_MAP_TCPropertyPageImpl: Macro for message map entries.
+  - XPageFieldEntry: Struct representing an entry in a table of property page fields.
+- lines 342-676
+  - TCPropertyPageImpl<T>: Template class for implementing property pages.
+  - SetDirty(bool bDirty): Sets the dirty flag of the property page and notifies the page site if necessary.
+  - SetDirtyNoApply(): Sets the dirty flag without notifying the page site.
+  - Create(HWND hWndParent): Creates the property page window using the IDD member variable.
+  - GetPageWindow(): Returns the HWND of the property page.
+  - GetPageUnknown(): Returns the IUnknown pointer of the property page.
+  - IsObjectKnown(IUnknown punk): Determines if an object supports an interesting interface.
+  - UpdateFields(DISPID dispid): Updates the property page fields from the set of objects being viewed/edited.
+- lines 677-1010
+  - TCPropertyPageImpl<T>: Implements IPropertyPage and IPropertyPageSite interfaces for property pages.
+  - OnSetDirty: Sets the dirty flag of the property page when a change occurs.
+  - OnSetDirtyNoApply: Sets the dirty flag without applying changes.
+  - OnInitDialogHandler: Handles WM_INITDIALOG message, delegating to base class.
+  - GetPageInfo: Returns information about the property page.
+  - SetObjects: Provides the property page with an array of IUnknown pointers for objects associated with this property page.
+  - Apply: Applies current property page values to underlying objects specified through SetObjects.
+  - Help: Invokes help in response to end-user request, always returns E_NOTIMPL.
+- lines 1011-1315
+  - TCPropertyPageImpl<T>: Implements IPropertyPage, IPropertyNotifySink, and ITCPropertyFieldToggle interfaces for property pages.
+  - GetPageContainer: Delegates to the page site's GetPageContainer method.
+  - TranslateAccelerator: Delegates to the page site's TranslateAccelerator method.
+  - OnChanged: Posts a message to handle property change notifications on the main thread.
+  - OnRequestEdit: Always returns S_OK, indicating that properties are allowed to change.
+  - put_EnableField and get_EnableField: Enable or disable fields based on their dispatch identifier.
+  - put_ShowField and get_ShowField: Show or hide fields based on their dispatch identifier.
+  - FieldToggle: Toggles the enable/disable or show/hide state of a field.
 
 #### `src/test/TCAtl/RangeValueImpl.h`
 
@@ -21067,34 +25719,19 @@ NOTES: None.
 
 ### src/test/TCLib
 
-### Folder: src/test/TCLib
+This folder contains utility classes and functions for managing various aspects of the Allegiance game engine, including COM operations, threading, memory management, and string manipulation.
 
-**Overview:** The `TCLib` folder contains utility classes, functions, and macros that provide essential functionality for managing COM objects, threading, synchronization, and other common tasks in the Allegiance game engine.
+- ActiveObject.h: Provides functionality similar to OLE API `RegisterActiveObject` without security context limitations.
+- AdviseHolder.h: Manages connecting to and disconnecting from connectable component objects using IConnectionPointContainer.
+- AsyncDebugOutput.h: Asynchronously writes debug output with timestamps to a log file.
+- AutoHandle.h: Automatically manages the lifecycle of Windows handles, ensuring they are closed when out of scope.
+- DynaLib.h: Framework for loading dynamic link libraries and resolving their exported functions.
+- PropertyPageSite.cpp: Manages an IPropertyPage interface, handling creation, attachment, and manipulation of property pages.
+- TCLib.cpp: Contains utility functions and classes for managing component categories, formatting dates, streams, and object operations.
+- TCThread.h: Defines a class for managing threads in Allegiance, similar to CWinThread but without MFC dependencies.
+- UtilityThread.h: Base class for performing background tasks in a separate thread, allowing queued work items to be processed asynchronously.
 
-**Important Files:**
-- **ActiveObject.h**: Implements custom registration of objects in the Running Object Table (ROT) with additional functionality.
-- **AdviseHolder.h**: Manages connections to connectable components using `IConnectionPointContainer`.
-- **AsyncDebugOutput.h**: Asynchronously writes debug output to a log file, handling timestamps and asynchronous I/O operations.
-- **AutoCriticalSection.h**: Manages Win32 critical section objects for thread synchronization.
-- **AutoHandle.h**: Encapsulates handle types and ensures proper cleanup when the object goes out of scope.
-- **AutoMutex.h**: Manages Win32 mutex objects in a thread-safe manner.
-- **BinString.h**: Provides encoding and decoding of binary data into a string format using only displayable characters.
-- **CoInit.h**: Simplifies initialization and cleanup of COM in Windows applications.
-- **CommonControls.h**: Declares the `TCCommonControls` class for managing the Win32 Common Control Library dynamically.
-- **CompositeValue.h**: Evaluates a series of values to determine a composite value representing them.
-- **DynaLib.cpp** / **DynaLib.h**: Manages dynamic loading and resolving API exports from DLLs at runtime.
-- **ExcepInfo.cpp** / **ExcepInfo.h**: Encapsulates error information for COM exceptions, providing methods to manage and create error info objects.
-- **InvokeArgs.cpp** / **InvokeArgs.h**: Manages dispatch parameters for calling methods on COM objects through `IDispatch::Invoke`.
-- **Lockable.h**: Provides locking functionality using critical sections.
-- **LookupTable.h**: Defines a template structure and macros for creating and using static lookup tables in C++.
-- **NetApi.h**: Utility classes and macros for managing Windows Net API buffers and LSA handles safely.
-- **ObjectLock.h**: Manages the locking and unlocking of protected resources with public `Lock` and `Unlock` methods.
-- **PropertyPageSite.cpp** / **PropertyPageSite.h**: Manages an IPropertyPage object within a dialog-based user interface.
-- **Range.h**: Represents a range of values with lower and upper bounds, providing methods to check intersections and compare ranges.
-- **RangeSet.h**: Manages a collection of non-overlapping ranges, ensuring they do not overlap and providing efficient range operations.
-- **RefCountedData.h**: Provides reference counting functionality for any base class or structure.
-- **RelPath.cpp** / **RelPath.h**: Contains implementation for creating relative path names from absolute paths using COM monikers.
-- **StrManip.cpp** / **StrManip.h**: Implements string manipulation routines, including functions to replace occurrences of a substring within another string with
+Largest files: DynaLib.h (1602 lines), WotLib.h (1063 lines), TCLib.cpp (1049 lines), PropertyPageSite.cpp (966 lines), AutoHandle.h (867 lines).
 
 #### `src/test/TCLib/ActiveObject.h`
 
@@ -21330,20 +25967,69 @@ NOTES:
 
 #### `src/test/TCLib/DynaLib.h`
 
-**PURPOSE:** The file `DynaLib.h` in Allegiance is responsible for dynamically loading DLLs and resolving API exports at runtime. It provides a structured way to handle function pointers and ensure proper error handling when functions are not found.
+PURPOSE: The file `DynaLib.h` provides a framework for loading dynamic link libraries (DLLs) and resolving their exported functions in the Allegiance game engine.
 
-**KEY PARTS:**
-- **Class: TCDynaLib**: Encapsulates the runtime loading of DLLs and resolving API exports.
-- **Function: IsLibraryLoaded()**: Checks if the library has been successfully loaded.
-- **Function: LoadLibrary(LPCTSTR pszLibName)**: Loads a DLL from the specified name.
-- **Macros: TCDynaLib_BEGIN_REQUIRED_MAP(), TCDynaLib_END_REQUIRED_MAP(), TCDynaLib_REQUIRED_FUNCTION()**: Define required API exports that must be resolved.
-- **Class: TCDynaLib_Fn**: Template class for defining dynamic function pointers and calling functions from a DLL.
-- **Macros: TCDynaLib_Fn(retType, name)**: Declares member functions that resolve and invoke an API export by its name.
-- **Macro: TCPtr<PFN_##name>**: Creates a smart pointer to manage the lifetime of the function pointer.
+KEY PARTS:
+- TCDynaLib: Manages the loading and resolution of DLLs.
+- IsLibraryLoaded: Checks if a library has been successfully loaded.
+- IsLibraryLoadedAndResolved: Ensures that all required APIs are resolved.
+- LoadLibrary: Loads a DLL by its name.
+- GetProcAddress: Retrieves the address of an exported function from a DLL.
+- FunctionNotFound: Handles cases where a required function is not found in the DLL.
+- CLock: Provides thread synchronization for library operations.
+- TCDynaLib_BEGIN_REQUIRED_MAP and TCDynaLib_END_REQUIRED_MAP: Macros to define which API exports are required.
 
-**CONNECTS TO:** Other parts of Allegiance that require dynamic loading of DLLs for functionality.
+CONNECTS TO: Allegiance game engine components that require dynamic library functionality.
 
-**NOTES:** The code includes macros for generating function declarations with varying numbers of parameters, which might be complex for new programmers to understand. There are placeholders like `{secret}` and `{partof:sizeofArg}` suggesting additional documentation or hidden logic not shown here.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-339
+  - TCDynaLib: Class for loading DLLs and resolving API exports.
+  - IsLibraryLoaded: Checks if a library has been loaded.
+  - IsLibraryLoadedAndResolved: Checks if a library has been loaded and all required APIs are resolved.
+  - LoadLibrary: Loads a library by name.
+  - GetProcAddress: Retrieves the address of an exported function.
+  - FunctionNotFound: Handles cases where a function is not found in the DLL.
+  - CLock: Internal class for thread synchronization.
+  - TCDynaLib_BEGIN_REQUIRED_MAP, TCDynaLib_END_REQUIRED_MAP: Macros to define required API exports.
+- lines 340-656
+  - TCDynaLib_Fn0(retType, name): Macro for declaring a member function with 0 parameters.
+  - TCDynaLib_Fn1(retType, name, P1): Macro for declaring a member function with 1 parameter.
+  - TCDynaLib_Fn2(retType, name, P1, P2): Macro for declaring a member function with 2 parameters.
+  - TCDynaLib_Fn3(retType, name, P1, P2, P3): Macro for declaring a member function with 3 parameters.
+  - TCDynaLib_Fn4(retType, name, P1, P2, P3, P4): Macro for declaring a member function with 4 parameters.
+  - TCDynaLib_Fn5(retType, name, P1, P2, P3, P4, P5): Macro for declaring a member function with 5 parameters.
+  - TCDynaLib_Fn6(retType, name, P1, P2, P3, P4, P5, P6): Macro for declaring a member function with 6 parameters.
+  - TCDynaLib_Fn7(retType, name, P1, P2, P3, P4, P5, P6, P7): Macro for declaring a member function with 7 parameters.
+- lines 657-978
+  - TCDynaLib: Main class for dynamic library management.
+  - FunctionNotFound: Function to handle cases where a required function is not found in the library.
+  - TCPtr: Smart pointer class used for managing pointers to dynamically loaded functions.
+  - Exists_##name(): Macro to check if a function exists in the loaded library.
+  - TCDynaLib_FnExists(name): Macro to declare existence of a function.
+  - TCDynaLib_PreFn0(retType, pre, name): Macro for declaring and implementing a function with no parameters.
+  - TCDynaLib_PreFn1(retType, pre, name, P1): Macro for declaring and implementing a function with one parameter.
+  - TCDynaLib_PreFn2(retType, pre, name, P1, P2): Macro for declaring and implementing a function with two parameters.
+- lines 980-1301
+  - TCDynaLib_PreFn12: Defines a member function that takes 12 parameters and returns a value.
+  - TCDynaLib_PreFn0_void: Defines a member function with no parameters and no return value.
+  - TCDynaLib_PreFn1_void: Defines a member function that takes one parameter and no return value.
+  - TCDynaLib_PreFn2_void: Defines a member function that takes two parameters and no return value.
+  - TCDynaLib_PreFn3_void: Defines a member function that takes three parameters and no return value.
+  - TCDynaLib_PreFn4_void: Defines a member function that takes four parameters and no return value.
+  - TCDynaLib_PreFn5_void: Defines a member function that takes five parameters and no return value.
+  - TCDynaLib_PreFn6_void: Defines a member function that takes six parameters and no return value.
+- lines 1302-1601
+  - TCDynaLib_DecPreFn0_void: Defines a function that takes no parameters and returns void.
+  - TCDynaLib_DecPreFn1_void: Defines a function that takes one parameter and returns void.
+  - TCDynaLib_DecPreFn2_void: Defines a function that takes two parameters and returns void.
+  - TCDynaLib_DecPreFn3_void: Defines a function that takes three parameters and returns void.
+  - TCDynaLib_DecPreFn4_void: Defines a function that takes four parameters and returns void.
+  - TCDynaLib_DecPreFn5_void: Defines a function that takes five parameters and returns void.
+  - TCDynaLib_DecPreFn6_void: Defines a function that takes six parameters and returns void.
+  - TCDynaLib_DecPreFn7_void: Defines a function that takes seven parameters and returns void.
 
 #### `src/test/TCLib/ExcepInfo.cpp`
 
@@ -21638,14 +26324,19 @@ NOTES: None.
 
 #### `src/test/TCLib/RelPath.h`
 
-PURPOSE: This file contains declarations for functions related to creating relative paths.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TCMakeRelativePath: Function that creates a relative path from one directory to another.
-
-CONNECTS TO: None
-
-NOTES: none
+    #ifndef __RelPath_h__
+    #define __RelPath_h__
+    /////////////////////////////////////////////////////////////////////////////
+    // RelPath.h : Declarations of relative pathname functions.
+    //
+    /////////////////////////////////////////////////////////////////////////////
+    // Relative Path Creation
+    bool TCMakeRelativePath(LPCTSTR pszPath, LPCTSTR pszFrom, LPTSTR pszDest,
+      int cchMaxDest, bool bBeginWithDot);
+    /////////////////////////////////////////////////////////////////////////////
+    #endif // !__RelPath_h__
 
 #### `src/test/TCLib/StrManip.cpp`
 
@@ -21942,59 +26633,46 @@ NOTES: None.
 
 #### `src/test/TCLib/WotLib.h`
 
-**PURPOSE:** The file `WotLib.h` contains a class and macros designed to facilitate the use of functions from a DLL through a window's message thread in the Allegiance game. It provides mechanisms for setting up message handlers and calling DLL functions via these handlers.
+PURPOSE: The file `WotLib.h` provides a mechanism for calling functions from a DLL through a window's message thread, encapsulating the use of exported DLL functions.
 
-**KEY PARTS:**
-- **Class: TCWotLib**
-  - Encapsulates the use of DLL functions through a window's message thread.
-  
-- **Function: TCWotLib()**
-  - Default constructor initializing `m_hWnd` to `NULL`.
-  
-- **Function: TCWotLib(HWND hWnd)**
-  - Constructor setting the window handle (`m_hWnd`) during object creation.
+KEY PARTS:
+- TCWotLib: A class to manage calling DLL functions via SendMessage.
+- SetWnd: Method to set the window that will receive function msg requests.
+- TCWOTLIB_HANDLER: Macro for defining message handlers for the window.
+- TCWotCall, TCWotCall_void, TCWotPreCall, TCWotPreCall_void: Macros to call DLL functions through SendMessage.
+- TCWotLib_Fn0 to TCWotLib_Fn12: Macros to declare non-prefixed functions with return-values.
+- TCWotLib_Fn0_void to TCWotLib_Fn12_void: Macros to declare non-prefixed void functions.
+- TCWotLib_PreFn0 to TCWotLib_PreFn12: Macros to declare prefixed functions with return-values.
+- TCWotLib_PreFn0_void to TCWotLib_PreFn12_void: Macros to declare prefixed void functions.
 
-- **Function: SetWnd(HWND hWnd)**
-  - Sets the window handle (`m_hWnd`) after object creation.
+CONNECTS TO: `TCLib` system, likely depends on a DLL for function calls.
 
-- **Macro: TCWOTLIB_HANDLER(Name)**
-  - Defines a message handler for a specific function, mapping it to a window message.
-
-- **Macros: TCWotLib_FnX(retType, Name, T1, ..., TN)**
-  - Defines non-prefixed functions with return values for each number of arguments (from 0 to 12).
-
-- **Macros: TCWotLib_DecHandler0_void**, etc.
-  - Define handler functions that take a dynamic library and a method name, handling different numbers of parameters.
-
-**CONNECTS TO:** Other parts of the Allegiance game that require interaction with DLLs through window messages.
-
-**NOTES:** The use of `va_list` and `va_arg` macros is unusual in C++ and suggests the code may have been written by someone more familiar with C. There are multiple TODOs indicating areas for future work or improvements.
+NOTES: None.
 
 #### `src/test/TCLib/pch.cpp`
 
-PURPOSE: This file is a precompiled header (PCH) source file for the Allegiance game's TCLib project. It includes standard headers to speed up compilation by caching their contents.
+PURPOSE: tiny file (4 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- None specifically highlighted in this snippet.
-
-CONNECTS TO: pch.h, which is the precompiled header file that will be used across the project.
-
-NOTES: none
+    // pch.cpp : source file that includes just the standard includes
+    //  TCLib.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
 
 #### `src/test/TCLib/pch.h`
 
-PURPOSE: This file is a precompiled header for the Allegiance game's TCLib module, including common headers and macros used frequently across the project.
+PURPOSE: This header file is a precompiled header for the Allegiance game's TCLib project, providing common includes and definitions used across multiple source files.
 
 KEY PARTS:
-- `WIN32_LEAN_AND_MEAN`: Excludes rarely-used parts of Windows headers to reduce compile time.
-- `_WIN32_DCOM`: Enables DCOM support.
-- `__MODULE__`: Defines a macro for the module name "TCLib".
-- `_CRTDBG_MAP_ALLOC`: Maps memory allocation functions to debug versions.
-- `<stdexcept>`, `<algorithm>`, `<string>`, `<vector>`, `<map>`: Standard C++ libraries for common data structures and utilities.
-- `<windows.h>`, `<tchar.h>`, `<malloc.h>`, `<comcat.h>`, `<zassert.h>`, `<comdef.h>`, `<commctrl.h>`, `<atlconv.h>`, `<process.h>`, `<mmsystem.h>`: Various Windows-specific headers for system functions, COM support, and multimedia handling.
-- ZLib headers: For compression and decompression functionalities.
+- `WIN32_LEAN_AND_MEAN`: Excludes rarely-used Windows headers to reduce compile time.
+- `_WIN32_DCOM`: Enables support for Distributed Component Object Model (DCOM).
+- `__MODULE__ "TCLib"`: Defines the module name as "TCLib".
+- `#pragma warning(disable: 4786)`: Disables warnings related to long identifiers in debug builds.
+- `<stdexcept>`, `<algorithm>`, `<string>`, `<vector>`, `<map>`: Standard C++ library includes for common data structures and utilities.
+- `<crtdbg.h>`: Header for debugging the C runtime library.
+- `<windows.h>`, `<tchar.h>`, `<malloc.h>`, `<comcat.h>`, `<zassert.h>`, `<comdef.h>`, `<commctrl.h>`, `<atlconv.h>`, `<process.h>`, `<mmsystem.h>`: Various Windows and ATL headers for system functionality.
+- `<..\zlib\zlib.h>`: Header for the ZLib compression library.
 
-CONNECTS TO: Other parts of the Allegiance game codebase that include this precompiled header.
+CONNECTS TO: Other source files within the TCLib project that include this precompiled header.
 
 NOTES: None.
 
@@ -22014,63 +26692,89 @@ NOTES: None.
 
 ### src/test/TCObj
 
-### Overview
+This folder contains source code related to COM (Component Object Model) components and utilities in Allegiance, a 2000 Microsoft multiplayer space game. It includes various classes for managing objects, properties, strings, and utility functions across process boundaries.
 
-The `src/test/TCObj` folder contains source code for various test and utility components in the Allegiance game, focusing on object management, property handling, and COM-based functionality.
+- ObjRef.js: Manages object references.
+- SrcInc.cpp: Header file with common includes.
+- SrcInc.h: Header file with common declarations.
+- TCMarshalByValue.cpp: Implements a COM component that marshals data by value using the IMarshal interface.
+- TCMarshalByValue.h: Defines the `CTCMarshalByValue` class for marshaling and unmarshaling objects across process boundaries.
+- TCMarshalByValue.rgs: Registers the Marshal By Value Helper Object in the Allegiance game.
+- TCNullStream.cpp: Implements a COM component that provides functionality through interfaces like `IUnknown`.
+- TCNullStream.h: Defines the `CTCNullStream` class for a Null IStream Object.
+- TCNullStream.rgs: Registers the "Null IStream Object" COM object.
+- TCObj.cpp: Manages common objects in the Allegiance game.
+- TCObj.def: Module definition file for the TCObj.dll.
+- TCObj.idl: Defines type library and interfaces for the TCObj.dll.
+- TCObjPS.def: Module definition file for the PS (Proxy Stub) DLL.
+- TCPropBagOnRegKey.cpp: Implements a component object that manages properties stored in Windows registry keys.
+- TCPropBagOnRegKey.h: Defines the `ITCPropBagOnRegKey` interface and provides functionality for managing properties on registry keys.
+- TCPropBagOnRegKey.rgs: Registers a COM object that implements a property bag on a registry key.
+- TCStrings.cpp: Manages a collection of strings and provides methods to manipulate them.
+- TCStrings.h: Defines the `CTCStrings` class for managing string collections.
+- TCStrings.rgs: Registers the "Strings collection" COM class.
+- TCUtility.cpp: Implements utility methods for creating objects, managing object references, sleeping, and retrieving objects by moniker.
+- TCUtility.h: Defines the `ITCUtility` interface and provides utility methods.
+- TCUtility.rgs: Registers a utility object used in Allegiance.
+- dlldatax.h: Header file for `dlldatax.c`.
+- pch.cpp: Precompiled header file for the TCObj project.
+- pch.h: Includes standard system headers, project-specific headers, and third-party libraries.
+- resource.h: Resource definitions for the Allegiance game.
 
-### Key Files and Their Functions:
-
-- **ObjRef.js**: Demonstrates how to create and manipulate object references using ActiveXObject in JScript.
-- **SrcInc.cpp** and **SrcInc.h**: Manage include directives for libraries related to automation and property management.
-- **TCMarshalByValue.cpp** and **TCMarshalByValue.h**: Implement a COM component that marshals interfaces by value.
-- **TCNullStream.cpp** and **TCNullStream.h**: Provide an IStream interface that counts bytes written, useful for persistence without memory allocation.
-- **TCPropBagOnRegKey.cpp** and **TCPropBagOnRegKey.h**: Manage properties stored in Windows Registry keys using COM interfaces.
-- **TCStrings.cpp** and **TCStrings.h**: Implement a collection of strings with methods to manipulate and access them.
-- **TCUtility.cpp** and **TCUtility.h**: Provide utility methods for creating objects, managing object references, sleeping, and retrieving objects by moniker.
-
-These files collectively support various aspects of object management, property handling, and COM-based communication within the Allegiance game.
+Largest files: TCPropBagOnRegKey.cpp (1433 lines), TCStrings.cpp (376 lines), TCPropBagOnRegKey.h (170 lines), TCObj.cpp (162 lines), TCMarshalByValue.cpp (157 lines).
 
 #### `src/test/TCObj/ObjRef.js`
 
-PURPOSE: This file demonstrates how to create and manipulate an object reference string using the TCUtil utility in a JScript environment.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- objUtil: Creates an instance of the TCUtil utility.
-- objStrings: Creates an instance of the TCObj.Strings collection.
-- Add: Adds strings ("One", "Two", "Three") to the objStrings collection.
-- ObjectReference: Generates an object reference string for the objStrings object using objUtil.
-- WScript.Echo: Displays the generated object reference string and the contents of the objStrings collection retrieved from the reference string.
-
-CONNECTS TO: TCUtil, TCObj.Strings
-
-NOTES: None.
+    // Create the utility object
+    var objUtil = new ActiveXObject("TCUtil");
+    // Create an object, using the JScript operator new
+    var objStrings = new ActiveXObject("TCObj.Strings");
+    // Add some strings to the collection
+    objStrings.Add("One");
+    objStrings.Add("Two");
+    objStrings.Add("Three");
+    // Create an ObjRef string for the object
+    var strObjRef = objUtil.ObjectReference(objStrings);
+    // Display the string
+    WScript.Echo(strObjRef);
+    // Get the object from it's reference string
+    var objStringsFromObjRef = WScript.GetObject(strObjRef);
+    // Display the strings in the collection
+    var str = "";
+    for (i = 0; i < objStringsFromObjRef.Count; ++i)
+      str += "objStringsFromObjRef(i) = " + objStringsFromObjRef(i) + "\n";
+    WScript.Echo(str);
 
 #### `src/test/TCObj/SrcInc.cpp`
 
-PURPOSE: This file includes source code files for various libraries used in the Allegiance project. It helps manage and organize the implementation details of these libraries.
+PURPOSE: tiny file (9 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- TCAtl.cpp: Contains the implementation of the ATL (Active Template Library) classes.
-- PropertyClass.cpp: Implements a class for handling properties, likely used for object attributes or configurations.
-- TCNullStreamImpl.cpp: Provides an implementation for a null stream, which might be used for logging or other purposes where output is not needed.
-
-CONNECTS TO: SrcInc.h, which contains the corresponding header files for these libraries.
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the CPP files for all source code-based
+    // libraries used in the project. Any corresponding header files for the
+    // libraries should be placed in SrcInc.h.
+    //
+    #include "pch.h"
+    #include <TCAtl.cpp>
+    #include <..\TCAtl\PropertyClass.cpp>
+    #include <..\TCAtl\TCNullStreamImpl.cpp>
 
 #### `src/test/TCObj/SrcInc.h`
 
-PURPOSE: This file is intended to centralize include directives for all source code-based libraries used in the Allegiance project. It helps manage dependencies and ensures that necessary headers are included consistently across the project.
+PURPOSE: tiny file (10 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `TCAtl.h`: Main header file for the TCAtl library, which provides various utilities and classes.
-- `PropertyClass.h`: Header for the PropertyClass template class, used for managing properties in objects.
-- `TCNullStreamImpl.h`: Header for the TCNullStreamImpl class, which implements a null stream for logging or other purposes where output is not needed.
-- `ObjectMap.h`: Header for the ObjectMap class, which provides a map-like data structure for managing and accessing objects.
-
-CONNECTS TO: Other source files that include this file to access the libraries and classes defined here.
-
-NOTES: None.
+    #pragma once
+    /////////////////////////////////////////////////////////////////////////////
+    // This file should contain the include files for all source code-based
+    // libraries used in the project. Any corresponding CPP files for the
+    // libraries should be placed in SrcInc.cpp.
+    //
+    #include <TCAtl.h>
+    #include <..\TCAtl\PropertyClass.h>
+    #include <..\TCAtl\TCNullStreamImpl.h>
+    #include <..\TCAtl\ObjectMap.h>
 
 #### `src/test/TCObj/TCMarshalByValue.cpp`
 
@@ -22134,15 +26838,24 @@ NOTES:
 
 #### `src/test/TCObj/TCNullStream.cpp`
 
-PURPOSE: Implements a null stream object that counts the number of bytes written to it. This is used to determine the size needed for persisting an object without allocating memory.
+PURPOSE: tiny file (16 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- CTCNullStream: Class implementing IStream interface, which does nothing but count bytes written.
-- TC_OBJECT_EXTERN_IMPL(CTCNullStream): Macro for externalizing the class implementation.
-
-CONNECTS TO: src/test/TCObj/TCNullStream.h (header file).
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // TCNullStream.cpp | Implementation of the CTCNullStream class, which
+    // implements the CLSID_TCNullStream component object.<nl><nl>
+    // This object provides an implementation of the IStream interface that does
+    // nothing more that count the number of bytes being written to it.  Since
+    // ATL (currently 3.0) implements IPersistStreamInitImpl::GetSizeMax by
+    // returning E_NOTIMPL, this object can be used in an override of that
+    // method. This is accomplished by creating an instance of this null stream
+    // and 'persisting' an object to it, thereby counting the number of bytes
+    // needed to persist the object without allocating any memory.
+    //
+    #include "pch.h"
+    #include "TCNullStream.h"
+    /////////////////////////////////////////////////////////////////////////////
+    // CTCNullStream
+    TC_OBJECT_EXTERN_IMPL(CTCNullStream)
 
 #### `src/test/TCObj/TCNullStream.h`
 
@@ -22191,15 +26904,16 @@ NOTES: None.
 
 #### `src/test/TCObj/TCObj.def`
 
-PURPOSE: This file defines the module parameters and exports for a DLL named TCObj in the Allegiance game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- LIBRARY "TCObj": Specifies the name of the DLL.
-- EXPORTS: Lists functions that are accessible from outside the DLL, including DllCanUnloadNow, DllGetClassObject, DllRegisterServer, and DllUnregisterServer.
-
-CONNECTS TO: None explicitly mentioned in this file.
-
-NOTES: none
+    ; TCObj.def : Declares the module parameters for the DLL.
+    ; Imago 6/10 removed ordinal and description warnings
+    LIBRARY      "TCObj"
+    EXPORTS
+      DllCanUnloadNow     PRIVATE
+      DllGetClassObject   PRIVATE
+      DllRegisterServer   PRIVATE
+      DllUnregisterServer PRIVATE
 
 #### `src/test/TCObj/TCObj.idl`
 
@@ -22219,49 +26933,70 @@ NOTES: None.
 
 #### `src/test/TCObj/TCObjPS.def`
 
-PURPOSE: This file defines the exports for a Proxy/Stub DLL used in Allegiance, which facilitates communication between different components of the game.
+PURPOSE: tiny file (8 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- DllGetClassObject: Retrieves a class object for a specified interface.
-- DllCanUnloadNow: Determines if the DLL can be unloaded from memory.
-- GetProxyDllInfo: Provides information about the proxy DLL.
-- DllRegisterServer: Registers the DLL with the system.
-- DllUnregisterServer: Unregisters the DLL from the system.
-
-CONNECTS TO: Other components of the Allegiance game engine that require inter-process communication or component-based architecture.
-
-NOTES: None.
+    LIBRARY      "TCObjPS"
+    DESCRIPTION  'Proxy/Stub DLL'
+    EXPORTS
+      DllGetClassObject       @1  PRIVATE
+      DllCanUnloadNow         @2  PRIVATE
+      GetProxyDllInfo         @3  PRIVATE
+      DllRegisterServer       @4  PRIVATE
+      DllUnregisterServer     @5  PRIVATE
 
 #### `src/test/TCObj/TCPropBagOnRegKey.cpp`
 
-**PURPOSE:** The file `TCObj/TCPropBagOnRegKey.cpp` contains the implementation of a component object that uses the Windows Registry as a storage backend for properties. It provides functions to manage and manipulate these properties, including creating, loading, saving, and querying objects stored in the registry.
+PURPOSE: The file `TCObj/TCPropBagOnRegKey.cpp` implements a component object that manages properties stored in Windows registry keys, providing functionality to create and manage local and remote objects.
 
-**KEY PARTS:**
-- **Class:** `CTCPropBagOnRegKey`
-  - Manages properties stored in the Windows Registry.
-  
-- **Functions:**
-  - `_GetSubkey()`: Retrieves the full subkey path.
-  - `_GetServer()`: Reads the "Server" value from a registry subkey.
-  - `_SetServer()`: Writes the "Server" value to a registry subkey.
-  - `_GetObjectCLSID()`: Reads the CLSID of an object from a registry subkey.
-  - `_CreateObject()`: Creates an object based on the information stored in a registry subkey.
-  - `_CreateLocalObject()`: Creates a local object by querying its CLSID and using `CoCreateInstance`.
-  - `_CreateRemoteObject()`: Creates a remote object using DCOM (`CoCreateInstanceEx`).
-  - `_LoadObject()`: Loads the persistent properties of an object from a registry subkey into an existing `IUnknown` object.
-  - `_ReadSafeArray()`: Reads a safe array from a registry subkey.
-  - `_WriteSafeArray()`: Writes a safe array to a registry subkey.
-  - `_ReadVariant()`: Reads a variant from the registry.
-  - `_WriteVariant()`: Writes a variant to the registry.
+KEY PARTS:
+- CTCPropBagOnRegKey: Manages properties using Windows registry keys.
+- _GetSubkey: Retrieves the full subkey path for an object and its parent.
+- CLSIDFromProgID: Converts a programmatic identifier to a class identifier.
+- _ReadVariantFromValue: Reads a value from the registry into a variant.
+- RootKeyFromString: Converts a string representing a registry root key to its corresponding HKEY value.
+- CreateObject, CreateLocalObject, CreateRemoteObject: Methods to create objects using the internal property bag.
 
-- **TODOs/Unusual Code:**
-  - Several TODO comments indicate areas that need further development or review.
-  - Extensive error handling with detailed logging using `LogError` and `USES_CONVERSION`.
-  - The use of `_bstr_t` for string manipulation and `CComVariant` for variant data types is common in COM-based applications.
+CONNECTS TO: Windows Registry API (e.g., `HKEY`, `RegOpenKeyEx`, `RegSetValueEx`).
 
-**CONNECTS TO:** Other components within the Allegiance game that require property management, such as game objects and settings stored in the registry.
+NOTES: None.
 
-**NOTES:** None.
+PARTS (in file order):
+
+- lines 1-364
+  - CTCPropBagOnRegKey: Implements a component object that interacts with registry keys to manage properties.
+  - _GetSubkey: Retrieves the full subkey path for this object and its parent.
+  - _GetServer: Reads the server name associated with an object in the registry.
+  - _SetServer: Writes the server name associated with an object in the registry.
+  - _GetObjectCLSID: Retrieves the CLSID of an object from the registry.
+  - _CreateObject: Creates a new object either locally or remotely based on the server information.
+  - _CreateLocalObject: Creates a local object using COM and loads its properties.
+  - _CreateRemoteObject: Creates a remote object using DCOM and loads its properties.
+- lines 365-714
+  - CTCPropBagOnRegKey: Manages properties stored in a registry key.
+  - CLSIDFromProgID: Converts a programmatic identifier to a class identifier.
+  - _ReadVariantFromValue: Reads a value from the registry into a variant.
+  - _LogError: Logs an error with details about the function, description, and HRESULT.
+  - _GetSubkeyVarType: Retrieves the variant type of a subkey in the registry.
+  - _ReadSafeArray: Reads a safe array from the registry into a VARIANT.
+  - _WriteSafeArray: Writes a safe array to the registry from a VARIANT.
+- lines 715-1045
+  - CTCPropBagOnRegKey::_WriteSafeArray: Writes a safe array to the registry.
+  - CTCPropBagOnRegKey::_ReadVariant: Reads a variant from the registry.
+  - CTCPropBagOnRegKey::_WriteVariant: Writes a variant to the registry.
+  - V_VT: Retrieves the type of a VARIANT.
+  - SafeArrayGetUBound: Gets the upper bound of a safe array dimension.
+  - SafeArrayGetLBound: Gets the lower bound of a safe array dimension.
+  - SafeArrayAccessData: Locks access to the data in a safe array.
+  - SafeArrayUnaccessData: Unlocks access to the data in a safe array.
+- lines 1046-1432
+  - CTCPropBagOnRegKey: Manages a property bag using Windows registry keys.
+  - _VarTypeFromUnknown: Determines the type of an object based on its interface.
+  - RootKeyFromString: Converts a string representing a registry root key to its corresponding HKEY value.
+  - KeyExists: Checks if a specified subkey exists under a given registry key.
+  - QueryString: Retrieves a string value from a registry key.
+  - CreateKey: Creates or opens a registry key.
+  - OpenKey: Opens an existing registry key.
+  - CreateObject, CreateLocalObject, CreateRemoteObject: Methods to create objects using the internal property bag.
 
 #### `src/test/TCObj/TCPropBagOnRegKey.h`
 
@@ -22419,30 +27154,43 @@ NOTES: None.
 
 #### `src/test/TCObj/dlldatax.h`
 
-PURPOSE: This file is a header file for a DLL (Dynamic Link Library) in the Allegiance game. It contains declarations for functions related to COM (Component Object Model) proxy/stub support.
+PURPOSE: tiny file (19 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `PrxDllMain`: Main entry point for the DLL.
-- `PrxDllCanUnloadNow`: Determines if the DLL can be unloaded.
-- `PrxDllGetClassObject`: Retrieves a class object for a specified CLSID and interface ID.
-- `PrxDllRegisterServer`: Registers the DLL with COM.
-- `PrxDllUnregisterServer`: Unregisters the DLL from COM.
-
-CONNECTS TO: COM proxy/stub support in the Allegiance game.
-
-NOTES: None.
+    #if !defined(AFX_DLLDATAX_H__25072D60_AB2F_11D2_97EF_00A0C932A52F__INCLUDED_)
+    #define AFX_DLLDATAX_H__25072D60_AB2F_11D2_97EF_00A0C932A52F__INCLUDED_
+    #if _MSC_VER >= 1000
+      #pragma once
+    #endif // _MSC_VER >= 1000
+    #ifdef _MERGE_PROXYSTUB
+    extern "C"
+    {
+    BOOL WINAPI PrxDllMain(HINSTANCE hInstance, DWORD dwReason,
+      LPVOID lpReserved);
+    STDAPI PrxDllCanUnloadNow(void);
+    STDAPI PrxDllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv);
+    STDAPI PrxDllRegisterServer(void);
+    STDAPI PrxDllUnregisterServer(void);
+    }
+    #endif
+    //{{AFX_INSERT_LOCATION}}
+    // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+    #endif // !defined(AFX_DLLDATAX_H__25072D60_AB2F_11D2_97EF_00A0C932A52F__INCLUDED_)
 
 #### `src/test/TCObj/pch.cpp`
 
-PURPOSE: This file is a precompiled header (PCH) for the Allegiance game's TCObj project. It includes standard headers to speed up compilation by reducing the amount of time spent on parsing these headers in every source file.
+PURPOSE: tiny file (11 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include "pch.h"`: Includes the primary PCH header.
-- `#ifdef _ATL_STATIC_REGISTRY`: Conditionally includes registry-related headers for static ATL registry support.
-
-CONNECTS TO: None, as it is a precompiled header file.
-
-NOTES: None.
+    /////////////////////////////////////////////////////////////////////////////
+    // pch.cpp : source file that includes just the standard includes
+    //  TCObj.pch will be the pre-compiled header
+    //  pch.obj will contain the pre-compiled type information
+    #include "pch.h"
+    #ifdef _ATL_STATIC_REGISTRY
+      #include <statreg.h>
+      //#include <statreg.cpp>
+    #endif
+    //#include <atlimpl.cpp>
+    //#include <atlwin.cpp>
 
 #### `src/test/TCObj/pch.h`
 
@@ -22464,39 +27212,39 @@ NOTES: None.
 
 #### `src/test/TCObj/resource.h`
 
-PURPOSE: This file contains resource definitions used by the TCObj project in Allegiance. It includes string tables and identifiers for various resources.
+PURPOSE: tiny file (20 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- IDR_TCStrings: Contains string resources.
-- IDR_TCMarshalByValue: Identifies a marshal-by-value resource.
-- IDR_TCNullStream: Identifies a null stream resource.
-- IDR_TCPropBagOnRegKey: Identifies a property bag on registry key resource.
-- IDR_REGISTRY1: Another identifier for a registry-related resource.
-- IDR_TCUtility: Also identified as a utility resource.
-
-CONNECTS TO: TCObj.rc
-
-NOTES: None.
+    //{{NO_DEPENDENCIES}}
+    // Microsoft Developer Studio generated include file.
+    // Used by TCObj.rc
+    //
+    #define IDR_TCStrings                   100
+    #define IDR_TCMarshalByValue            101
+    #define IDR_TCNullStream                102
+    #define IDR_TCPropBagOnRegKey           103
+    #define IDR_REGISTRY1                   2000
+    #define IDR_TCUtility                   2000
+    // Next default values for new objects
+    //
+    #ifdef APSTUDIO_INVOKED
+    #ifndef APSTUDIO_READONLY_SYMBOLS
+    #define _APS_NEXT_RESOURCE_VALUE        2001
+    #define _APS_NEXT_COMMAND_VALUE         32768
+    #define _APS_NEXT_CONTROL_VALUE         3000
+    #define _APS_NEXT_SYMED_VALUE           104
+    #endif
+    #endif
 
 ### src/training
 
-### Folder Overview
+The `src/training` folder in Allegiance contains essential components for managing and executing training missions within the game. These files define conditions, actions, and goals necessary for players to learn specific game mechanics.
 
-The `src/training` folder in Allegiance contains the implementation for training-related functionalities, including mission setup, action execution, condition evaluation, and goal management. This part of the game or toolset is crucial for creating and managing training missions that help players learn and practice various aspects of the game.
+- AbstractTarget.cpp: Implements a base class for different target types used in game training.
+- Action.cpp: Contains the implementation of the "action" interface within the training library.
+- Mission2.h: Defines the header for a specific training mission interface named "Mission2".
+- Training.cpp: Manages the core functionality for training missions, including initialization and execution.
 
-### Important Files and Their Functions
-
-- **AbstractTarget.cpp** and **AbstractTarget.h**: Define a base class `AbstractTarget` for representing targets in space combat scenarios, providing an interface for target selection and management.
-  
-- **Action.cpp** and **Action.h**: Implement the training library's "action" interface, which defines basic actions that can be executed during training missions.
-
-- **CreateDroneAction.cpp** and **CreateDroneAction.h**: Handle the creation of drone ships in training missions, including setting up their properties like name, hull ID, pilot type, etc.
-
-- **GetCommandCondition.cpp** and **GetCommandCondition.h**: Implement a condition that checks if a specific command has been received by a ship, used to evaluate mission progress based on player actions.
-
-- **Goal.cpp** and **Goal.h**: Manage the lifecycle and evaluation of training goals, including success conditions, start actions, constraint conditions, and skip conditions.
-
-- **TrainingMission.cpp** and **TrainingMission.h**: Define the core class for managing training missions, handling the setup, execution, and completion of various training scenarios.
+Largest files: mission3.cpp (1159 lines), mission4.cpp (1045 lines), mission6.cpp (974 lines), mission10.cpp (970 lines), trainingmission.cpp (935 lines).
 
 #### `src/training/AbstractTarget.cpp`
 
@@ -24880,27 +29628,59 @@ None.
 
 #### `src/training/mission3.cpp`
 
-**PURPOSE:** The `mission3.cpp` file implements the third training mission in Allegiance. It defines the mission's objectives, conditions, and actions to guide the player through various tasks related to targeting derelict ships, using weapons, and repairing their ship.
+PURPOSE: Implements the third training mission for Allegiance, setting up the environment and defining goals and conditions to be completed by the player.
 
-**KEY PARTS:**
-- **Mission3 Class**: Manages the overall structure of Mission 3.
-- **GetMissionID Function**: Returns the unique ID for this mission.
-- **GetStartSectorID Function**: Specifies the starting sector for the mission.
-- **RecordKeyPress Function**: Handles key presses, particularly for targeting and weapon swapping.
-- **ShipLanded Function**: Ends the mission if the player's ship lands.
-- **CreateUniverse Function**: Sets up the initial universe with a fighter ship, derelict hulls, and other objects.
-- **CreateMission Function**: Constructs the sequence of goals for the mission.
-- **CreateGotTargetCondition Function**: Checks if any derelict hulls are targeted.
-- **CreateGoal01 Function**: Defines the first subgoal with audio messages and HUD overlays.
-- **CreateGoal02 Function**: Explains shield and armor systems, demonstrates damage effects, and guides the player on returning to stations for repairs.
-- **CreateGoal03 Function**: Introduces targeting derelict hulls using peripheral radar and flight controls.
+KEY PARTS:
+- Mission3: Manages the overall structure of the mission.
+- GoalList: Organizes multiple goals that must be completed sequentially.
+- ElapsedTimeCondition: Checks if a certain amount of time has passed.
+- GetKeyCondition: Waits for a specific key press.
+- SetControlsAction: Sets the controls for the player.
+- ToggleWeaponAction: Toggles weapon usage on or off.
+- RepairRearmAction: Repairs and rearms the player's ship.
 
-**CONNECTS TO:** `mission.cpp`, `gamestate.cpp`, `ship.cpp`, `audio.cpp`
+CONNECTS TO: Allegiance game engine, mission system, and player input handling.
 
-**NOTES:**
-- The comment "XXX I hope this works out" suggests potential issues with random vector generation.
-- Some TODO comments indicate voiceover sounds not matching the keymap, such as `tm_3_19Sound`.
-- The use of `FalseCondition` in `CreateGoal13` creates an infinite loop or placeholder goal.
+NOTES: None.
+
+PARTS (in file order):
+
+- lines 1-332
+  - Mission3: Implements the first training mission.
+  - GetMissionID: Returns the ID of the mission.
+  - GetStartSectorID: Returns the starting sector for the mission.
+  - RecordKeyPress: Handles key press events specific to the mission.
+  - ShipLanded: Terminates the mission if the ship lands.
+  - CreateUniverse: Sets up the game universe and initializes the mission environment.
+  - CreateMission: Creates the main goal list and constraints for the mission.
+  - CreateGotTargetCondition: Generates a condition that checks if any derelict is targeted.
+- lines 334-688
+  - Goal: Represents a single goal within a mission.
+  - GoalList: A container for multiple goals that must be completed sequentially.
+  - CreatePlaySoundGoal: Creates a goal that plays a sound when activated.
+  - ElapsedTimeCondition: Checks if a certain amount of time has passed.
+  - ConditionalAction: Executes an action only if a condition is true.
+  - SetHUDOverlayAction: Changes the HUD overlay to display specific information.
+  - DoDamageAction: Applies damage to the player's ship or target.
+  - GetKeyCondition: Waits for a specific key press.
+- lines 689-1044
+  - Goal: Represents a single goal that can be achieved.
+  - GoalList: A list of goals that must all be completed for the mission to succeed.
+  - SetControlsAction: Sets the controls for the player.
+  - ElapsedTimeCondition: Checks if a certain amount of time has passed.
+  - GetShipIsDestroyedCondition: Checks if a ship is destroyed.
+  - KeyCondition: Checks if a specific key has been pressed.
+  - StateBitsCondition: Checks if a specific state bit is set.
+  - ToggleWeaponAction: Toggles the weapon on or off.
+- lines 1046-1159
+  - GoalList: Manages a list of goals.
+  - Goal: Represents a single goal with conditions and actions.
+  - ElapsedTimeCondition: Checks if a certain amount of time has elapsed.
+  - GetKeyCondition: Checks if a specific key is pressed.
+  - GetTargetCondition: Checks if the player's ship targets a specific type of object within a range.
+  - SetControlConstraintsAction: Enables or disables input controls.
+  - ToggleWeaponAction: Toggles weapon usage.
+  - RepairRearmAction: Repairs and rearms the player's ship.
 
 #### `src/training/mission4.cpp`
 
@@ -25288,15 +30068,9 @@ NOTES: None.
 
 #### `src/training/pch.cpp`
 
-PURPOSE: This file is a precompiled header for the training system in Allegiance, including common headers and declarations used across multiple source files.
+PURPOSE: tiny file (1 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- `#include "pch.h"`: Includes the main precompiled header file.
-- `// TODO: Remove unused includes`: Indicates that there are unused includes that should be removed.
-
-CONNECTS TO: src/training/*.cpp
-
-NOTES: Contains a TODO comment to clean up unused includes.
+    #include "pch.h"
 
 #### `src/training/pch.h`
 
@@ -25680,14 +30454,9 @@ NOTES:
 
 ### src/training/asteroids
 
-The `src/training/asteroids` folder contains a simple utility script for generating asteroid data, which is used in the Allegiance game. This script helps in creating realistic asteroid fields by randomly generating properties such as radius, mass, hitpoints, and position.
+This folder contains code related to generating random asteroid data for a game. It processes command-line arguments to determine the number of asteroids and outputs their properties in a specific format.
 
-- `main.cpp`: The main entry point of the program that processes command-line arguments to specify the number of asteroids to generate and outputs their properties in a specific format.
-- `UnitRandom()`: A function that generates a random float between 0 and 1, used to calculate various asteroid properties.
-- `AsteroidDataGenerator.cpp` (not shown): This file likely contains additional functions or classes for generating more complex asteroid data or handling different types of asteroids.
-- `AsteroidProperties.h` (not shown): A header file that defines the structure or class representing an asteroid's properties, which is used by `main.cpp`.
-- `WorldGenerator.cpp` (not shown): This file might be responsible for generating the world space where asteroids are placed, ensuring they do not overlap and are distributed according to game rules.
-- `AsteroidDataOutput.cpp` (not shown): A utility file that handles the output of asteroid data in a format suitable for the game's internal systems or external tools.
+- main.cpp: This file generates random asteroid data based on user input and outputs it in a structured format.
 
 #### `src/training/asteroids/main.cpp`
 
@@ -25706,28 +30475,41 @@ NOTES: The program outputs data in a format that appears to be used by another s
 
 ### src/ui
 
-The `src/ui` folder contains essential components for managing the user interface in Allegiance, including loading UI elements from Lua scripts, handling events, and exposing C++ objects to Lua for scripting.
+The `src/ui` folder in Allegiance contains essential components for managing and rendering user interfaces within the game. It includes classes and functions for handling UI states, image loading, event management, and screen interactions.
 
-- **Exposer.h**: Defines an abstract class `Exposer` used for exposing C++ objects to Lua scripts using the Sol2 library.
-- **UiEngine.cpp**: Manages loading and managing UI elements from Lua scripts, including images, event sinks, and other UI components.
-- **UiEngine.h**: Declares classes and structures related to the user interface engine, such as screen configurations, image loading, and Lua scripting context.
-- **UiState.cpp**: Implements a template class `UiState` for managing user interface states with properties.
-- **UiState.h**: Defines various classes and structures for UI states, including containers for UI objects and specific UI state implementations.
-- **items.hpp**: Contains the `MouseEventImage` class that extends `WrapImage` to handle mouse events and provide event sources.
+- Exposer.h: Provides mechanisms to expose types and functionality to Lua scripts.
+- UiEngine.cpp: Implements the core logic for loading and managing UI elements from Lua scripts.
+- UiEngine.h: Declares interfaces and utilities for the UI engine.
+- UiState.cpp: Manages different states of the user interface within the game.
+- UiState.h: Defines classes and structures for handling UI states and objects.
+- ns_image.hpp: Offers functionalities for loading, manipulating, and managing images in the UI.
+
+Largest files: UiEngine.cpp (500 lines), ui_types.h (373 lines), ns_event.hpp (326 lines), ns_image.hpp (315 lines), ns_screen.hpp (255 lines).
 
 #### `src/ui/Exposer.h`
 
-PURPOSE: The file defines a base class `Exposer` for exposing C++ objects to Lua scripting using the Sol2 library.
+PURPOSE: tiny file (20 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- Exposer: A base class that wraps any C++ object and provides methods to expose it to Lua.
-- m_pobject: A shared pointer to the wrapped C++ object.
-- ExposeSolObject: An abstract method that must be implemented by derived classes to return a `sol::object` representing the exposed object in Lua.
-- operator const T&(): A template operator that allows casting an `Exposer` instance back to its underlying C++ type.
-
-CONNECTS TO: sol.hpp (the Sol2 library for Lua integration).
-
-NOTES: None.
+    #pragma once
+    #define SOL_CHECK_ARGUMENTS 1
+    #define SOL_ENABLE_INTEROP 1
+    #include "sol.hpp"
+    class Exposer {
+    protected:
+        std::shared_ptr<void> m_pobject;
+    public:
+        Exposer(std::shared_ptr<void>& pobject) : m_pobject(pobject) {
+        }
+        template <typename T>
+        Exposer(T object) {
+            m_pobject = std::make_shared<T>(object);
+        }
+        virtual sol::object ExposeSolObject(lua_State* L) = 0;
+        template <typename T>
+        operator const T&() const {
+            return *std::static_pointer_cast<T>(m_pobject);
+        }
+    };
 
 #### `src/ui/UiEngine.cpp`
 
@@ -25842,15 +30624,21 @@ NOTES: None.
 
 #### `src/ui/ns_file.hpp`
 
-PURPOSE: This file defines a namespace for file operations in the Allegiance game, specifically focusing on loading Lua scripts.
+PURPOSE: tiny file (13 lines), shown in full rather than summarized.
 
-KEY PARTS:
-- FileNamespace: A class that encapsulates functionality related to managing namespaces.
-- AddNamespace: A static function within FileNamespace that adds a Lua table to the global environment with a "LoadLua" function.
-
-CONNECTS TO: ui.h, items.hpp, Loader
-
-NOTES: none
+    #pragma once
+    #include "ui.h"
+    #include "items.hpp"
+    class FileNamespace {
+    public:
+        static void AddNamespace(sol::state* m_pLua, Loader* pLoader) {
+            sol::table table = m_pLua->create_table();
+            table["LoadLua"] = [pLoader](std::string path) {
+                return pLoader->LoadScript(path);
+            };
+            m_pLua->set("File", table);
+        }
+    };
 
 #### `src/ui/ns_font.hpp`
 
@@ -25999,40 +30787,21 @@ NOTES: None.
 
 ### src/zlib
 
-### Folder Overview
+The Allegiance source code folder `src/zlib` contains essential utilities and components for various aspects of the game's functionality, including networking, logging, memory management, and event handling.
 
-The `src/zlib` folder contains essential utility classes, functions, and headers for managing various aspects of the Allegiance game engine, including threading, networking, file operations, logging, and more.
+- AutoCriticalSection.h: Manages Win32 critical section objects for thread synchronization.
+- FTPSession_win.cpp: Handles asynchronous FTP download sessions from an FTP server.
+- Logger.cpp: Implements logging functionality with timestamped log files and output to both files and debug output.
+- StackTracer.cpp: Captures and logs the call stack when exceptions occur using Structured Exception Handling (SEH).
+- TlsValue.h: Provides thread-local storage for various data types with synchronization mechanisms.
+- VersionInfo_msvc.cpp: Retrieves and parses version information from Windows executable files.
+- Win32app.cpp: Contains main application logic, initialization, exception handling, logging, and memory management.
+- matrix.cpp: Implements a 4x4 transformation matrix class for geometric transformations in 3D space.
+- orientation.cpp: Represents a 3D orientation using a rotation matrix with methods for setting and manipulating orientations.
+- token.cpp: Parses text and command-line inputs into tokens such as strings, numbers, symbols, and special characters.
+- zstring.cpp: Implements a custom string class with operations like token extraction, encryption, and path manipulation.
 
-### Key Files and Their Functions:
-
-- **AutoCriticalSection.h**: Manages Win32 critical sections for thread synchronization.
-- **CMakeLists.txt**: CMake configuration script for building the zlib library.
-- **FTPSession.h** and **FTPSession_win.cpp**: Manage FTP sessions and handle asynchronous file downloads.
-- **Logger.cpp** and **Logger.h**: Implement a logging system with various output options.
-- **StackTracer.cpp** and **StackTracer.h**: Capture and display call stack information on exceptions.
-- **TlsValue.h**: Manages thread-local storage for any data type.
-- **VersionInfo.h**, **VersionInfo_dummy.cpp**, and **VersionInfo_msvc.cpp**: Handle version information retrieval from executable files.
-- **Win32app.cpp** and **Win32app.h**: Main application logic, including initialization, exception handling, and logging.
-- **alloc.h**: Provides debug allocation utilities for memory management.
-- **base.h** and **base_win.cpp**: Basic utility classes and file operations.
-- **cast.h**: Macros and templates for casting pointers between different types.
-- **color.cpp** and **color.h**: Implementations and utilities related to color manipulation.
-- **doit.bat**: Batch file for compiling and linking source files into a static library.
-- **event.cpp** and **event.h**: Framework for event handling in the game engine.
-- **fixdelete.h**: Custom implementation of the `delete` operator for compatibility with Microsoft Visual C++'s debug heap management.
-- **genericlist.h**: Defines a generic list interface and an empty list implementation.
-- **input.cpp** and **input.h**: Interfaces and classes related to input handling, including keyboard and mouse inputs.
-- **main.h**: Main entry point for the Windows application.
-- **mask.h**: Classes and templates for managing bit masks.
-- **matrix.cpp** and **matrix.h**: Implementation of a 4x4 transformation matrix class used for various transformations.
-- **olddxdefns.h**: Legacy DirectX definitions and utility macros.
-- **orientation.cpp** and **orientation.h**: Represents a 3D orientation in space using a rotation matrix.
-- **point.h**: Template-based rectangle classes for different numeric types and coordinate systems.
-- **quaternion.cpp** and **quaternion.h**: Implementation of quaternion operations for representing and manipulating rotations in 3D space.
-- **rect.h**: Defines template-based rectangle classes for different numeric types and coordinate systems.
-- **tarray.h**: Defines a template class `TArray` for creating fixed-size arrays of any type.
-- **tcompare.h**: Default comparison and equality operators used throughout the game.
-- **tlist.cpp** and **tlist.h**: Implementation
+Largest files: window.cpp (1230 lines), zstring.cpp (1030 lines), matrix.cpp (910 lines), FTPSession_win.cpp (892 lines), VersionInfo_msvc.cpp (688 lines).
 
 #### `src/zlib/AutoCriticalSection.h`
 
@@ -26927,39 +31696,59 @@ NOTES:
 
 #### `src/zlib/window.cpp`
 
-**PURPOSE:** The `window.cpp` file in Allegiance handles the creation, management, and interaction of windows within the game. It includes functionalities for window styling, input handling, timers, and message processing.
+PURPOSE: Manages window properties and behavior, including creating, resizing, handling messages, and managing child windows.
 
-**KEY PARTS:**
-- **Class: Window**: Manages a window's properties, including style, focus, and event handling.
-- **Function: FillSolidRect**: Fills a rectangle on a device context with a solid color.
-- **Function: Window::Construct**: Initializes default values for a new `Window` object.
-- **Function: Window::Create**: Creates a window using Windows API functions.
-- **Class: Timer**: Represents a timer that triggers an event after a specified delay.
-- **Class: TimerList**: A list of timers, sorted by their trigger time.
-- **Function: CallTimers**: Processes all timers that have triggered and schedules new ones if necessary.
-- **Function: Window::AddSink**, **RemoveSink**: Adds or removes an event sink to the window's timer list.
-- **Function: Window::GetTimer**: Returns a pointer to the window itself as an `ITimerEventSource`.
-- **Function: IsFocus(IKeyboardInput* pinput)**: Checks if the given `IKeyboardInput` object has focus within the window.
-- **Function: GetFocus()**: Returns the current `IKeyboardInput` object that has focus in the window.
-- **Function: SetFocus(IKeyboardInput* pinput)**: Sets the specified `IKeyboardInput` object as having focus in the window.
-- **Function: RemoveFocus(IKeyboardInput* pinput)**: Removes the specified `IKeyboardInput` object from having focus in the window.
-- **Function: OnMouseMessage(UINT message, UINT nFlags, const WinPoint& pointArg)**: Handles mouse messages.
-- **Function: SetCursorPos(const Point& point)**: Sets the cursor position relative to the client area of the window.
-- **Function: DoHitTest()**: Simulates a mouse move event to recompute hit testing for images in the window.
-- **Function: GetText() const**: Retrieves the text associated with the window's title bar.
-- **Function: GetCursor() const**: Returns the cursor currently set for the window, or inherits it from its parent if not explicitly set.
-- **Function: ShowMouse(bool bShow)**: Shows or hides the mouse cursor based on the provided boolean value.
-- **Function: CaptureMouse()**: Captures the mouse input to this window.
-- **Function: ReleaseMouse()**: Releases any captured mouse input from this window.
-- **Function: SetCursor(HCURSOR hcursor)**: Sets a custom cursor for the client area of the window.
-- **Function: WndProc(UINT message, WPARAM wParam, LPARAM lParam)**: The main window procedure that processes messages and events.
-- **Function: MessageLoop()**: Handles the main message loop for the window, processing messages, timers, and idle functions.
-- **Function: ToggleProfiling(int count)**: Toggles profiling based on the input count.
-- **Function: IsProfiling()**: Returns whether profiling is currently started.
+KEY PARTS:
+- Window: Manages a window's properties and behavior.
+- FillSolidRect: Draws a solid rectangle on a device context.
+- Create: Creates a window with specified parameters.
+- SetSize: Adjusts the window size.
+- AddChild: Adds a child window to this window.
+- WndProc: Handles all window messages.
+- MessageLoop: Main message loop function handling window messages and timers.
 
-**CONNECTS TO:** Other systems or files it depends on or serves include `zlib.h`, `win32api.h`, and other game-specific classes like `IKeyboardInput`.
+CONNECTS TO: Allegiance game engine, Win32 API
 
-**NOTES:** The code contains several TODO comments, indicating areas that need further work or review. There is an intentional fallthrough in the `switch` statement for the `WM_CHAR` case, which might be unexpected behavior.
+NOTES: None
+
+PARTS (in file order):
+
+- lines 1-354
+  - Window: Manages a window's properties and behavior.
+  - FillSolidRect: Draws a solid rectangle on a device context.
+  - Construct: Initializes default values for a Window object.
+  - Window::Window(): Constructor for creating a new Window object.
+  - Window::Create(): Creates a window with specified parameters.
+  - ~Window(): Destructor that cleans up the window.
+  - CalcStyle: Recalculates and applies style settings to the window.
+  - SetTopMost, SetSizeable, SetHasMinimize, SetHasMaximize, SetHasSysMenu: Methods to modify window properties and recalculate styles.
+- lines 356-721
+  - Window::SetSize: Adjusts the window size.
+  - Window::SetClientSize: Sets the client area size of the window.
+  - Window::SetMinimumClientSize: Defines the minimum client area size for the window.
+  - AddChild: Adds a child window to this window.
+  - RemoveChild: Removes a child window from this window.
+  - RemoveAllChildren: Clears all child windows from this window.
+  - AddKeyboardInputFilter: Adds a keyboard input filter to handle key events.
+  - RemoveKeyboardInputFilter: Removes a keyboard input filter.
+- lines 723-1083
+  - Window::WndProc: Handles all window messages.
+  - Window::OnClose: Posts a quit message to close the application.
+  - Window::SetCursor: Updates the cursor and sends a message to the window under the cursor.
+  - Window::DoIdle: Placeholder for idle processing.
+  - Window::EnableIdleFunction: Enables or disables idle function calls.
+  - CallIdleFunctions: Calls all registered idle functions.
+  - Window::Win32WndProc: The main Win32 window procedure that maps HWNDs to Window objects.
+  - Window::StaticInitialize: Registers the window class and initializes static members.
+- lines 1084-1230
+  - g_bContinuousIdle: Global boolean indicating whether the message loop should continuously check for idle messages.
+  - Window::s_countProfile: Static integer to count profiling operations.
+  - Window::s_bProfileStarted: Static boolean indicating whether profiling is currently started.
+  - Window::ToggleProfiling(int count): Function to toggle or set the profiling count.
+  - Window::IsProfiling(): Function to check if profiling is started.
+  - Window::MessageLoop(): Main message loop function handling window messages and timers.
+  - MSG msg: Structure used to store Windows messages.
+  - CallTimers(): Function to call all registered timer functions.
 
 #### `src/zlib/window.h`
 
