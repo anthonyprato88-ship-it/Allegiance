@@ -2971,6 +2971,23 @@ void WinTrekClient::ShipWarped(IshipIGC*    pship,
                                SectorID    sidOld,
                                SectorID    sidNew)
 {
+    //Command view tracking: follow the targeted ship when it jumps to another sector
+    if (pship && TrekWindow::CommandCamera(GetWindow()->GetCameraMode()) &&
+        GetWindow()->GetTrackCommandView() && trekClient.GetShip()->GetStation())
+    {
+        ImodelIGC*  ptarget = trekClient.GetShip()->GetCommandTarget(c_cmdCurrent);
+        if (ptarget && (ptarget->GetObjectType() == OT_ship))
+            ptarget = ((IshipIGC*)ptarget)->GetSourceShip();
+
+        IclusterIGC*    pclusterView = trekClient.GetViewCluster();
+        if ((ptarget == pship) && pclusterView && (pclusterView->GetObjectID() == sidOld))
+        {
+            IclusterIGC*    pclusterNew = trekClient.m_pCoreIGC->GetCluster(sidNew);
+            if (pclusterNew)
+                RequestViewCluster(pclusterNew, pship);
+        }
+    }
+
     /*
     if ((GetWindow()->GetViewMode() == TrekWindow::vmCommand) && trekClient.GetShip()->GetStation())
     {

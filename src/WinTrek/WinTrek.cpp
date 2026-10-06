@@ -71,7 +71,7 @@ TRef<ZWriteFile> g_pzfFrameDump = NULL;
 FrameDumpInfo    g_fdInfo;
 
 const float s_fCommandViewDistanceMax = 20000.0f;
-const float s_fCommandViewDistanceMin = 50.0f;
+const float s_fCommandViewDistanceMin = 25.0f;
 const float s_fCommandViewDistanceDefault = 6000.0f;
 const float c_fCommandGridRadius = 7500.0f;
 
@@ -1291,6 +1291,8 @@ public:
     float               m_distanceExternalCamera;
     float               m_distanceCommandCamera;
     float               m_rollCommandCamera;
+    float               m_pitchCommandCamera;
+    bool                m_bCommandViewLocked;
     bool                m_bEnableDisplacementCommandView;
     int                 m_suicideCount;
     Time                m_suicideTime;
@@ -2709,6 +2711,8 @@ public:
 		m_distanceExternalCamera(s_fExteralViewDistanceDefault),
 		m_distanceCommandCamera(s_fCommandViewDistanceDefault),
 		m_rollCommandCamera(0.0f),
+		m_pitchCommandCamera(pi / 4.0f),
+		m_bCommandViewLocked(false),
 		m_bEnableDisplacementCommandView(true),
 		m_suicideCount(0),
 		m_bLensFlare(true),
@@ -2723,7 +2727,7 @@ public:
 		m_pszCursor(AWF_CURSOR_DEFAULT),
 		m_nLastCountdown(c_nCountdownMax),
 		m_ctLobbyChat(CHAT_EVERYONE),
-		m_bTrackCommandView(false),
+		m_bTrackCommandView(true),
 		m_bQuitComposing(true),
 		m_bEnableVirtualJoystick(false),
 		m_bFlipY(false),
@@ -7428,8 +7432,10 @@ public:
         Orientation o;
         if (m_cm == cmExternalCommandView34)
         {
-            static const Vector  forward(0.0f, sqrt2 / 2.0f, -sqrt2 / 2.0f);    //Remember negated in set
-            static const Vector  up(0.0f, sqrt2 / 2.0f, sqrt2 / 2.0f);
+            float   cosPitch = (float)cos(m_pitchCommandCamera);
+            float   sinPitch = (float)sin(m_pitchCommandCamera);
+            Vector  forward(0.0f, cosPitch, -sinPitch);    //Remember negated in set
+            Vector  up(0.0f, sinPitch, cosPitch);
             o.Set(forward, up);
         }
         else
@@ -7440,6 +7446,27 @@ public:
         }
         o.PostRoll(m_rollCommandCamera);
         m_cameraControl.SetOrientation(o);
+    }
+
+    virtual void OrbitCommandCamera(float dAzimuth, float dElevation)
+    {
+        m_rollCommandCamera = (float)fmod(m_rollCommandCamera + dAzimuth, 2.0f * pi);
+        if (m_rollCommandCamera < 0.0f)
+            m_rollCommandCamera += 2.0f * pi;
+
+        m_pitchCommandCamera += dElevation;
+        if (m_pitchCommandCamera < -1.4f)
+            m_pitchCommandCamera = -1.4f;
+        else if (m_pitchCommandCamera > 1.55f)
+            m_pitchCommandCamera = 1.55f;
+
+        if (CommandCamera(m_cm))
+            OrientCommandView();
+    }
+
+    virtual bool GetTrackCommandView(void) const
+    {
+        return m_bTrackCommandView;
     }
 
     static void  GetDefaultPosition(Vector*    pposition, float*   pradiusMin)
@@ -7474,7 +7501,10 @@ public:
             if (pposition)
             {
                 m_positionCommandView = *pposition;
-                m_distanceCommandCamera = s_fCommandViewDistanceMax / 2.0f;
+
+                //Keep the zoom when following a ship into another sector
+                if (!(m_bTrackCommandView && trekClient.GetShip()->GetCommandTarget(c_cmdCurrent)))
+                    m_distanceCommandCamera = s_fCommandViewDistanceMax / 2.0f;
             }
             else
             {
@@ -7490,6 +7520,7 @@ public:
     virtual void UpdateCommandView(void)
     {
         assert (CommandCamera(m_cm));
+        m_bCommandViewLocked = false;
 
         IclusterIGC*    pcluster = trekClient.GetCluster();
         assert (pcluster);
@@ -7511,6 +7542,7 @@ public:
                     {
                         positionTarget = pmodelTarget->GetPosition();
                         fMin = 5.0f + pmodelTarget->GetRadius() * 2.0f;
+                        m_bCommandViewLocked = true;
 
                         if (m_distanceCommandCamera < fMin)
                             m_distanceCommandCamera = fMin;
@@ -8492,7 +8524,7 @@ public:
                         }
                     }
 
-                    if (bInside) {
+                    if (bInside && !m_bCommandViewLocked) {
                         static const float gutter = 8.0f;
                         static const float maxGutter = 12.0f;
 
@@ -8577,25 +8609,57 @@ public:
                     if (m_ptrekInput->IsTrekKeyDown(TK_ThrustDown, bAllowKeyboardMovement))
                         dUp += delta / 2;
 
-                    if (dRight)
+                    //Arrow keys move the camera too (orbit when following a ship)
+                    if (bAllowKeyboardMovement)
                     {
-                        Vector  v = m_cameraControl.GetOrientation().GetRight() * dRight;
-                        m_displacementCommandView += v;
-                        m_positionCommandView += v;
+                        if (GetKeyState(VK_RIGHT) & 0x8000)
+                            dRight += delta / 2;
+                        if (GetKeyState(VK_LEFT) & 0x8000)
+                            dRight -= delta / 2;
+                        if (GetKeyState(VK_UP) & 0x8000)
+                            dUp -= delta / 2;
+                        if (GetKeyState(VK_DOWN) & 0x8000)
+                            dUp += delta / 2;
                     }
 
-                    if (dUp)
+                    if (m_bCommandViewLocked)
                     {
-                        Vector  up = m_cameraControl.GetOrientation().GetUp();
-                        up.z = 0.0f;
+                        //Following a ship: the movement keys orbit the camera around it
+                        if (dRight || dUp)
+                            OrbitCommandCamera(2.0f * dRight / m_distanceCommandCamera,
+                                               -2.0f * dUp / m_distanceCommandCamera);
+                    }
+                    else
+                    {
+                        if (dRight)
+                        {
+                            Vector  v = m_cameraControl.GetOrientation().GetRight() * dRight;
+                            m_displacementCommandView += v;
+                            m_positionCommandView += v;
+                        }
 
-                        float   l = (float)sqrt(up.x * up.x + up.y * up.y);
-                        assert (l != 0.0f);
+                        if (dUp)
+                        {
+                            //Pan along the plane: use the horizontal part of the view direction,
+                            //or the up vector when looking straight down
+                            Vector  up = m_cameraControl.GetOrientation().GetForward();
+                            up.z = 0.0f;
 
+                            float   l = (float)sqrt(up.x * up.x + up.y * up.y);
+                            if (l < 0.1f)
+                            {
+                                up = m_cameraControl.GetOrientation().GetUp();
+                                up.z = 0.0f;
+                                l = (float)sqrt(up.x * up.x + up.y * up.y);
+                            }
 
-                        Vector  v = up * (dUp / l);
-                        m_displacementCommandView -= v;
-                        m_positionCommandView -= v;
+                            if (l > 0.0f)
+                            {
+                                Vector  v = up * (dUp / l);
+                                m_displacementCommandView -= v;
+                                m_positionCommandView -= v;
+                            }
+                        }
                     }
                 }
                 else if (!bNoCameraControl)
@@ -8822,7 +8886,8 @@ public:
 
     void SetTarget(ImodelIGC* pmodel, CommandID cid)
     {
-        if (pmodel && trekClient.GetShip()->GetCommandTarget(c_cmdCurrent) != pmodel)
+        bool    bNewTarget = pmodel && (trekClient.GetShip()->GetCommandTarget(c_cmdCurrent) != pmodel);
+        if (bNewTarget)
         {
             StartSound(newTargetSound);
         }
@@ -8857,6 +8922,15 @@ public:
         {
             if (m_cameraControl.GetAnimation() < 1.0f)
                 m_cameraControl.SetAnimation(1.0f);
+
+            //Following a ship: move in close for a chase view
+            if (bNewTarget && m_bTrackCommandView && (pmodel->GetObjectType() == OT_ship))
+            {
+                if (m_distanceCommandCamera > 2000.0f)
+                    m_distanceCommandCamera = 300.0f;
+
+                trekClient.PostText(false, "Following %s. Middle-drag or arrow keys orbit, mouse wheel zooms.", pmodel->GetName());
+            }
 
             if (pmodel && !m_bTrackCommandView)
             {

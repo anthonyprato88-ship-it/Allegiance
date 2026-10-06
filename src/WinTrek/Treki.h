@@ -170,6 +170,8 @@ public:
     virtual void        SetViewMode(ViewMode vm, bool bForce = false) = 0;
 
     virtual void        EnableDisplacementCommandView (bool bEnable) = 0;
+    virtual void        OrbitCommandCamera(float dAzimuth, float dElevation) = 0;
+    virtual bool        GetTrackCommandView(void) const = 0;
 
     virtual OverlayMask GetOverlayFlags() const = 0;
     virtual void        SetOverlayFlags(OverlayMask om) = 0;

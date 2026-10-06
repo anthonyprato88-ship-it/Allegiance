@@ -608,6 +608,8 @@ private:
     Point                  m_pointMouseStart;
     Point                  m_pointMouseStop;
     int                    m_maskMouseState;
+    bool                   m_bOrbitDrag;
+    Point                  m_pointOrbitLast;
 
     TRef<ModifiableColorValue> m_pcolorTargetSide;
 
@@ -638,6 +640,7 @@ public:
         m_timeLastCriticalTipSet2(Time::Now()),
         m_timeLastCriticalTipSet3(Time::Now()),
         m_maskMouseState(0),
+        m_bOrbitDrag(false),
         m_bMouseIn(false),
         m_chsQuick(CHAT_NOSELECTION),
         m_chsCommand(CHAT_NOSELECTION),
@@ -1028,6 +1031,7 @@ public:
     {
         GetWindow()->SetCursor(AWF_CURSOR_DEFAULT);
         m_maskMouseState = 0;
+        m_bOrbitDrag = false;
 
         if (m_csComposeState == c_csComposeMouseCommand)
             QuitComposing();
@@ -1979,6 +1983,25 @@ public:
 
     MouseResult Button(IInputProvider* pprovider, const Point& point, int button, bool bCaptured, bool bInside, bool bDown)
     {     
+        //Middle button drag orbits the command view camera
+        if (button == 2)
+        {
+            if (!bDown && m_bOrbitDrag)
+            {
+                m_bOrbitDrag = false;
+                if (m_maskMouseState)
+                    return MouseResultHit();
+                return MouseResultRelease();
+            }
+
+            if (bDown && GetWindow()->CommandCamera(GetWindow()->GetCameraMode()))
+            {
+                m_bOrbitDrag = true;
+                m_pointOrbitLast = point;
+                return MouseResultCapture();
+            }
+        }
+
         //Imago 8/15/09
         if (button > 1) {
             TRef<TrekInput> pinput = GetWindow()->GetInput();
@@ -2176,6 +2199,10 @@ public:
                                 m_pchsCurrent->SetRecipient(CHAT_INDIVIDUAL, pship->GetObjectID(), pship);
                             }
                             UpdateComposedChat();
+
+                            //Command view tracking: a click on a ship makes the camera follow it
+                            if (GetWindow()->GetTrackCommandView() && !(GetKeyState(VK_SHIFT) & 0x8000))
+                                GetWindow()->SetTarget(pship, c_cidDefault);
                         }
                         else
                         {
@@ -2195,6 +2222,14 @@ public:
 
     void MouseMove(IInputProvider* pprovider, const Point& point, bool bCaptured, bool bInside)
     {
+        if (m_bOrbitDrag)
+        {
+            Point   d = point - m_pointOrbitLast;
+            m_pointOrbitLast = point;
+            GetWindow()->OrbitCommandCamera(-0.006f * d.X(), -0.006f * d.Y());
+            return;
+        }
+
         m_pointMouseStop = point;
     }
 

@@ -304,6 +304,28 @@ public:
     HRESULT Initialize(const ZString& strCommandLine)
     {
         _controlfp(_PC_53, _MCW_PC);
+        //
+        // Make sure reloader finished correctly--this must be first before any other files are opened
+        //
+        //
+        {
+          // Make sure the current path is where Allegiance.exe is for the AutoUpdate: 
+          // For Download -AND- for Reloader.exe -AND- Loading FileList which happens 
+          // when client logs onto lobby
+          // It is also where Steam looks for steam_appid.txt, so this comes before the
+          // Steam calls: a program run as administrator starts in System32.
+          //
+          char    path[MAX_PATH + 16];
+          ::GetModuleFileName(NULL, path, MAX_PATH);
+          char*   p = strrchr(path, '\\');
+          if (!p)
+              p = path;
+          else
+              p++;
+
+          *p = 0; // erase filename
+          ::SetCurrentDirectory(path);
+        }
 #ifdef STEAM_APP_ID
 		// BT - STEAM
 #ifndef _DEBUG
@@ -322,26 +344,6 @@ public:
 			::exit(-1);
 		}
 #endif
-        //
-        // Make sure reloader finished correctly--this must be first before any other files are opened
-        //
-        //
-        {
-          // Make sure the current path is where Allegiance.exe is for the AutoUpdate: 
-          // For Download -AND- for Reloader.exe -AND- Loading FileList which happens 
-          // when client logs onto lobby
-          //
-          char    path[MAX_PATH + 16];
-          ::GetModuleFileName(NULL, path, MAX_PATH);
-          char*   p = strrchr(path, '\\');
-          if (!p)
-              p = path;
-          else
-              p++;
-
-          *p = 0; // erase filename
-          ::SetCurrentDirectory(path);
-        }
 
 
         //
