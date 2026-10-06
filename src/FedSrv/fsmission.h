@@ -203,6 +203,8 @@ public:
   virtual void OnPassed();
 };
 
+class AICommander;   // AI-vs-AI: see aicommander.h
+
 class CFSMission
 {
 public:
@@ -276,6 +278,24 @@ public:
   int                   GetSideRankSum(IsideIGC * pside, bool bCountGhosts);	// TE: Added for balancing
   int                   GetRankThreshold();	// TE: Added for balancing
   bool                  HasPlayers(IsideIGC * pside, bool bCountGhosts);
+
+  // AI-vs-AI: sides run by an AICommander instead of a human commander
+  bool                  IsAISide(SideID sid) const
+  {
+    return (sid >= 0) && (sid < c_cSidesMax) && (((m_maskAISides >> sid) & 1) != 0);
+  }
+  bool                  HasAISides() const { return m_maskAISides != 0; }
+  unsigned              GetAISides() const { return m_maskAISides; }
+  void                  SetAISides(unsigned mask) { m_maskAISides = mask; }
+  Money                 GetSideMoney(SideID sid) const { return m_rgMoney[sid]; }
+  void                  SpendSideMoney(SideID sid, Money money) { m_rgMoney[sid] -= money; }
+  bool                  SideHasCommander(IsideIGC * pside, bool bCountGhosts)
+  {
+    return IsAISide(pside->GetObjectID()) || HasPlayers(pside, bCountGhosts);
+  }
+  void                  TickAICommanders(Time timeNow);
+  void                  DeleteAICommanders();
+
   IstationIGC *         GetBase(IsideIGC * pside);
   int                   GetCountSides()   
   {
@@ -463,6 +483,8 @@ private:
   Time                  m_timeNextPayday;
 
   int                   m_rgMoney[c_cSidesMax];
+  unsigned              m_maskAISides;      // AI-vs-AI: bit n set when side n has an AI commander
+  AICommander*          m_rgpAI[c_cSidesMax];
   TRef<IsideIGC>        m_psideWon;         // set when a side won--not acted upon until out of igc updates
   const char*           m_pszReason;
 

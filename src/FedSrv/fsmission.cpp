@@ -9,6 +9,7 @@
  *-----------------------------------------------------------------------*/
 
 #include "pch.h"
+#include "aicommander.h"   // AI-vs-AI
 
 using json = nlohmann::json;
 
@@ -97,6 +98,10 @@ CFSMission::CFSMission(
     m_pttbmAltered(NULL),
     m_strStoryText(pszStoryText)
 {
+  // AI-vs-AI: no AI sides until StartDefaultGames asks for them
+  m_maskAISides = 0;
+  ZeroMemory(m_rgpAI, sizeof(m_rgpAI));
+
   // Init mission def
   ZeroMemory(&m_misdef, sizeof(m_misdef));
   BEGIN_PFM_CREATE_PREALLOC(g.fm, &m_misdef, S, MISSIONDEF)
@@ -257,6 +262,8 @@ CFSMission::CFSMission(
 
 CFSMission::~CFSMission()
 {
+  DeleteAICommanders();   // AI-vs-AI
+
   //
   // Fire off an AGC event that a game was destroyed
   //
@@ -510,6 +517,7 @@ void CFSMission::RemovePlayerFromMission(CFSPlayer * pfsPlayer, QuitSideReason r
 
   // KGJV #114 changed logic to remove empty games
   if (!HasPlayers(NULL, true)          && // no one left in the mission
+      !HasAISides()                    && // AI-vs-AI: AI sides keep the game alive
       //!m_misdef.misparms.bAllowEmptyTeams && // game doesn't allow empty sides
       //m_misdef.misparms.bClubGame && // not a standalone server - KGJV #114
       //(IMPLIES( GetMissionDef()->misparms.bObjectModelCreated, GetStage() != STAGE_NOTSTARTED )) // not an admin created game that has started
@@ -1144,7 +1152,7 @@ void CFSMission::RemovePlayerFromSide(CFSPlayer * pfsPlayer, QuitSideReason reas
   // pfsPlayer->SetReady(true); Imago commented out so afk not reset
   GiveSideMoney(psideOld, payday);
 
-  bool fDeactivate = (STAGE_NOTSTARTED != m_misdef.stage) && !HasPlayers(psideOld, false);
+  bool fDeactivate = (STAGE_NOTSTARTED != m_misdef.stage) && !SideHasCommander(psideOld, false); // AI-vs-AI
   if (fDeactivate)
     DeactivateSide(psideOld);             // deactivate the side _after_ the side change
   else
@@ -1401,7 +1409,8 @@ int CFSMission::GetRankThreshold()
 		}
 	}
 
-	iAverageRank = iAverageRank / plistShip->n();
+	if (plistShip->n() > 0)   // AI-vs-AI: a game with only AI sides can have no ships
+		iAverageRank = iAverageRank / plistShip->n();
 	int iThreshold = iHighestRank + ((iAverageRank * iAverageRank) / (iHighestRank + iAverageRank));
 	return iThreshold;
 }
@@ -2030,7 +2039,7 @@ void CFSMission::StartCountdown(float fCountdownLength)
           // tell them about the world
           SendMissionInfo(NULL, pside);
         }
-        else
+        else if (!IsAISide(pside->GetObjectID()))   // AI-vs-AI: an AI side plays with no humans
         {
           // don't penalize a squad who is not in the game
           if (pside->GetSquadID() != NA)
@@ -2295,6 +2304,10 @@ void CFSMission::DoPayday(IsideIGC* pside)
 {
     SideID  sideID = pside->GetObjectID();
 
+    // AI-vs-AI: an AI commander spends its side's money itself, so keep it in the pot
+    if (IsAISide(sideID))
+        return;
+
     int np = GetCountOfPlayers(pside, true);
     if (np != 0)
     {
@@ -2323,6 +2336,35 @@ void CFSMission::DoPayday(IsideIGC* pside)
             }
         }
     }
+}
+
+// AI-vs-AI: run the AI commanders, creating each one the first time its side ticks
+void CFSMission::TickAICommanders(Time timeNow)
+{
+  if (!HasAISides())
+    return;
+
+  for (SideLinkIGC* l = m_pMission->GetSides()->first(); l; l = l->next())
+  {
+    IsideIGC* pside = l->data();
+    SideID    sid = pside->GetObjectID();
+    if (!IsAISide(sid) || !pside->GetActiveF())
+      continue;
+
+    if (m_rgpAI[sid] == NULL)
+      m_rgpAI[sid] = new AICommander(this, sid);
+
+    m_rgpAI[sid]->Tick(timeNow);
+  }
+}
+
+void CFSMission::DeleteAICommanders()
+{
+  for (int i = 0; i < c_cSidesMax; i++)
+  {
+    delete m_rgpAI[i];
+    m_rgpAI[i] = NULL;
+  }
 }
 
 void CFSMission::DoTick(Time timeNow)
@@ -2510,6 +2552,8 @@ void CFSMission::DoTick(Time timeNow)
       ProcessGameOver();
       return;
     }
+
+    TickAICommanders(timeNow);    // AI-vs-AI
 
     if (timeNow >= m_timeNextPayday)
     {
@@ -3033,6 +3077,10 @@ void CFSMission::RecordPlayerResults(IshipIGC* pship, CFSPlayer *player, SideID 
         };
     }
 
+	// AI-vs-AI: a no-lobby (private test) server's games stay off the online leaderboard and Steam stats
+	if (g.fNoLobby)
+		return;
+
 	// BT - STEAM
 	CSteamAchievements *pSteamAchievements = player->GetSteamAchievements();
 	IshipIGC *pIship = player->GetIGCShip();
@@ -3173,6 +3221,17 @@ void CFSMission::ProcessGameOver()
   ShipLinkIGC * pShiplink;
 
   m_flGameDuration = g.timeNow - m_misdef.misparms.timeStart;
+
+  // AI-vs-AI: record the result and stand the AI commanders down
+  if (HasAISides())
+  {
+    int seconds = int(m_flGameDuration);
+    AILog("MATCH OVER after %d:%02d. Winner: %s. %s",
+          seconds / 60, seconds % 60,
+          m_psideWon ? m_psideWon->GetName() : "none (draw)",
+          m_pszReason ? m_pszReason : "");
+    DeleteAICommanders();
+  }
 
   //Xynth Determine Rank Ratio and load it into PlayerScoreObjects
   {
@@ -3773,7 +3832,7 @@ IsideIGC* CFSMission::CheckForVictoryByInactiveSides(bool& bAllSidesInactive)
   for (SideLinkIGC * plinkSide = plistSide->first(); plinkSide; plinkSide = plinkSide->next())
   {
     IsideIGC * pside = plinkSide->data();
-    if (HasPlayers(pside, false) && pside->GetActiveF()) // found one
+    if (SideHasCommander(pside, false) && pside->GetActiveF()) // found one (AI-vs-AI: an AI side counts)
     {
       bAllSidesInactive = false;
 
@@ -4396,6 +4455,8 @@ bool CFSMission::FAllReady()
 			if (m_misdef.misparms.bAllowEmptyTeams)
 				if (n==0 && !m_misdef.rgfActive[psl->data()->GetObjectID()])
 					bSkipTeam = true; // skip inactive & empty teams
+			if (IsAISide(psl->data()->GetObjectID()))
+				bSkipTeam = true; // AI-vs-AI: an AI side needs no players
 
 			if (!bSkipTeam)
 			{

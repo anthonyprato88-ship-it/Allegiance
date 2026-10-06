@@ -14,6 +14,7 @@
 #include <..\TCLib\AutoHandle.h>
 #include <agc.h>
 #include <zreg.h>
+#include "aicommander.h"   // AI-vs-AI
 
  // BT - STEAM
 #include <inttypes.h>
@@ -7387,8 +7388,8 @@ HRESULT FedSrvSiteBase::OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnF
   		SideID sid = pfmSideInactive->sideID;
 
 		//TrapHackBoot(!pfsMission->HasPlayers(pfsMission->GetIGCMission()->GetSide(sid),true));
-		// only change activeflag if team is empty
-		if (!pfsMission->HasPlayers(pfsMission->GetIGCMission()->GetSide(sid),true))
+		// only change activeflag if team is empty (an AI side is never empty)
+		if (!pfsMission->SideHasCommander(pfsMission->GetIGCMission()->GetSide(sid),true))
 			pfsMission->SetSideActive(sid,pfmSideInactive->bActive); // update cached missdef
 		else // otherwise revert
 			pfmSideInactive->bActive = pfsMission->GetSideActive(sid);
@@ -8054,6 +8055,10 @@ void ProcessNetworkMessages()
     bSupposedToConnectToLobby = !g.strLobbyServer.IsEmpty();
 #endif
 
+  // AI-vs-AI: no-lobby mode never (re)connects to a lobby or downloads the cfg file
+  if (g.fNoLobby)
+    bSupposedToConnectToLobby = false;
+
 	static int iTrys = 1;
 
 	if (bSupposedToConnectToLobby) // are we supposed to be connected to a lobby?
@@ -8349,6 +8354,18 @@ bool IsCFGFileValid(const char * szFileName)
 }
 
 
+// AI-vs-AI: the per-user key (HKCU, a non-admin install) first, so its settings override a
+// machine-wide install's (HKLM, e.g. the Steam server's), then the same subkey under HKLM
+LONG OpenFedSrvRegKey(HKEY* phKey)
+{
+  *phKey = NULL;
+  LONG lRes = ::RegOpenKeyEx(HKEY_CURRENT_USER, HKLM_FedSrv, 0, KEY_READ, phKey);
+  if (ERROR_SUCCESS != lRes)
+    lRes = ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, HKLM_FedSrv, 0, KEY_READ, phKey);
+  return lRes;
+}
+
+
 IHTTPSession * BeginConfigDownload()
 {
   // Get the version information of the current module
@@ -8363,7 +8380,8 @@ IHTTPSession * BeginConfigDownload()
 #endif
 
   CRegKey key;
-  if (ERROR_SUCCESS == key.Open(HKEY_LOCAL_MACHINE, HKLM_FedSrv, KEY_READ))
+  if (ERROR_SUCCESS == key.Open(HKEY_CURRENT_USER, HKLM_FedSrv, KEY_READ) || // AI-vs-AI: per-user settings first, as OpenFedSrvRegKey
+      ERROR_SUCCESS == key.Open(HKEY_LOCAL_MACHINE, HKLM_FedSrv, KEY_READ))
   {
       ZString strConfig;
       if (SUCCEEDED(LoadRegString(key, "cfgfile", strConfig)))
@@ -8773,6 +8791,13 @@ void RestartPausedMissions()
 
 HRESULT ConnectToLobby(const char * pszLobby_OverrideCFG /* NULL == do not override */)
 {
+  // AI-vs-AI: no-lobby mode: no cfg download, no lobby connection (no outbound traffic)
+  if (g.fNoLobby)
+  {
+    printf("NoLobby: not connecting to a lobby.\n");
+    return S_FALSE; // a success code, so put_PublicLobby(true) still reports the hosted session as OK
+  }
+
   // Disconnect from current lobby, if any
   DisconnectFromLobby();
   assert(!g.fmLobby.IsConnected());
@@ -9015,7 +9040,7 @@ void StartDefaultGames()
   DWORD dwType;
   DWORD dwValue;
   DWORD cbValue;
-  if (ERROR_SUCCESS == ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, HKLM_FedSrv, 0, KEY_READ, &hKey))
+  if (ERROR_SUCCESS == OpenFedSrvRegKey(&hKey)) // AI-vs-AI: HKCU, else HKLM
   {
     // get the max players per game to use.from the registry
     cbValue = sizeof(dwValue);
@@ -9156,6 +9181,14 @@ void StartDefaultGames()
         if (LoadRegString(hKey, cbValueName, strPassword) == S_OK)
 			strcpy_s(mp.strGamePassword,sizeof(mp.strGamePassword),PCC(strPassword));
 
+        // AI-vs-AI: AIvsAI#=1 gives every side an AI commander; AISides# is a bit
+        // mask of AI sides (bit 0 = the first side) for humans against the AI.
+        // The AI settings apply to this game only.
+        MissionParams mpShared = mp;
+        unsigned maskAI = AIGetGameSides(hKey, iGame, mp.nTeams);
+        if (maskAI)
+          AIApplyMissionParams(&mp);
+
         // KGJV #92 - display LockOpen/Min/Maxrank and removed map name
         printf("Starting game \"%s\"(%s) with core: %s - minrank=%d - maxrank=%d\n", mp.strGameName, (mp.bLockGameOpen == 1) ? "LockOpen":"Not LockOpen",mp.szIGCStaticFile,mp.iMinRank,mp.iMaxRank);
 
@@ -9163,6 +9196,12 @@ void StartDefaultGames()
         // Create the new mission
         FedSrvSite * psiteFedSrv = new FedSrvSite();
         CFSMission * pfsMissionNew = new CFSMission(mp, NULL, psiteFedSrv, psiteFedSrv, NULL, NULL);
+
+        if (maskAI)   // AI-vs-AI
+        {
+          pfsMissionNew->SetAISides(maskAI);
+          printf("  AI commanders on sides 0x%x. Log: %s\n", maskAI, AIGetOptions().logFile);
+        }
 
         // tell the lobby about the mission
         if (g.fmLobby.IsConnected())
@@ -9218,6 +9257,7 @@ void StartDefaultGames()
 		g.bRestarting = true;
 		Sleep(1000);
 #endif
+        mp = mpShared;   // AI-vs-AI: the next game starts from the shared settings
       }
       ++iGame;
     }
@@ -9330,8 +9370,11 @@ DWORD WINAPI ReceiveThread(LPVOID pThreadParameter)
   }
   else
   {
-    g.strLobbyServer="?"; // this will be overrided by cfg file download; needs to be non-blank so ConnectToLobby() is called
-    pServer->put_PublicLobby(true); // true means use public dplay session, and connect to lobby is g.strLobbyServer is not empty
+    if (!g.fNoLobby) // AI-vs-AI: no-lobby mode leaves the lobby server blank (ConnectToLobby returns at once anyway)
+      g.strLobbyServer="?"; // this will be overrided by cfg file download; needs to be non-blank so ConnectToLobby() is called
+    // AI-vs-AI: with no lobby to point clients at the public session, host the LAN session
+    // instead, which the client's LAN button finds, so people can join and watch
+    pServer->put_PublicLobby(!g.fNoLobby); // true means use public dplay session, and connect to lobby is g.strLobbyServer is not empty
   }
 #else
   //non-standalone servers always should connect to a lobby
@@ -9351,6 +9394,16 @@ DWORD WINAPI ReceiveThread(LPVOID pThreadParameter)
   debugf("LoadStaticMapInfo result: #maps=%d\n",g.cStaticMapInfo);
 
   CTimer timerReceiveIterations("between iterations in ReceiveThread loop", .25f);
+
+#if defined(ALLSRV_STANDALONE) && !defined(SRV_PARENT) && !defined(SRV_CHILD)
+  // AI-vs-AI: without a lobby nothing else starts the registry's Game# entries
+  // (normally the tail of a successful ConnectToLobby does this)
+  if (g.fNoLobby && !_Module.WasCOMStarted())
+  {
+    printf("NoLobby: starting default games without a lobby\n");
+    StartDefaultGames();
+  }
+#endif
 
   printf("Ready for clients.\n");
 
@@ -9495,7 +9548,7 @@ void LoadSettings()
     DWORD dwType;
     DWORD dwValue;
     DWORD cbValue;
-    if (ERROR_SUCCESS == ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, HKLM_FedSrv, 0, KEY_READ, &hKey))
+    if (ERROR_SUCCESS == OpenFedSrvRegKey(&hKey)) // AI-vs-AI: HKCU, else HKLM
     {
         if (FAILED(LoadRegString(hKey, "AuthServer", g.strAuthServer)))
           g.strAuthServer = "Pointweb01"; // default for all developers
@@ -9659,6 +9712,14 @@ void LoadSettings()
         if (ERROR_SUCCESS == ::RegQueryValueEx(hKey, "fTimeout", NULL, &dwType, (unsigned char*)&dwValue, &cbValue))
             g.fTimeOut = !!dwValue;
         else g.fTimeOut = true;
+
+        // AI-vs-AI: NoLobby (DWORD, default 0): never download the cfg file or contact a
+        // lobby; the default games (Game1..n) are started locally once the server is ready
+        dwValue=0;
+        cbValue = sizeof(dwValue);
+        if (ERROR_SUCCESS == ::RegQueryValueEx(hKey, "NoLobby", NULL, &dwType, (unsigned char*)&dwValue, &cbValue))
+            g.fNoLobby = !!dwValue;
+        else g.fNoLobby = false;
 
       //#if !defined(ALLSRV_STANDALONE) Imago revived 6/10 // BT - 9/17 - No longer used.
         //dwValue=0;
@@ -10174,6 +10235,24 @@ void RegisterAllSrv(BOOL fReRegister, BOOL fInstallAsService, int argc, char *ar
   }
 
   DWORD dwErrorCode(_Module.RegisterServer(fReRegister, TRUE, fInstallAsService, argc, argv));
+
+  // AI-vs-AI: without admin rights HKCR\AppID and the class keys cannot be written
+  // machine-wide (RegisterServer then returns a Win32 code such as 5, or a failed
+  // HRESULT), so register the EXE per-user under HKCU\Software\Classes instead.
+  // Registration only matters to external admin tools, so never exit from here.
+  if (ERROR_SUCCESS != dwErrorCode && !fInstallAsService)
+  {
+    HKEY hkClasses = BeginPerUserClassesOverride();
+    DWORD dwPerUser = (NULL != hkClasses) ?
+      _Module.RegisterServer(fReRegister, TRUE, FALSE, argc, argv) : E_FAIL;
+    EndPerUserClassesOverride(hkClasses);
+
+    if (ERROR_SUCCESS == dwPerUser)
+      printf("Registry Update Successful (registered per-user in HKCU\\Software\\Classes).\n");
+    else
+      printf("Unable to register server [0x%08x, per-user 0x%08x]; continuing unregistered.\n", dwErrorCode, dwPerUser);
+    return;
+  }
 
   if (FAILED(dwErrorCode))
   {
@@ -12067,7 +12146,7 @@ void FedSrvSiteBase::KillShipEvent(Time timeCollision, IshipIGC* pship, ImodelIG
           pfsPlayer->SetCluster(pcluster, true);      //Pretend the client sent a set view cluster
 
 
-          if (pship->IsGhost() && !m_pfsMission->HasPlayers(pside, false))
+          if (pship->IsGhost() && !m_pfsMission->SideHasCommander(pside, false))   // AI-vs-AI: keep AI sides
           {
               m_pfsMission->DeactivateSide(pside);
           }
@@ -13224,8 +13303,12 @@ void    FedSrvSiteBase::ChangeStation(IshipIGC* pship, IstationIGC* pstationOld,
 			if (pside->ApplyDevelopmentTechs(ttbm))
 			{
 				pfsShip->GetPlayerScoreObject()->AddTechsRecovered();
-				CSteamAchievements *pSteamAchievements = pfsShip->GetPlayer()->GetSteamAchievements();
-				pSteamAchievements->AwardRecoverTechAchievement();
+				// Drones (AI ships) have no Steam achievements: GetPlayer() on one is not a real player.
+				if (pfsShip->IsPlayer())
+				{
+					CSteamAchievements *pSteamAchievements = pfsShip->GetPlayer()->GetSteamAchievements();
+					pSteamAchievements->AwardRecoverTechAchievement();
+				}
 			}
 		}
 		
@@ -13694,6 +13777,24 @@ void FedSrvSiteBase::SendChat(IshipIGC*     pshipSender,
 void FedSrvSiteBase::ClusterUpdateEvent(IclusterIGC* c)
 {
 
+}
+
+// AI-vs-AI: the drones of an AI side may head for rocks and alephs their side
+// hasn't seen yet, as if it had scouted the map. The stock IIgcSite::GetCluster
+// gives NULL for anything unseen, and a drone sent to one just sits where it
+// is (see GotoPlan in Igc\common.cpp). Everyone else sees as before.
+IclusterIGC* FedSrvSiteBase::GetCluster(IshipIGC* pship, ImodelIGC* pmodel)
+{
+    if (pship->CanSee(pmodel))
+        return pmodel->GetCluster();
+
+    ObjectType  type = pmodel->GetObjectType();
+    IsideIGC*   pside = pship->GetSide();
+    if (((type == OT_asteroid) || (type == OT_warp)) && pside && m_pfsMission &&
+        m_pfsMission->IsAISide(pside->GetObjectID()))
+        return pmodel->GetCluster();
+
+    return NULL;
 }
 
 void FedSrvSiteBase::CommandChangedEvent(Command i, IshipIGC * pship, ImodelIGC* ptarget, CommandID cid)

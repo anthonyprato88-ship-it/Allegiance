@@ -188,6 +188,7 @@ xcopy $(ProjectDir)..\src\Inc\steam_appid.txt $(OutDir) /s /d /y</Command>
     <ClCompile Include="..\src\FedSrv\AdminShip.cpp" />
     <ClCompile Include="..\src\FedSrv\AdminUser.cpp" />
     <ClCompile Include="..\src\FedSrv\AdminUsers.cpp" />
+    <ClCompile Include="..\src\FedSrv\aicommander.cpp" />
     <ClCompile Include="..\src\FedSrv\allsrvmodule.cpp" />
     <ClCompile Include="..\src\FedSrv\BitArray.cpp" />
     <ClCompile Include="..\src\FedSrv\CSteamAchievements.cpp" />
@@ -238,6 +239,7 @@ xcopy $(ProjectDir)..\src\Inc\steam_appid.txt $(OutDir) /s /d /y</Command>
     <ClInclude Include="..\src\FedSrv\AdminUser.h" />
     <ClInclude Include="..\src\FedSrv\AdminUsers.h" />
     <ClInclude Include="..\src\FedSrv\AdminUtil.h" />
+    <ClInclude Include="..\src\FedSrv\aicommander.h" />
     <ClInclude Include="..\src\FedSrv\allsrvmodule.h" />
     <ClInclude Include="..\src\FedSrv\BitArray.h" />
     <ClInclude Include="..\src\FedSrv\counters.h" />

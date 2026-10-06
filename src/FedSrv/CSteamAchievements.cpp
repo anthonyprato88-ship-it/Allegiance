@@ -495,6 +495,9 @@ static DWORD WINAPI UpdateLeaderboardThread(LPVOID pThreadParameter)
 
 void CSteamAchievements::UpdateLeaderboard(PlayerScoreObject*  ppso)
 {
+	// AI-vs-AI: no leaderboard URL in the registry (e.g. a private test server), nothing to send
+	if (g.szLeaderboardUpdateUrl[0] == '\0')
+		return;
 
 
 	char steamID[100];

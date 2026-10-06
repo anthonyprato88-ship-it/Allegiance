@@ -141,6 +141,7 @@ public:
   void TerminateModelEvent(ImodelIGC* model);
   void TerminateMissionEvent(ImissionIGC* pMission) {}
   void CommandChangedEvent(Command i, IshipIGC * pship, ImodelIGC* ptarget, CommandID cid);
+  IclusterIGC* GetCluster(IshipIGC* pship, ImodelIGC* pmodel);  // AI-vs-AI: see FedSrv.CPP
 
   void        CreateBuildingEffect(Time           now,
                                    IasteroidIGC*  pasteroid,
@@ -246,7 +247,8 @@ struct Global
     MaxNewbRank(4),        //Imago 7/10 DIE ASGS DIE
     fProtocol(false),
     fPaused(false),
-    fDoublePrecision(true)
+    fDoublePrecision(true),
+    fNoLobby(false)        // AI-vs-AI: lobby-less standalone mode, see LoadSettings
 //#if !defined(ALLSRV_STANDALONE) Imago commented 6/10
     
 
@@ -363,6 +365,7 @@ struct Global
   bool                fProtocol;
   bool                fPaused;
   bool                fDoublePrecision;
+  bool                fNoLobby; // AI-vs-AI: registry DWORD "NoLobby" (default 0): never contact a lobby, start the default games locally
   //  CAdminSponsor<CAdminGames>  sponsorGames;
 //#if !defined(ALLSRV_STANDALONE) Imago commented 6/10
  
@@ -432,7 +435,12 @@ IshipIGC*   PickNewLeader(const ShipListIGC*    pships,
                           int                   maxVotes);
 void SetSessionDetails();
 HRESULT ConnectToLobby(const char * pszLobby_OverrideCFG /* NULL == do not override */);
-  
+
+// AI-vs-AI: opens HKLM\HKLM_FedSrv for KEY_READ, falling back to HKCU\HKLM_FedSrv so a
+// non-admin (per-user) install can be configured.  Returns ERROR_SUCCESS and sets *phKey
+// (caller must RegCloseKey it) on success, otherwise the error from the HKCU attempt.
+LONG OpenFedSrvRegKey(HKEY* phKey);
+
 #define TrapHack(x) assert(x)
 
 #define wm_fs_pause WM_APP // wparam/lparam not used

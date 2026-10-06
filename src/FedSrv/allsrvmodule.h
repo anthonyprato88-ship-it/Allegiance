@@ -115,6 +115,11 @@ extern CServiceModule _Module;
 
 
 void PrintSystemErrorMessage(LPCTSTR szBuf, DWORD dwErrorCode);
+// AI-vs-AI: per-user (non-admin) COM registration: remaps HKEY_CLASSES_ROOT to
+// HKCU\Software\Classes for this process until EndPerUserClassesOverride.
+// Begin returns NULL on failure; pass its result to End either way.
+HKEY BeginPerUserClassesOverride();
+void EndPerUserClassesOverride(HKEY hkClasses);
 #if defined(SRV_PARENT)
 void WINAPI MPServiceMain(DWORD dwArgc, LPTSTR* lpszArgv);
 #else

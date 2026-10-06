@@ -242,11 +242,107 @@ void CServiceModule::Term()
 }
 
 
+/*-------------------------------------------------------------------------
+ * BeginPerUserClassesOverride / EndPerUserClassesOverride
+ *-------------------------------------------------------------------------
+ * Purpose:
+ *    AI-vs-AI: per-user (non-admin) COM registration.  Remaps
+ *    HKEY_CLASSES_ROOT to HKCU\Software\Classes for this process, so the ATL
+ *    registrar (ours and AGC.dll's) and RegisterTypeLib write per-user keys
+ *    instead of failing on HKLM\Software\Classes.
+ *
+ * Returns:
+ *    The HKCU\Software\Classes key to pass to EndPerUserClassesOverride, or
+ *    NULL if the override could not be set up.
+ */
+HKEY BeginPerUserClassesOverride()
+{
+  // AI-vs-AI: open (or create) HKCU\Software\Classes
+  HKEY hkClasses = NULL;
+  if (ERROR_SUCCESS != ::RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes"), 0,
+    NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkClasses, NULL))
+      return NULL;
+
+  // AI-vs-AI: remap HKEY_CLASSES_ROOT onto it
+  if (ERROR_SUCCESS != ::RegOverridePredefKey(HKEY_CLASSES_ROOT, hkClasses))
+  {
+    ::RegCloseKey(hkClasses);
+    return NULL;
+  }
+
+  // AI-vs-AI: make RegisterTypeLib honor the override (oleaut32 export, Vista and later)
+  HINSTANCE hinstOleAut = ::LoadLibrary(TEXT("oleaut32.dll"));
+  if (hinstOleAut)
+  {
+    typedef void (WINAPI *PFNOAENABLEPERUSER)();
+    PFNOAENABLEPERUSER pfn = (PFNOAENABLEPERUSER)GetProcAddress(hinstOleAut, "OaEnablePerUserTLibRegistration");
+    if (pfn)
+      (*pfn)();
+    FreeLibrary(hinstOleAut);
+  }
+  return hkClasses;
+}
+
+void EndPerUserClassesOverride(HKEY hkClasses)
+{
+  // AI-vs-AI: restore the normal (merged) HKEY_CLASSES_ROOT
+  ::RegOverridePredefKey(HKEY_CLASSES_ROOT, NULL);
+  if (NULL != hkClasses)
+    ::RegCloseKey(hkClasses);
+}
+
+
+/*-------------------------------------------------------------------------
+ * RegisterAGCPerUser
+ *-------------------------------------------------------------------------
+ * Purpose:
+ *    AI-vs-AI: registers AGC.dll (from the exe's directory) under
+ *    HKCU\Software\Classes, for when CAGCModule::Init could not register it
+ *    machine-wide (no admin rights).
+ */
+static HRESULT RegisterAGCPerUser()
+{
+  HKEY hkClasses = BeginPerUserClassesOverride();
+  if (NULL == hkClasses)
+    return E_FAIL;
+
+  // AI-vs-AI: AGC.dll lives beside AllSrv.exe
+  TCHAR szModule[_MAX_PATH];
+  ::GetModuleFileName(NULL, szModule, sizeofArray(szModule));
+  TCHAR szDrive[_MAX_DRIVE], szDir[_MAX_DIR], szAGC[_MAX_PATH];
+  _tsplitpath(szModule, szDrive, szDir, NULL, NULL);
+  _tmakepath(szAGC, szDrive, szDir, TEXT("AGC"), TEXT(".dll"));
+
+  // AI-vs-AI: load it and call its DllRegisterServer
+  HINSTANCE hinst = ::LoadLibrary(szAGC);
+  HRESULT hr = HRESULT_FROM_WIN32(::GetLastError());
+  if (hinst)
+  {
+    typedef HRESULT (CALLBACK *PFNREG)();
+    PFNREG pfn = (PFNREG)GetProcAddress(hinst, "DllRegisterServer");
+    hr = pfn ? (*pfn)() : HRESULT_FROM_WIN32(::GetLastError());
+    FreeLibrary(hinst);
+  }
+
+  EndPerUserClassesOverride(hkClasses);
+  return hr;
+}
+
+
 HRESULT CServiceModule::InitAGC()
 {
   // Initialize AGC
   HRESULT hr;
-  ZSucceeded(hr = _AGCModule.Init());
+  hr = _AGCModule.Init();
+  // AI-vs-AI: without admin rights AGC.dll cannot register itself machine-wide,
+  // so register it under HKCU\Software\Classes and try once more
+  if (FAILED(hr))
+  {
+    RegisterAGCPerUser();
+    if (SUCCEEDED(hr = _AGCModule.Init()))
+      printf("AGC.dll registered per-user (HKCU\\Software\\Classes).\n");
+  }
+  ZSucceeded(hr);
   RETURN_FAILED(hr);
 
   _AGCModule.SetDebugBreakOnErrors(g.fWantInt3);
@@ -274,7 +370,16 @@ HRESULT CServiceModule::InitAGC()
 
   // Initialize the event logger object
   CComBSTR bstrEventSource(__MODULE__);
-  CComBSTR bstrRegKey("HKLM\\" HKLM_FedSrv);
+  // AI-vs-AI: a non-admin install keeps its settings under HKCU, and they override a
+  // machine-wide install's (as OpenFedSrvRegKey); use that key when it can be opened
+  LPCSTR pszRegKey = "HKLM\\" HKLM_FedSrv;
+  HKEY hkCU = NULL;
+  if (ERROR_SUCCESS == ::RegOpenKeyEx(HKEY_CURRENT_USER, HKLM_FedSrv, 0, KEY_READ, &hkCU))
+  {
+    ::RegCloseKey(hkCU);
+    pszRegKey = "HKCU\\" HKLM_FedSrv;
+  }
+  CComBSTR bstrRegKey(pszRegKey);
   IAGCEventLoggerPrivatePtr spPrivate(m_spEventLogger);
   hr = spPrivate->Initialize(bstrEventSource, bstrRegKey);
   ZSucceeded(hr);
